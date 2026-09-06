@@ -65,7 +65,7 @@
 
 <script>
 const messages=[];
-async function bootAuth(){try{const r=await fetch('/api/v1/me');const d=await r.json();if(!d.authenticated){location.href='/auth/discord';return;}workspaces=d.workspaces||[];renderWorkspaces(workspaces[0]?.id||'');await loadProjects();await loadMemory();await loadBridges();}catch(e){toast('Could not load your workspace.');console.error(e)}}
+async function bootAuth(){try{const r=await fetch('/api/v1/me');const d=await r.json();if(!d.authenticated){location.href='https://klizonion-agent.umamaheswara-bandi84.workers.dev/auth/discord';return;}workspaces=d.workspaces||[];renderWorkspaces(workspaces[0]?.id||'');await loadProjects();await loadMemory();await loadBridges();}catch(e){toast('Could not load your workspace.');console.error(e)}}
 function toast(text){let t=qs('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;right:22px;bottom:22px;padding:12px 14px;background:#151515;color:#fff;border:1px solid #333;border-radius:10px;z-index:200;box-shadow:0 20px 60px rgba(0,0,0,.5);font-size:12px';document.body.appendChild(t)}t.textContent=text;t.style.display='block';clearTimeout(t._hide);t._hide=setTimeout(()=>t.style.display='none',2600)}
 let workspaces=[];
 let currentWorkspace='';
@@ -106,3 +106,4 @@ bootAuth();
 </script>
 </body>
 </html>
+
