@@ -1,25 +1,56 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard • Klizonion v0.01</title>
-  <link rel="stylesheet" href="static/style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard • Klizonion v0.01</title>
+<link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar"><div><div class="pill">KLIZONION • v0.01</div><h1 id="hello">Dashboard</h1></div><button id="logout" class="button">Log out</button></header>
-    <div class="grid dashboard-grid">
-      <section class="card"><h3>Account</h3><p id="account">Loading…</p></section>
-      <section class="card"><h3>Workspaces</h3><p id="workspaces">Loading…</p></section>
-      <section class="card"><h3>Cloud API</h3><p id="health">Checking…</p></section>
-      <section class="card"><h3>Model</h3><p>Prebuilt model + knowledge gateway ready. Connect the model server to enable generation.</p></section>
-    </div>
-  </main>
+<main class="shell">
+<header class="topbar">
+  <div><div class="pill">KLIZONION • v0.01</div><h1 id="hello">Dashboard</h1></div>
+  <button id="logout" class="button">Log out</button>
+</header>
+
+<section class="chat-card card">
+  <div class="chat-head"><div><h2>Klizonion AI Agent</h2><p class="muted">Ask about Roblox, Luau, code, projects, or your workspace.</p></div><div id="modelStatus" class="status-badge">Checking model…</div></div>
+  <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+  <form id="chatForm" class="chat-form">
+    <textarea id="chatInput" rows="2" placeholder="Message Klizonion…" autocomplete="off"></textarea>
+    <button id="sendButton" class="button primary" type="submit">Send</button>
+  </form>
+</section>
+
+<div class="grid dashboard-grid">
+  <section class="card"><h3>Account</h3><p id="account">Loading…</p></section>
+  <section class="card"><h3>Workspaces</h3><p id="workspaces">Loading…</p></section>
+  <section class="card"><h3>Cloud API</h3><p id="health">Checking…</p></section>
+  <section class="card"><h3>Model</h3><p id="modelInfo">Checking…</p></section>
+</div>
+</main>
 <script>
 const API = "https://klizonion-agent.umamaheswara-bandi84.workers.dev";
 const token = localStorage.getItem("klizonion_token");
 if (!token) location.href = "login.html";
 const auth = {Authorization: "Bearer " + token};
+const $ = (id) => document.getElementById(id);
+const chatMessages = $("chatMessages");
+const chatInput = $("chatInput");
+const sendButton = $("sendButton");
+const history = [];
+let workspaceId = null;
+
+function addMessage(role, text) {
+  const row = document.createElement("div");
+  row.className = "chat-row " + role;
+  const bubble = document.createElement("div");
+  bubble.className = "chat-bubble";
+  bubble.textContent = text;
+  row.appendChild(bubble);
+  chatMessages.appendChild(row);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
 async function load() {
   try {
     const [meR, hR] = await Promise.all([
@@ -29,21 +60,71 @@ async function load() {
     const me = await meR.json();
     const h = await hR.json();
     if (!me.authenticated) throw new Error("session_expired");
-    document.getElementById("hello").textContent = "Welcome, " + me.user.username;
-    document.getElementById("account").textContent = me.user.email;
-    document.getElementById("workspaces").textContent = (me.workspaces || []).length + " workspace(s)";
-    document.getElementById("health").textContent = h.status + " • database " + (h.database ? "online" : "offline");
+    $("hello").textContent = "Welcome, " + me.user.username;
+    $("account").textContent = me.user.email;
+    $("workspaces").textContent = (me.workspaces || []).length + " workspace(s)";
+    $("health").textContent = h.status + " • database " + (h.database ? "online" : "offline");
+    $("modelInfo").textContent = h.model_connected ? "Gateway connected" : "Gateway not connected yet";
+    $("modelStatus").textContent = h.model_connected ? "Model online" : "Cloud ready";
+    workspaceId = (me.workspaces || [])[0]?.id || null;
+    addMessage("assistant", "Klizonion online. Ask me something.");
   } catch (e) {
     localStorage.removeItem("klizonion_token");
+    localStorage.removeItem("klizonion_user");
     location.href = "login.html";
   }
 }
-document.getElementById("logout").onclick = async () => {
-  await fetch(API + "/api/auth/logout", {method:"POST", headers: auth});
+
+$("chatForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = chatInput.value.trim();
+  if (!text || sendButton.disabled) return;
+  history.push({role:"user", content:text});
+  addMessage("user", text);
+  chatInput.value = "";
+  sendButton.disabled = true;
+  sendButton.textContent = "Thinking…";
+  const typing = document.createElement("div");
+  typing.className = "chat-row assistant";
+  typing.innerHTML = '<div class="chat-bubble muted-bubble">Thinking…</div>';
+  chatMessages.appendChild(typing);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  try {
+    const r = await fetch(API + "/api/v1/chat", {
+      method: "POST",
+      headers: {"Content-Type":"application/json", ...auth},
+      body: JSON.stringify({messages: history, workspace_id: workspaceId})
+    });
+    const data = await r.json().catch(() => ({}));
+    typing.remove();
+    if (!r.ok) throw new Error(data.error || "chat_failed");
+    const answer = data.content || "Klizonion returned no answer.";
+    history.push({role:"assistant", content:answer});
+    addMessage("assistant", answer);
+  } catch (err) {
+    typing.remove();
+    addMessage("assistant", "I couldn't reach the model gateway yet. The Cloudflare API is online.");
+  } finally {
+    sendButton.disabled = false;
+    sendButton.textContent = "Send";
+    chatInput.focus();
+  }
+});
+
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    $("chatForm").requestSubmit();
+  }
+});
+
+$("logout").onclick = async () => {
+  await fetch(API + "/api/auth/logout", {method:"POST", headers: auth}).catch(() => {});
   localStorage.removeItem("klizonion_token");
   localStorage.removeItem("klizonion_user");
   location.href = "index.html";
 };
+
 load();
 </script>
 </body>

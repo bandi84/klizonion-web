@@ -1,43 +1,61 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login • Klizonion v0.01</title>
-  <link rel="stylesheet" href="static/style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login • Klizonion v0.01</title>
+<link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-  <main class="shell auth-shell">
-    <div class="pill">KLIZONION • v0.01</div>
-    <h1>Welcome back.</h1>
-    <p class="muted">Your workspace is waiting.</p>
-    <form id="loginForm" class="panel">
-      <label>Email<input id="email" type="email" autocomplete="email" required></label>
-      <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
-      <button class="button primary" type="submit">Log in</button>
-      <div id="message" class="message"></div>
-    </form>
-    <p class="muted">No account? <a href="register.html">Create one</a></p>
-  </main>
+<main class="shell auth-shell">
+<div class="pill">KLIZONION • v0.01</div>
+<h1>Welcome back.</h1>
+<p class="muted">Use your username or email and password.</p>
+<form id="loginForm" class="panel" novalidate>
+<label>Username or email<input id="identifierInput" autocomplete="username" required></label>
+<label>Password<input id="passwordInput" type="password" autocomplete="current-password" required></label>
+<button id="loginButton" class="button primary" type="submit">Log in</button>
+<div id="message" class="message" role="alert"></div>
+</form>
+<p class="muted">No account? <a href="register.html">Create one</a></p>
+</main>
 <script>
 const API = "https://klizonion-agent.umamaheswara-bandi84.workers.dev";
 const form = document.getElementById("loginForm");
+const identifierInput = document.getElementById("identifierInput");
+const passwordInput = document.getElementById("passwordInput");
+const button = document.getElementById("loginButton");
 const message = document.getElementById("message");
-form.addEventListener("submit", async e => {
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  message.textContent = "Signing in…";
+  message.textContent = "";
+  button.disabled = true;
+  button.textContent = "Signing in…";
   try {
     const r = await fetch(API + "/api/auth/login", {
       method: "POST",
       headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({email: email.value, password: password.value})
+      body: JSON.stringify({
+        identifier: identifierInput.value.trim(),
+        password: passwordInput.value
+      })
     });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || "login_failed");
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || "invalid_credentials");
     localStorage.setItem("klizonion_token", data.token);
     localStorage.setItem("klizonion_user", JSON.stringify(data.user));
     location.href = "dashboard.html";
   } catch (err) {
-    message.textContent = err.message.replaceAll("_", " ");
+    if (err.message === "invalid_credentials" || err.message === "account_deleted") {
+      message.textContent = "Incorrect username or password, or account has been deleted.";
+    } else if (err.message === "network_error") {
+      message.textContent = "Klizonion could not reach the server.";
+    } else {
+      message.textContent = "Incorrect username or password, or account has been deleted.";
+    }
+  } finally {
+    button.disabled = false;
+    button.textContent = "Log in";
   }
 });
 </script>
