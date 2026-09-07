@@ -1,17 +1,17 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Klizonion Dashboard</title><link rel="stylesheet" href="static/style.css"></head>
 <body>
 <main class="shell">
   <header class="topbar">
     <div class="brand-row"><div class="logo">K</div><div class="brand">KLIZONION</div><div class="version">v0.01</div></div>
-    <div class="top-actions"><div class="user-pill"><div id="avatar" class="avatar">K</div><span id="topUser">Loading…</span></div><button id="logout" class="button">Log out</button></div>
+    <div class="top-actions"><div class="user-pill"><div id="avatar" class="avatar">K</div><span id="topUser">Loadingâ€¦</span></div><button id="logout" class="button">Log out</button></div>
   </header>
 
   <section class="dashboard-grid">
     <section class="chat-card card">
       <div class="chat-head">
-        <div class="chat-title"><div class="agent-dot"></div><div><h2>Klizonion Agent</h2><p>Roblox • Luau • Studio • projects • debugging</p></div></div>
+        <div class="chat-title"><div class="agent-dot"></div><div><h2>Klizonion Agent</h2><p>Roblox â€¢ Luau â€¢ Studio â€¢ projects â€¢ debugging</p></div></div>
         <div id="modelStatus" class="status-badge">Studio offline</div>
       </div>
       <div id="chatMessages" class="chat-messages" aria-live="polite">
@@ -19,7 +19,7 @@
       </div>
       <div id="chatLock" class="chat-lock locked">Connect your Studio Bridge to unlock chat</div>
       <form id="chatForm" class="chat-form">
-        <div class="chat-input-wrap"><textarea id="chatInput" rows="3" placeholder="Connect your Studio Bridge to start chatting…" autocomplete="off" disabled></textarea><div class="chat-hint">Enter to send • Shift+Enter for a new line</div></div>
+        <div class="chat-input-wrap"><textarea id="chatInput" rows="3" placeholder="Connect your Studio Bridge to start chattingâ€¦" autocomplete="off" disabled></textarea><div class="chat-hint">Enter to send â€¢ Shift+Enter for a new line</div></div>
         <button id="sendButton" class="button primary" type="submit" disabled>Locked</button>
       </form>
     </section>
@@ -33,14 +33,14 @@
         <div id="bridgeStatus" class="bridge-status"><div id="bridgeDot" class="bridge-dot"></div><div><strong id="bridgeTitle">Bridge not paired</strong><span id="bridgeText">Open your Studio bridge and enter the code above.</span></div></div>
       </section>
 
-      <section class="side-card card"><h3>Workspace</h3><p id="workspaceName">Loading…</p><div class="stat-grid" style="margin-top:12px"><div class="stat"><div class="k">Workspaces</div><div class="v" id="workspaces">—</div></div><div class="stat"><div class="k">Cloud API</div><div class="v" id="health">—</div></div></div></section>
-      <section class="side-card card"><h3>Account</h3><p id="account">Loading…</p><div class="stat-grid" style="margin-top:12px"><div class="stat"><div class="k">Model</div><div class="v" id="modelInfo">—</div></div><div class="stat"><div class="k">Version</div><div class="v">v0.01</div></div></div></section>
+      <section class="side-card card"><h3>Workspace</h3><p id="workspaceName">Loadingâ€¦</p><div class="stat-grid" style="margin-top:12px"><div class="stat"><div class="k">Workspaces</div><div class="v" id="workspaces">â€”</div></div><div class="stat"><div class="k">Cloud API</div><div class="v" id="health">â€”</div></div></div></section>
+      <section class="side-card card"><h3>Account</h3><p id="account">Loadingâ€¦</p><div class="stat-grid" style="margin-top:12px"><div class="stat"><div class="k">Model</div><div class="v" id="modelInfo">â€”</div></div><div class="stat"><div class="k">Version</div><div class="v">v0.01</div></div></div></section>
       <div class="notice">Pairing codes expire after 10 minutes and are designed to be used once. Never post a live pairing code publicly.</div>
     </aside>
   </section>
 </main>
 <script>
-const API="https://api.klizonion.vexr.dev";
+const API="https://klizonion-agent.umamaheswara-bandi84.workers.dev";
 const token=localStorage.getItem("klizonion_token");
 if(!token) location.href="login.html";
 const auth={Authorization:"Bearer "+token};
@@ -99,13 +99,13 @@ async function refreshState(){
   }
 }
 $("generatePairCode").onclick=async()=>{
-  const b=$("generatePairCode"); b.disabled=true; b.textContent="Generating…";
-  $("codeMeta").textContent="Creating secure code…";
+  const b=$("generatePairCode"); b.disabled=true; b.textContent="Generatingâ€¦";
+  $("codeMeta").textContent="Creating secure codeâ€¦";
   try{
     const r=await fetch(API+"/api/v1/bridge/pair-code",{method:"POST",headers:auth});
     const data=await r.json().catch(()=>({})); if(!r.ok) throw new Error(data.error||"pair_code_failed");
     pairCode=String(data.code); $("pairCode").textContent=pairCode; $("copyCode").disabled=false;
-    $("codeMeta").textContent="Expires in 10 minutes • single use";
+    $("codeMeta").textContent="Expires in 10 minutes â€¢ single use";
   }catch{ $("codeMeta").textContent="Could not generate a pairing code."; }
   finally{b.disabled=false;b.textContent="Generate code";}
 };
@@ -136,8 +136,8 @@ $("chatForm").addEventListener("submit",async e=>{
   if(!(bridgeConnected&&modelConnected)) return;
   const text=chatInput.value.trim(); if(!text||sendButton.disabled)return;
   history.push({role:"user",content:text}); addMessage("user",text); chatInput.value="";
-  sendButton.disabled=true; chatInput.disabled=true; sendButton.textContent="Thinking…";
-  const typing=document.createElement("div"); typing.className="chat-row assistant"; typing.innerHTML='<div class="chat-bubble muted-bubble">Thinking…</div>'; chatMessages.appendChild(typing); chatMessages.scrollTop=chatMessages.scrollHeight;
+  sendButton.disabled=true; chatInput.disabled=true; sendButton.textContent="Thinkingâ€¦";
+  const typing=document.createElement("div"); typing.className="chat-row assistant"; typing.innerHTML='<div class="chat-bubble muted-bubble">Thinkingâ€¦</div>'; chatMessages.appendChild(typing); chatMessages.scrollTop=chatMessages.scrollHeight;
   try{
     const r=await fetch(API+"/api/v1/chat",{method:"POST",headers:{"Content-Type":"application/json",...auth},body:JSON.stringify({messages:history,workspace_id:workspaceId})});
     const data=await r.json().catch(()=>({})); typing.remove();
@@ -149,7 +149,7 @@ $("chatForm").addEventListener("submit",async e=>{
     const answer=data.content||data.message||"The model returned no text.";
     history.push({role:"assistant",content:answer}); addMessage("assistant",answer);
   }catch(err){typing.remove();addMessage("assistant",err.message||"The model could not be reached.");}
-  finally{updateChatLock();if(bridgeConnected&&modelConnected)sendButton.textContent="Send ↵";else sendButton.textContent="Locked";if(bridgeConnected&&modelConnected)chatInput.focus();}
+  finally{updateChatLock();if(bridgeConnected&&modelConnected)sendButton.textContent="Send â†µ";else sendButton.textContent="Locked";if(bridgeConnected&&modelConnected)chatInput.focus();}
 });
 chatInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("chatForm").requestSubmit();}});
 $("logout").onclick=async()=>{await fetch(API+"/api/auth/logout",{method:"POST",headers:auth}).catch(()=>{});localStorage.removeItem("klizonion_token");localStorage.removeItem("klizonion_user");location.href="index.html"};
@@ -157,3 +157,4 @@ updateChatLock();
 load();
 </script>
 </body></html>
+

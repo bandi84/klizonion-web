@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create account • Klizonion</title><link rel="stylesheet" href="static/style.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create account â€¢ Klizonion</title><link rel="stylesheet" href="static/style.css"></head>
 <body>
 <main class="shell auth-shell">
-  <a class="home-link" href="index.html">← Back to Klizonion</a>
+  <a class="home-link" href="index.html">â† Back to Klizonion</a>
   <div class="auth-head" style="margin-top:18px"><div class="brand-row"><div class="logo">K</div><div class="brand">KLIZONION</div><div class="version">v0.01</div></div><h1>Start building.</h1><p>Create an account and get your own cloud workspace.</p></div>
   <section class="panel card"><form id="registerForm" class="form" novalidate>
     <div class="field"><label for="usernameInput">Username</label><input id="usernameInput" autocomplete="username" required minlength="2" maxlength="32"></div>
@@ -16,8 +16,9 @@
   <div class="auth-footer">Already have an account? <a href="login.html">Log in</a></div>
 </main>
 <script>
-const API="https://api.klizonion.vexr.dev";
+const API="https://klizonion-agent.umamaheswara-bandi84.workers.dev";
 const form=document.getElementById("registerForm"),usernameInput=document.getElementById("usernameInput"),emailInput=document.getElementById("emailInput"),passwordInput=document.getElementById("passwordInput"),confirmInput=document.getElementById("confirmInput"),button=document.getElementById("registerButton"),message=document.getElementById("message");
-form.addEventListener("submit",async e=>{e.preventDefault();message.textContent="";message.className="message";if(passwordInput.value!==confirmInput.value){message.className="message error";message.textContent="Passwords do not match.";confirmInput.focus();return}button.disabled=true;button.textContent="Creating…";try{const r=await fetch(API+"/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:usernameInput.value.trim(),email:emailInput.value.trim(),password:passwordInput.value})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"registration_failed");localStorage.setItem("klizonion_token",data.token);localStorage.setItem("klizonion_user",JSON.stringify(data.user));location.href="dashboard.html"}catch(err){const m={invalid_email:"Enter a valid email address.",invalid_username:"Username must be at least 2 characters.",password_too_short:"Password must be at least 8 characters.",email_already_registered:"That email is already registered.",username_already_registered:"That username is already registered.",registration_failed:"Could not create the account."};message.className="message error";message.textContent=m[err.message]||"Could not create the account."}finally{button.disabled=false;button.textContent="Create account"}});
+form.addEventListener("submit",async e=>{e.preventDefault();message.textContent="";message.className="message";if(passwordInput.value!==confirmInput.value){message.className="message error";message.textContent="Passwords do not match.";confirmInput.focus();return}button.disabled=true;button.textContent="Creatingâ€¦";try{const r=await fetch(API+"/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:usernameInput.value.trim(),email:emailInput.value.trim(),password:passwordInput.value})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"registration_failed");localStorage.setItem("klizonion_token",data.token);localStorage.setItem("klizonion_user",JSON.stringify(data.user));location.href="dashboard.html"}catch(err){const m={invalid_email:"Enter a valid email address.",invalid_username:"Username must be at least 2 characters.",password_too_short:"Password must be at least 8 characters.",email_already_registered:"That email is already registered.",username_already_registered:"That username is already registered.",registration_failed:"Could not create the account."};message.className="message error";message.textContent=m[err.message]||"Could not create the account."}finally{button.disabled=false;button.textContent="Create account"}});
 </script>
 </body></html>
+
