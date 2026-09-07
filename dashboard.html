@@ -1,109 +1,50 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#050505">
-  <title>Klizonion Workspace</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard • Klizonion v0.01</title>
+  <link rel="stylesheet" href="static/style.css">
 </head>
-<body class="dashboard-shell">
-  <header class="app-nav">
-    <a class="brand" href="/"><span class="brand-mark">K</span><span>KLIZONION</span></a>
-    <div class="app-nav-right"><span class="account-pill">Klizonion User</span><a class="nav-button" href="/auth/logout">Logout</a></div>
-  </header>
-
-  <main class="dashboard">
-    <aside class="sidebar">
-      <div>
-        <div class="sidebar-top">
-          <div class="eyebrow">WORKSPACE</div>
-          <select id="workspace"></select>
-          <button class="button button-sidebar" onclick="openWorkspaceModal()">+ New workspace</button>
-        </div>
-        <div class="side-list">
-          <button class="side-item side-active" data-view="agent" onclick="showView('agent')"><span>◈</span><span>Agent</span></button>
-          <button class="side-item" data-view="projects" onclick="showView('projects')"><span>▦</span><span>Projects</span></button>
-          <button class="side-item" data-view="bridge" onclick="showView('bridge')"><span>◇</span><span>Studio Bridge</span></button>
-          <button class="side-item" data-view="memory" onclick="showView('memory')"><span>⌘</span><span>Memory</span></button>
-        </div>
-      </div>
-      <div class="sidebar-bottom"><div class="bridge-mini"><span id="bridgeDot" class="status-dot"></span><div><strong id="bridgeTitle">Studio Bridge</strong><small id="bridgeSubtitle">Checking connection…</small></div></div></div>
-    </aside>
-
-    <section class="workspace-stage">
-      <div id="view-agent" class="view-panel active">
-        <div class="chat-head"><div><div class="eyebrow">KLIZONION AGENT</div><h1>What are we building?</h1></div><div class="model-badge">MODEL <b>LOCAL</b></div></div>
-        <div id="messages" class="messages"><div class="welcome-card"><div class="welcome-icon">K</div><h2>Start building with Klizonion.</h2><p>Ask it to plan a system, explain Luau, inspect a project, or prepare a Studio action.</p><div class="suggestions"><button onclick="useSuggestion('Create a clean round system for my Roblox game.')">Create a round system</button><button onclick="useSuggestion('Explain how RemoteEvents should be structured in this project.')">Explain RemoteEvents</button><button onclick="useSuggestion('Inspect the current project structure and suggest improvements.')">Inspect my project</button></div></div></div>
-        <div class="composer-wrap"><div class="composer"><textarea id="prompt" placeholder="Tell Klizonion what you want to build..." aria-label="Message Klizonion"></textarea><button class="button button-main send-button" onclick="send()">Send <span>↑</span></button></div><div class="composer-note">Enter to send · Shift + Enter for a new line</div></div>
-      </div>
-
-      <div id="view-projects" class="view-panel">
-        <div class="page-head"><div><div class="eyebrow">PROJECTS</div><h1>Your build spaces.</h1><p>Real projects are stored in the Klizonion backend and are scoped to this workspace.</p></div><button class="button" onclick="openProjectModal()">+ New project</button></div>
-        <div id="projectGrid" class="card-grid"></div>
-      </div>
-
-      <div id="view-bridge" class="view-panel">
-        <div class="page-head"><div><div class="eyebrow">STUDIO BRIDGE</div><h1>Connect Roblox Studio.</h1><p>See live bridge sessions and send a safe test command through the backend queue.</p></div></div>
-        <div id="bridgeList" class="stack-list"></div>
-      </div>
-
-      <div id="view-memory" class="view-panel">
-        <div class="page-head"><div><div class="eyebrow">MEMORY</div><h1>Workspace memory.</h1><p>Durable facts and project notes are stored separately from model weights.</p></div><button class="button" onclick="openMemoryModal()">+ Add memory</button></div>
-        <div class="memory-tools"><input id="memorySearch" placeholder="Search this workspace's memory…"><button class="button" onclick="loadMemory()">Search</button></div>
-        <div id="memoryList" class="stack-list"></div>
-      </div>
-    </section>
-  </main>
-
-  <div id="modalBackdrop" class="modal-backdrop" onclick="backdropClose(event)">
-    <div id="modal" class="modal-card" role="dialog" aria-modal="true" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal()">×</button>
-      <div id="modalContent"></div>
+<body>
+  <main class="shell">
+    <header class="topbar"><div><div class="pill">KLIZONION • v0.01</div><h1 id="hello">Dashboard</h1></div><button id="logout" class="button">Log out</button></header>
+    <div class="grid dashboard-grid">
+      <section class="card"><h3>Account</h3><p id="account">Loading…</p></section>
+      <section class="card"><h3>Workspaces</h3><p id="workspaces">Loading…</p></section>
+      <section class="card"><h3>Cloud API</h3><p id="health">Checking…</p></section>
+      <section class="card"><h3>Model</h3><p>Prebuilt model + knowledge gateway ready. Connect the model server to enable generation.</p></section>
     </div>
-  </div>
-
+  </main>
 <script>
-const messages=[];
-async function bootAuth(){try{const r=await fetch('/api/v1/me');const d=await r.json();if(!d.authenticated){location.href='https://klizonion-agent.umamaheswara-bandi84.workers.dev/auth/discord';return;}workspaces=d.workspaces||[];renderWorkspaces(workspaces[0]?.id||'');await loadProjects();await loadMemory();await loadBridges();}catch(e){toast('Could not load your workspace.');console.error(e)}}
-function toast(text){let t=qs('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;right:22px;bottom:22px;padding:12px 14px;background:#151515;color:#fff;border:1px solid #333;border-radius:10px;z-index:200;box-shadow:0 20px 60px rgba(0,0,0,.5);font-size:12px';document.body.appendChild(t)}t.textContent=text;t.style.display='block';clearTimeout(t._hide);t._hide=setTimeout(()=>t.style.display='none',2600)}
-let workspaces=[];
-let currentWorkspace='';
-
-function qs(id){return document.getElementById(id)}
-function activeWorkspace(){return qs('workspace').value}
-function add(role,text){const box=qs('messages');const welcome=box.querySelector('.welcome-card');if(welcome)welcome.remove();const el=document.createElement('div');el.className='msg '+role;el.textContent=text;box.appendChild(el);box.scrollTop=box.scrollHeight;return el;}
-function useSuggestion(text){qs('prompt').value=text;qs('prompt').focus();}
-async function send(){const input=qs('prompt');const content=input.value.trim();if(!content)return;input.value='';add('user',content);messages.push({role:'user',content});const pending=add('assistant pending','Klizonion is thinking…');try{const r=await fetch('/api/v1/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workspace_id:activeWorkspace(),messages})});const data=await r.json();pending.remove();const text=data.content||data.message||JSON.stringify(data);add('assistant',text);messages.push({role:'assistant',content:text});}catch(e){pending.remove();add('assistant','Backend error: '+e);}}
-
-function openModal(html){qs('modalContent').innerHTML=html;qs('modalBackdrop').classList.add('open');setTimeout(()=>{const f=qs('modalContent').querySelector('input,textarea');if(f)f.focus()},40)}
-function closeModal(){qs('modalBackdrop').classList.remove('open')}
-function backdropClose(e){if(e.target===qs('modalBackdrop'))closeModal()}
-function openWorkspaceModal(){openModal(`<div class="eyebrow">NEW WORKSPACE</div><h2>Create a workspace.</h2><p class="modal-muted">A workspace gets its own projects, conversations, memory and Studio connections.</p><label>Name</label><input id="workspaceName" class="modal-input" placeholder="My Roblox Game"><div class="modal-actions"><button class="button" onclick="closeModal()">Cancel</button><button class="button button-main" onclick="createWorkspace()">Create workspace</button></div>`)}
-async function createWorkspace(){const name=qs('workspaceName').value.trim();if(!name)return;const r=await fetch('/api/v1/workspaces',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});const w=await r.json();if(w.id){workspaces.push(w);renderWorkspaces(w.id);closeModal();await loadProjects();await loadMemory();await loadBridges();}else{toast(w.error||'Could not create workspace.')}}
-function renderWorkspaces(selectId){const s=qs('workspace');s.innerHTML='';for(const w of workspaces){const o=document.createElement('option');o.value=w.id;o.textContent=w.name;s.appendChild(o);}if(selectId)s.value=selectId;currentWorkspace=s.value}
-async function refreshWorkspaces(){const r=await fetch('/api/v1/workspaces');const d=await r.json();if(d.workspaces){workspaces=d.workspaces;renderWorkspaces(workspaces[0]?.id||'');}}
-
-function showView(name){document.querySelectorAll('.view-panel').forEach(v=>v.classList.remove('active'));qs('view-'+name).classList.add('active');document.querySelectorAll('.side-item').forEach(b=>b.classList.toggle('side-active',b.dataset.view===name));if(name==='projects')loadProjects();if(name==='bridge')loadBridges();if(name==='memory')loadMemory();}
-
-async function loadProjects(){const r=await fetch('/api/v1/projects?workspace_id='+encodeURIComponent(activeWorkspace()));const d=await r.json();const grid=qs('projectGrid');grid.innerHTML='';if(!d.projects?.length){grid.innerHTML='<div class="empty-card">No projects yet. Create one above.</div>';return;}for(const p of d.projects){const card=document.createElement('article');card.className='data-card';card.innerHTML=`<div class="card-top"><span class="card-icon">▦</span><span class="status-chip">${p.status}</span></div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description||'No description yet.')}</p><small>Created ${escapeHtml(p.created_at)}</small>`;grid.appendChild(card)}}
-function openProjectModal(){openModal(`<div class="eyebrow">NEW PROJECT</div><h2>Create a project.</h2><label>Name</label><input id="projectName" class="modal-input" placeholder="Combat system"><label>Description</label><textarea id="projectDescription" class="modal-input" placeholder="What this project is for…"></textarea><div class="modal-actions"><button class="button" onclick="closeModal()">Cancel</button><button class="button button-main" onclick="createProject()">Create project</button></div>`)}
-async function createProject(){const name=qs('projectName').value.trim();if(!name)return;const description=qs('projectDescription').value.trim();const r=await fetch('/api/v1/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workspace_id:activeWorkspace(),name,description})});const d=await r.json();if(d.id){closeModal();loadProjects()}else toast(d.error||'Could not create project.')}
-
-async function loadBridges(){const r=await fetch('/api/v1/bridges');const d=await r.json();const list=qs('bridgeList');list.innerHTML='';if(!d.bridges?.length){list.innerHTML='<div class="empty-card"><strong>No Studio Bridge is connected.</strong><span>Open the Colian Studio Bridge plugin and press CONNECT.</span></div>';updateBridgeMini(null);return;}for(const b of d.bridges){const card=document.createElement('article');card.className='data-card wide';const connected=b.connected;card.innerHTML=`<div class="card-top"><span class="card-icon">◇</span><span class="status-chip ${connected?'good':''}">${connected?'CONNECTED':'OFFLINE'}</span></div><h3>${escapeHtml(b.plugin)}</h3><p>Version ${escapeHtml(b.version)}</p><small>Bridge ID: ${escapeHtml(b.bridge_id)}</small><div class="card-actions"><button class="button" ${connected?'':'disabled'} onclick="sendBridgeTest('${escapeAttr(b.bridge_id)}')">Send test part</button><button class="button button-ghost" onclick="loadBridges()">Refresh</button></div>`;list.appendChild(card);}const live=d.bridges.find(b=>b.connected);updateBridgeMini(live)}
-function updateBridgeMini(b){qs('bridgeDot').classList.toggle('live',!!b);qs('bridgeSubtitle').textContent=b?'Connected to Roblox Studio':'Waiting for connection';}
-async function sendBridgeTest(id){const r=await fetch('/api/v1/bridges/'+encodeURIComponent(id)+'/commands',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:'create_part',arguments:{name:'Klizonion_TestPart',parent:'Workspace',size:{x:4,y:1,z:4},position:{x:0,y:5,z:0},anchored:true,can_collide:true}})});const d=await r.json();toast(d.id?`Command #${d.id} queued. Roblox Studio will pick it up.`:d.error||'Failed to queue command.');}
-
-async function loadMemory(){const q=qs('memorySearch').value.trim();const r=await fetch('/api/v1/memory?workspace_id='+encodeURIComponent(activeWorkspace())+'&q='+encodeURIComponent(q));const d=await r.json();const list=qs('memoryList');list.innerHTML='';if(!d.memories?.length){list.innerHTML='<div class="empty-card">No memory entries found for this workspace.</div>';return;}for(const m of d.memories){const card=document.createElement('article');card.className='data-card wide';card.innerHTML=`<div class="card-top"><span class="status-chip">${escapeHtml(m.kind)}</span><small>${escapeHtml(m.created_at)}</small></div><p>${escapeHtml(m.content)}</p>`;list.appendChild(card)}}
-function openMemoryModal(){openModal(`<div class="eyebrow">ADD MEMORY</div><h2>Save a workspace fact.</h2><label>Type</label><select id="memoryKind" class="modal-input"><option value="fact">Fact</option><option value="project">Project note</option><option value="lesson">Lesson</option><option value="preference">Preference</option></select><label>Content</label><textarea id="memoryContent" class="modal-input" placeholder="Remember that…"></textarea><div class="modal-actions"><button class="button" onclick="closeModal()">Cancel</button><button class="button button-main" onclick="createMemory()">Save memory</button></div>`)}
-async function createMemory(){const content=qs('memoryContent').value.trim();if(!content)return;const r=await fetch('/api/v1/memory',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workspace_id:activeWorkspace(),kind:qs('memoryKind').value,content})});const d=await r.json();if(d.id){closeModal();loadMemory()}else toast(d.error||'Could not save memory.')}
-
-function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-function escapeAttr(v){return String(v).replace(/'/g,"\\'")}
-qs('workspace').addEventListener('change',async()=>{currentWorkspace=activeWorkspace();await loadProjects();await loadMemory();await loadBridges();});
-qs('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
-bootAuth();
+const API = "https://klizonion-agent.umamaheswara-bandi84.workers.dev";
+const token = localStorage.getItem("klizonion_token");
+if (!token) location.href = "login.html";
+const auth = {Authorization: "Bearer " + token};
+async function load() {
+  try {
+    const [meR, hR] = await Promise.all([
+      fetch(API + "/api/v1/me", {headers: auth}),
+      fetch(API + "/api/health")
+    ]);
+    const me = await meR.json();
+    const h = await hR.json();
+    if (!me.authenticated) throw new Error("session_expired");
+    document.getElementById("hello").textContent = "Welcome, " + me.user.username;
+    document.getElementById("account").textContent = me.user.email;
+    document.getElementById("workspaces").textContent = (me.workspaces || []).length + " workspace(s)";
+    document.getElementById("health").textContent = h.status + " • database " + (h.database ? "online" : "offline");
+  } catch (e) {
+    localStorage.removeItem("klizonion_token");
+    location.href = "login.html";
+  }
+}
+document.getElementById("logout").onclick = async () => {
+  await fetch(API + "/api/auth/logout", {method:"POST", headers: auth});
+  localStorage.removeItem("klizonion_token");
+  localStorage.removeItem("klizonion_user");
+  location.href = "index.html";
+};
+load();
 </script>
 </body>
 </html>
-

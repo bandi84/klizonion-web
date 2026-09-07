@@ -2,120 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#080808">
-  <title>Klizonion | Roblox AI Development Agent</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Klizonion v0.01</title>
+  <link rel="stylesheet" href="static/style.css">
 </head>
-<body class="site-shell">
-  <header class="nav-wrap">
-    <div class="nav">
-      <a class="brand" href="/">
-        <span class="brand-mark">K</span>
-        <span>KLIZONION</span>
-      </a>
-      <nav class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#how-it-works">How it works</a>
-        <a href="#architecture">Architecture</a>
-        <a class="nav-button" href="https://klizonion-agent.umamaheswara-bandi84.workers.dev/auth/discord">Continue with Discord</a>
-      </nav>
+<body>
+  <main class="shell hero">
+    <div class="pill">KLIZONION • v0.01</div>
+    <h1>Your Roblox AI workspace.</h1>
+    <p class="lead">Agent runtime, memory, controlled Studio tools, and the model stack. This is the beginning.</p>
+    <div class="actions">
+      <a class="button primary" href="login.html">Log in</a>
+      <a class="button" href="register.html">Create account</a>
     </div>
-  </header>
-
-  <main>
-    <section class="hero section-pad">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> ROBLOX AI DEVELOPMENT PLATFORM</div>
-        <h1>Build Roblox systems with an AI that can <span>plan, code, and act.</span></h1>
-        <p class="hero-sub">Klizonion is being built as an end-to-end development agent for Roblox. It combines an agent runtime, persistent project memory, controlled Studio tools, web knowledge, and an own-model training stack.</p>
-        <div class="hero-actions">
-          <a class="nav-button" href="https://klizonion-agent.umamaheswara-bandi84.workers.dev/auth/discord">Continue with Discord</a>
-          <a class="button button-ghost" href="#features">Explore features</a>
-        </div>
-        <div class="hero-note">Built for serious Roblox development, from first idea to Studio execution.</div>
-      </div>
-      <div class="hero-panel">
-        <div class="panel-window">
-          <div class="window-bar"><span></span><span></span><span></span><label>Klizonion Agent</label></div>
-          <div class="agent-line"><span class="prompt">YOU</span><span>"Build a round system with a lobby, countdown, and winner UI."</span></div>
-          <div class="agent-status">ANALYZING PROJECT <span>•••</span></div>
-          <div class="agent-step"><b>01</b><div><strong>Inspect workspace</strong><small>Read relevant project structure and existing scripts</small></div><i>✓</i></div>
-          <div class="agent-step"><b>02</b><div><strong>Plan implementation</strong><small>Choose services, modules, events, and UI flow</small></div><i>✓</i></div>
-          <div class="agent-step active"><b>03</b><div><strong>Execute Studio tools</strong><small>Create and edit approved instances through the Bridge</small></div><i>↻</i></div>
-          <div class="agent-step"><b>04</b><div><strong>Verify result</strong><small>Inspect output and recover from failures</small></div><i>•</i></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="features" class="section-pad feature-section">
-      <div class="section-heading">
-        <div class="eyebrow">ONE PLATFORM, MANY LAYERS</div>
-        <h2>Everything the agent needs to build.</h2>
-        <p>Klizonion is designed as a complete system instead of a chat box with a prompt taped onto it.</p>
-      </div>
-      <div class="feature-grid">
-        <article class="feature-card"><div class="feature-icon">⌘</div><h3>Agent Runtime</h3><p>Turns a user request into a sequence of plans, tool calls, observations, corrections, and final results.</p><span>Reasoning + orchestration</span></article>
-        <article class="feature-card"><div class="feature-icon">▦</div><h3>Persistent Memory</h3><p>Keeps durable project facts, recent context, summaries, and lessons separate for each workspace.</p><span>Project-aware context</span></article>
-        <article class="feature-card"><div class="feature-icon">◇</div><h3>Studio Bridge</h3><p>Connects the agent to controlled Roblox Studio operations instead of giving the model unrestricted access.</p><span>Controlled execution</span></article>
-        <article class="feature-card"><div class="feature-icon">⌕</div><h3>Web Knowledge</h3><p>Allows the backend to fetch current documentation and reference material without exposing private API keys to users.</p><span>Current information</span></article>
-        <article class="feature-card"><div class="feature-icon">◫</div><h3>Own-Model Stack</h3><p>A from-scratch Transformer, tokenizer, training pipeline, evaluation gates, and checkpoint promotion workflow.</p><span>Train and improve</span></article>
-        <article class="feature-card"><div class="feature-icon">↗</div><h3>Multi-User Workspaces</h3><p>One shared model service can support many users while memory, projects, tools, and sessions remain logically isolated.</p><span>Built for scale</span></article>
-      </div>
-    </section>
-
-    <section id="how-it-works" class="section-pad workflow-section">
-      <div class="section-heading narrow">
-        <div class="eyebrow">HOW KLIZONION WORKS</div>
-        <h2>From one sentence to a working Studio change.</h2>
-      </div>
-      <div class="workflow">
-        <div class="workflow-row"><div class="flow-num">01</div><div><h3>Describe what you want</h3><p>Tell Klizonion what you are building in normal language. The agent receives the current project context instead of starting from zero.</p></div></div>
-        <div class="flow-connector"></div>
-        <div class="workflow-row"><div class="flow-num">02</div><div><h3>Plan before acting</h3><p>The agent can inspect the project, choose tools, break a larger request into smaller operations, and keep the workspace state in view.</p></div></div>
-        <div class="flow-connector"></div>
-        <div class="workflow-row"><div class="flow-num">03</div><div><h3>Execute through the Bridge</h3><p>Approved commands travel through the backend queue to the Colian Studio Bridge, which performs the supported Studio operations and reports results.</p></div></div>
-        <div class="flow-connector"></div>
-        <div class="workflow-row"><div class="flow-num">04</div><div><h3>Observe, verify, recover</h3><p>Results can be fed back into the agent so it can identify failures, correct its approach, and keep going instead of blindly stopping.</p></div></div>
-      </div>
-    </section>
-
-    <section id="architecture" class="section-pad architecture-section">
-      <div class="section-heading">
-        <div class="eyebrow">THE KLIZONION STACK</div>
-        <h2>Designed as a real service.</h2>
-        <p>The browser does not talk directly to the private model. The backend sits between users, tools, memory, and model workers.</p>
-      </div>
-      <div class="arch-card">
-        <div class="arch-node"><strong>Browser</strong><span>klizonion.com</span></div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-node"><strong>Public API</strong><span>Auth · workspaces · chat · tools</span></div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-split">
-          <div class="arch-node small"><strong>Agent</strong><span>planning + memory</span></div>
-          <div class="arch-node small"><strong>PostgreSQL</strong><span>users + projects</span></div>
-          <div class="arch-node small"><strong>Model Server</strong><span>private inference</span></div>
-          <div class="arch-node small"><strong>Studio Bridge</strong><span>controlled Roblox tools</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-pad promise-section">
-      <div class="promise-grid">
-        <div><div class="eyebrow">THE LONG GAME</div><h2>Intelligence comes from the training system behind the product.</h2></div>
-        <div><p>The actual intelligence still comes from obtaining a sufficiently large, legally usable training corpus and substantial compute, then running and iterating the training/evaluation pipeline.</p><p>Klizonion's architecture is built so better checkpoints can be evaluated and promoted without rebuilding the entire website or user system.</p></div>
-      </div>
-    </section>
-
-    <section class="section-pad cta-section">
-      <div class="cta-card">
-        <div><div class="eyebrow">READY WHEN YOU ARE</div><h2>Build the workspace first. Train the brain next.</h2><p>Get the service architecture working locally, then deploy the same stack behind klizonion.com.</p></div>
-        <a class="nav-button" href="https://klizonion-agent.umamaheswara-bandi84.workers.dev/auth/discord">Continue with Discord</a>
-      </div>
+    <section class="grid">
+      <div class="card"><h3>Agent Runtime</h3><p>Connect models to tools and projects.</p></div>
+      <div class="card"><h3>Persistent Memory</h3><p>Keep workspace facts and project context in D1.</p></div>
+      <div class="card"><h3>Studio Bridge</h3><p>Queue controlled Roblox Studio commands.</p></div>
+      <div class="card"><h3>Own-Model Stack</h3><p>Leave the gateway ready for your future model server.</p></div>
     </section>
   </main>
-
-  <footer class="footer"><span>KLIZONION</span><span>Own-model Roblox AI development platform</span></footer>
 </body>
 </html>
-

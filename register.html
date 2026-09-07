@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create account • Klizonion v0.01</title>
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+  <main class="shell auth-shell">
+    <div class="pill">KLIZONION • v0.01</div>
+    <h1>Start your workspace.</h1>
+    <p class="muted">Email/password auth. No Discord dependency.</p>
+    <form id="registerForm" class="panel">
+      <label>Username<input id="username" autocomplete="username" required minlength="2" maxlength="32"></label>
+      <label>Email<input id="email" type="email" autocomplete="email" required></label>
+      <label>Password<input id="password" type="password" autocomplete="new-password" required minlength="8"></label>
+      <label>Confirm password<input id="confirm" type="password" autocomplete="new-password" required minlength="8"></label>
+      <button class="button primary" type="submit">Create account</button>
+      <div id="message" class="message"></div>
+    </form>
+    <p class="muted">Already have an account? <a href="login.html">Log in</a></p>
+  </main>
+<script>
+const API = "https://klizonion-agent.umamaheswara-bandi84.workers.dev";
+const form = document.getElementById("registerForm");
+const message = document.getElementById("message");
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  if (password.value !== confirm.value) { message.textContent = "Passwords do not match"; return; }
+  message.textContent = "Creating account…";
+  try {
+    const r = await fetch(API + "/api/auth/register", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({username: username.value, email: email.value, password: password.value})
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "registration_failed");
+    localStorage.setItem("klizonion_token", data.token);
+    localStorage.setItem("klizonion_user", JSON.stringify(data.user));
+    location.href = "dashboard.html";
+  } catch (err) {
+    message.textContent = err.message.replaceAll("_", " ");
+  }
+});
+</script>
+</body>
+</html>
