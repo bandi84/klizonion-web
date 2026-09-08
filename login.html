@@ -1,23 +1,8 @@
-﻿<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login â€¢ Klizonion</title><link rel="stylesheet" href="static/style.css"></head>
-<body>
-<main class="shell auth-shell">
-  <a class="home-link" href="index.html">â† Back to Klizonion</a>
-  <div class="auth-head" style="margin-top:18px"><div class="brand-row"><div class="logo">K</div><div class="brand">KLIZONION</div><div class="version">v0.01</div></div><h1>Welcome back.</h1><p>Sign in to open your workspace and Studio pairing controls.</p></div>
-  <section class="panel card"><form id="loginForm" class="form" novalidate>
-    <div class="field"><label for="identifierInput">Username or email</label><input id="identifierInput" autocomplete="username" required></div>
-    <div class="field"><label for="passwordInput">Password</label><input id="passwordInput" type="password" autocomplete="current-password" required></div>
-    <button id="loginButton" class="button primary" type="submit">Log in</button>
-    <div id="message" class="message" role="alert"></div>
-  </form></section>
-  <div class="auth-footer">No account yet? <a href="register.html">Create one</a></div>
-</main>
-<script>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Log in · Klizonion</title><link rel="stylesheet" href="static/style.css"></head><body><main class="shell auth"><section class="auth-card card">
+<div class="auth-top"><a class="back" href="index.html">← Klizonion</a><div class="brand-row" style="margin-top:18px"><div class="logo">K</div><div class="brand">KLIZONION</div><div class="version">v1.0</div></div><h1 class="auth-title">Welcome back.</h1><p class="auth-sub">Your workspace is waiting.</p></div>
+<form id="loginForm" class="form" novalidate><div class="field"><label for="identifierInput">Username or email</label><input id="identifierInput" autocomplete="username" required></div><div class="field"><label for="passwordInput">Password</label><input id="passwordInput" type="password" autocomplete="current-password" required></div><button id="loginButton" class="button primary" type="submit">Log in</button><div id="message" class="message" role="alert"></div></form>
+<div class="auth-foot">New to Klizonion? <a href="register.html">Create an account</a></div></section></main><script>
 const API="https://klizonion-agent.umamaheswara-bandi84.workers.dev";
-if(localStorage.getItem("klizonion_token")) location.href="dashboard.html";
-const form=document.getElementById("loginForm"),identifierInput=document.getElementById("identifierInput"),passwordInput=document.getElementById("passwordInput"),button=document.getElementById("loginButton"),message=document.getElementById("message");
-form.addEventListener("submit",async e=>{e.preventDefault();message.textContent="";button.disabled=true;button.textContent="Signing inâ€¦";try{const r=await fetch(API+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({identifier:identifierInput.value.trim(),password:passwordInput.value})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"invalid_credentials");localStorage.setItem("klizonion_token",data.token);localStorage.setItem("klizonion_user",JSON.stringify(data.user));location.href="dashboard.html"}catch(err){message.className="message error";message.textContent="Incorrect username or password, or the account could not be reached."}finally{button.disabled=false;button.textContent="Log in"}});
-</script>
-</body></html>
-
+const existing=localStorage.getItem("klizonion_token"); if(existing) location.replace("dashboard.html");
+const $=id=>document.getElementById(id); $("loginForm").addEventListener("submit",async e=>{e.preventDefault();const b=$("loginButton");b.disabled=true;b.textContent="Signing in…";$("message").textContent="";try{const r=await fetch(API+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({identifier:$("identifierInput").value.trim(),password:$("passwordInput").value})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"invalid_credentials");localStorage.setItem("klizonion_token",d.token);localStorage.setItem("klizonion_user",JSON.stringify(d.user));location.replace("dashboard.html")}catch(err){const m={invalid_credentials:"Incorrect username or password.",rate_limited:"Too many attempts. Please wait a little and try again."};$("message").className="message error";$("message").textContent=m[err.message]||"Could not sign you in."}finally{b.disabled=false;b.textContent="Log in"}});
+</script></body></html>

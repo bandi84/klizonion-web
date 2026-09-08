@@ -1,160 +1,42 @@
-﻿<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Klizonion Dashboard</title><link rel="stylesheet" href="static/style.css"></head>
-<body>
-<main class="shell">
-  <header class="topbar">
-    <div class="brand-row"><div class="logo">K</div><div class="brand">KLIZONION</div><div class="version">v0.01</div></div>
-    <div class="top-actions"><div class="user-pill"><div id="avatar" class="avatar">K</div><span id="topUser">Loadingâ€¦</span></div><button id="logout" class="button">Log out</button></div>
-  </header>
-
-  <section class="dashboard-grid">
-    <section class="chat-card card">
-      <div class="chat-head">
-        <div class="chat-title"><div class="agent-dot"></div><div><h2>Klizonion Agent</h2><p>Roblox â€¢ Luau â€¢ Studio â€¢ projects â€¢ debugging</p></div></div>
-        <div id="modelStatus" class="status-badge">Studio offline</div>
-      </div>
-      <div id="chatMessages" class="chat-messages" aria-live="polite">
-        <div id="chatEmpty" class="chat-empty"><h3>Connect Studio to start</h3><p>Generate the 5-digit code, pair your Studio Bridge, and the Klizonion chat will unlock.</p></div>
-      </div>
-      <div id="chatLock" class="chat-lock locked">Connect your Studio Bridge to unlock chat</div>
-      <form id="chatForm" class="chat-form">
-        <div class="chat-input-wrap"><textarea id="chatInput" rows="3" placeholder="Connect your Studio Bridge to start chattingâ€¦" autocomplete="off" disabled></textarea><div class="chat-hint">Enter to send â€¢ Shift+Enter for a new line</div></div>
-        <button id="sendButton" class="button primary" type="submit" disabled>Locked</button>
-      </form>
-    </section>
-
-    <aside class="sidebar">
-      <section class="side-card code-card card">
-        <div class="code-label">Studio pairing code</div>
-        <div id="pairCode" class="pair-code">-----</div>
-        <div id="codeMeta" class="code-meta">Generate a one-time 5-digit code.</div>
-        <div class="code-actions"><button id="generatePairCode" class="button primary" type="button">Generate</button><button id="copyCode" class="button" type="button" disabled>Copy</button></div>
-        <div id="bridgeStatus" class="bridge-status"><div id="bridgeDot" class="bridge-dot"></div><div><strong id="bridgeTitle">Bridge not paired</strong><span id="bridgeText">Open your Studio bridge and enter the code above.</span></div></div>
-      </section>
-
-      <section class="side-card card"><h3>Workspace</h3><p id="workspaceName">Loadingâ€¦</p><div class="stat-grid" style="margin-top:12px"><div class="stat"><div class="k">Workspaces</div><div class="v" id="workspaces">â€”</div></div><div class="stat"><div class="k">Cloud API</div><div class="v" id="health">â€”</div></div></div></section>
-      <section class="side-card card"><h3>Account</h3><p id="account">Loadingâ€¦</p><div class="stat-grid" style="margin-top:12px"><div class="stat"><div class="k">Model</div><div class="v" id="modelInfo">â€”</div></div><div class="stat"><div class="k">Version</div><div class="v">v0.01</div></div></div></section>
-      <div class="notice">Pairing codes expire after 10 minutes and are designed to be used once. Never post a live pairing code publicly.</div>
-    </aside>
-  </section>
-</main>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Klizonion · Workspace</title><link rel="stylesheet" href="static/style.css"></head><body>
+<div class="app-shell">
+<aside class="app-sidebar"><div class="sidebar-brand"><div class="brand-row"><div class="logo">K</div><div class="brand">KLIZONION</div><div class="version">v1.0</div></div></div>
+<div class="nav-section">WORKSPACE</div><button class="nav-item active" data-view="chat"><span class="nav-icon">◈</span><span>Chat</span></button><button class="nav-item" data-view="explorer"><span class="nav-icon">⌁</span><span>Studio Explorer</span></button><button class="nav-item" data-view="memory"><span class="nav-icon">◌</span><span>Memory</span></button><button class="nav-item" data-view="projects"><span class="nav-icon">▦</span><span>Projects</span></button>
+<div class="sidebar-bottom"><div class="user-mini"><div id="avatar" class="avatar">K</div><div><strong id="miniUser">Loading</strong><span id="miniEmail">Loading</span></div></div></div></aside>
+<header class="app-topbar"><div class="crumb" id="crumb">Workspace / Chat</div><div class="top-right"><div class="status-chip"><span id="topStudioDot" class="chip-dot"></span><span id="topStudio">Studio</span></div><div class="status-chip"><span id="topModelDot" class="chip-dot"></span><span id="topModel">Model</span></div><button id="logout" class="button ghost small">Log out</button></div></header>
+<main class="main-area">
+<section id="view-chat" class="view active"><div class="chat-layout"><section class="chat-panel card"><div class="chat-head"><div class="chat-name"><div id="chatSpark" class="spark"></div><div><h2>Klizonion</h2><p>Your Studio-aware development assistant.</p></div></div><div id="readyState" class="state">Getting ready</div></div><div id="messages" class="messages"><div id="emptyChat" class="empty-chat"><div class="empty-logo">K</div><h3>Your workspace is ready.</h3><p>Pair Studio and bring the model online. Once both are ready, you can ask Klizonion to build, inspect, debug, or explain.</p></div></div><div id="lockBanner" class="lock-banner">Connect Studio and bring the model online to unlock chat.</div><form id="chatForm" class="composer"><div class="composer-wrap"><textarea id="chatInput" rows="3" disabled placeholder="Waiting for Studio and model…"></textarea><div class="composer-hint">Enter to send · Shift+Enter for a new line</div></div><button id="sendButton" class="button primary send" disabled>Locked</button></form></section>
+<aside class="side-stack"><section class="side-card card"><div class="side-head"><div><div class="eyebrow">STUDIO</div><h3 id="bridgeTitle">Not connected</h3><p id="bridgeDesc">Pair this workspace with Studio.</p></div><div id="bridgeDot" class="conn-dot"></div></div><div class="code-display"><div class="eyebrow">PAIRING CODE</div><div id="pairCode" class="big-code">•••••</div><div id="codeMeta" class="code-meta">Single use · expires in 10 minutes</div><div class="code-row"><button id="generateCode" class="button primary small">Generate</button><button id="copyCode" class="button small" disabled>Copy</button></div></div></section>
+<section class="side-card card"><div class="eyebrow">MODEL</div><h3 id="modelTitle">Not ready</h3><p id="modelDesc">Waiting for the Klizonion model gateway.</p><div class="conn"><div id="modelDot" class="conn-dot"></div><div><strong id="modelState">Offline</strong><span>Only a verified live model unlocks chat.</span></div></div></section>
+<section class="side-card card"><div class="eyebrow">WORKSPACE</div><h3 id="workspaceName">Default</h3><p id="accountLine">Loading…</p><div class="stats"><div class="stat"><b>Projects</b><span id="projectCount">0</span></div><div class="stat"><b>Memories</b><span id="memoryCount">0</span></div></div></section></aside></div></section>
+<section id="view-explorer" class="view"><div class="explorer-grid"><section class="tree-panel card"><div class="view-toolbar"><div><h2>Studio Explorer</h2><p id="treeMeta">Connect Studio to inspect the experience.</p></div><button id="refreshTree" class="button small">Refresh</button></div><input id="treeSearch" class="tree-search" placeholder="Search instances…"><div id="tree" class="tree"><div class="panel-message">Your connected Studio hierarchy will appear here.</div></div></section><section class="inspect-panel card"><div class="view-toolbar"><div><h2>Inspector</h2><p>Inspect what Klizonion knows about the selected instance.</p></div></div><div id="inspector" class="inspect-empty">Select an instance from the tree.</div></section></div></section>
+<section id="view-memory" class="view"><section class="memory-panel card"><div class="view-toolbar"><div><h2>Memory</h2><p>Keep useful project facts available to Klizonion.</p></div></div><div class="inline-form"><input id="memoryInput" placeholder="Add a project memory…"><button id="saveMemory" class="button primary small">Save</button></div><div class="inline-form" style="margin-top:8px"><input id="memorySearch" placeholder="Search memories…"><button id="searchMemory" class="button small">Search</button></div><div id="memoryList" class="list" style="margin-top:12px"></div></section></section>
+<section id="view-projects" class="view"><section class="project-panel card"><div class="view-toolbar"><div><h2>Projects</h2><p>Your workspace projects.</p></div><button id="newProject" class="button primary small">New project</button></div><div id="projectList" class="list"></div></section></section>
+</main></div>
 <script>
-const API="https://klizonion-agent.umamaheswara-bandi84.workers.dev";
-const token=localStorage.getItem("klizonion_token");
-if(!token) location.href="login.html";
-const auth={Authorization:"Bearer "+token};
-const $=id=>document.getElementById(id);
-const chatMessages=$("chatMessages"),chatInput=$("chatInput"),sendButton=$("sendButton");
-const history=[];
-let workspaceId=null;
-let pairCode="";
-let bridgeConnected=false;
-let modelConnected=false;
-let startupMessageShown=false;
-
-function setBridgeStatus(title,text,good=false){
-  $("bridgeTitle").textContent=title;
-  $("bridgeText").textContent=text;
-  $("bridgeDot").className="bridge-dot"+(good?" good":"");
-}
-function addMessage(role,text){
-  $("chatEmpty")?.remove();
-  const row=document.createElement("div"); row.className="chat-row "+role;
-  const bubble=document.createElement("div"); bubble.className="chat-bubble"; bubble.textContent=text;
-  row.appendChild(bubble); chatMessages.appendChild(row); chatMessages.scrollTop=chatMessages.scrollHeight;
-}
-function updateChatLock(){
-  const ready=bridgeConnected && modelConnected;
-  chatInput.disabled=!ready;
-  sendButton.disabled=!ready;
-  $("chatLock").textContent=ready ? "Connected and ready" : (!bridgeConnected ? "Connect your Studio Bridge to unlock chat" : "Model is not connected yet");
-  $("chatLock").className="chat-lock "+(ready?"ready":"locked");
-  $("modelStatus").textContent=ready ? "Ready" : (!bridgeConnected ? "Studio offline" : "Model offline");
-}
-async function refreshState(){
-  try{
-    const [bR,hR]=await Promise.all([
-      fetch(API+"/api/v1/bridges",{headers:auth}),
-      fetch(API+"/api/health")
-    ]);
-    const bd=await bR.json().catch(()=>({}));
-    const hd=await hR.json().catch(()=>({}));
-    const now=Date.now();
-    const live=(bd.bridges||[]).find(b=>b.connected || now-Number(b.last_seen||0)<=15000);
-    bridgeConnected=!!live;
-    modelConnected=hd.model_connected===true;
-    if(bridgeConnected){
-      setBridgeStatus("Studio bridge connected",live.plugin||"Klizonion Studio Bridge is online",true);
-    }else{
-      setBridgeStatus("Studio bridge not connected","Generate a code, then enter it in the Studio Bridge.",false);
-    }
-    $("health").textContent=hd.database?"Online":"Offline";
-    $("modelInfo").textContent=modelConnected?"Connected":"Not connected";
-    updateChatLock();
-  }catch{
-    bridgeConnected=false; modelConnected=false;
-    setBridgeStatus("Connection unavailable","Could not check the bridge state.",false);
-    updateChatLock();
-  }
-}
-$("generatePairCode").onclick=async()=>{
-  const b=$("generatePairCode"); b.disabled=true; b.textContent="Generatingâ€¦";
-  $("codeMeta").textContent="Creating secure codeâ€¦";
-  try{
-    const r=await fetch(API+"/api/v1/bridge/pair-code",{method:"POST",headers:auth});
-    const data=await r.json().catch(()=>({})); if(!r.ok) throw new Error(data.error||"pair_code_failed");
-    pairCode=String(data.code); $("pairCode").textContent=pairCode; $("copyCode").disabled=false;
-    $("codeMeta").textContent="Expires in 10 minutes â€¢ single use";
-  }catch{ $("codeMeta").textContent="Could not generate a pairing code."; }
-  finally{b.disabled=false;b.textContent="Generate code";}
-};
-$("copyCode").onclick=async()=>{
-  if(!pairCode)return;
-  try{await navigator.clipboard.writeText(pairCode);$("copyCode").textContent="Copied";setTimeout(()=>$("copyCode").textContent="Copy",1200)}catch{}
-};
-async function load(){
-  try{
-    const [meR,hR]=await Promise.all([fetch(API+"/api/v1/me",{headers:auth}),fetch(API+"/api/health")]);
-    const me=await meR.json().catch(()=>({})); const h=await hR.json().catch(()=>({}));
-    if(!meR.ok || !me.authenticated) throw new Error("session_expired");
-    const u=me.user;
-    $("topUser").textContent=u.username;
-    $("avatar").textContent=(u.username||"K").slice(0,1).toUpperCase();
-    $("account").textContent=u.email;
-    $("workspaces").textContent=(me.workspaces||[]).length;
-    $("workspaceName").textContent=(me.workspaces||[])[0]?.name||"Default";
-    $("health").textContent=h.database?"Online":"Offline";
-    $("modelInfo").textContent=h.model_connected?"Connected":"Not connected";
-    workspaceId=(me.workspaces||[])[0]?.id||null;
-    await refreshState();
-    setInterval(refreshState,5000);
-  }catch{localStorage.removeItem("klizonion_token");localStorage.removeItem("klizonion_user");location.href="login.html";}
-}
-$("chatForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  if(!(bridgeConnected&&modelConnected)) return;
-  const text=chatInput.value.trim(); if(!text||sendButton.disabled)return;
-  history.push({role:"user",content:text}); addMessage("user",text); chatInput.value="";
-  sendButton.disabled=true; chatInput.disabled=true; sendButton.textContent="Thinkingâ€¦";
-  const typing=document.createElement("div"); typing.className="chat-row assistant"; typing.innerHTML='<div class="chat-bubble muted-bubble">Thinkingâ€¦</div>'; chatMessages.appendChild(typing); chatMessages.scrollTop=chatMessages.scrollHeight;
-  try{
-    const r=await fetch(API+"/api/v1/chat",{method:"POST",headers:{"Content-Type":"application/json",...auth},body:JSON.stringify({messages:history,workspace_id:workspaceId})});
-    const data=await r.json().catch(()=>({})); typing.remove();
-    if(!r.ok){
-      if(data.error==="studio_bridge_required"){bridgeConnected=false;updateChatLock();throw new Error("Connect the Studio Bridge first.");}
-      if(data.error==="model_not_connected"){modelConnected=false;updateChatLock();throw new Error("The Klizonion model is not connected yet.");}
-      throw new Error(data.error||"chat_failed");
-    }
-    const answer=data.content||data.message||"The model returned no text.";
-    history.push({role:"assistant",content:answer}); addMessage("assistant",answer);
-  }catch(err){typing.remove();addMessage("assistant",err.message||"The model could not be reached.");}
-  finally{updateChatLock();if(bridgeConnected&&modelConnected)sendButton.textContent="Send â†µ";else sendButton.textContent="Locked";if(bridgeConnected&&modelConnected)chatInput.focus();}
-});
-chatInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("chatForm").requestSubmit();}});
-$("logout").onclick=async()=>{await fetch(API+"/api/auth/logout",{method:"POST",headers:auth}).catch(()=>{});localStorage.removeItem("klizonion_token");localStorage.removeItem("klizonion_user");location.href="index.html"};
-updateChatLock();
-load();
-</script>
-</body></html>
-
+const API="https://klizonion-agent.umamaheswara-bandi84.workers.dev";const token=localStorage.getItem("klizonion_token");if(!token){location.replace("login.html");throw new Error("no_session")}const auth={Authorization:`Bearer ${token}`};const $=id=>document.getElementById(id);let me=null,workspaceId=null,bridgeConnected=false,modelConnected=false,pairCode="",history=[],treeData=null,selectedNode=null;
+function clearSession(){localStorage.removeItem("klizonion_token");localStorage.removeItem("klizonion_user");location.replace("login.html")}
+function setChip(dot,text,ok){$(dot).classList.toggle("good",!!ok);$(text).textContent=ok?$(text).dataset.ok||"Ready":$(text).dataset.off||text}
+function updateReady(){const ready=bridgeConnected&&modelConnected;$("readyState").textContent=ready?"Ready":"Getting ready";$("readyState").classList.toggle("ready",ready);$("lockBanner").className=ready?"lock-banner ok":"lock-banner";$("lockBanner").textContent=ready?"Klizonion is ready.":(!bridgeConnected?"Connect Studio to unlock chat.":"The model is still coming online.");$("chatInput").disabled=!ready;$("sendButton").disabled=!ready;$("sendButton").textContent=ready?"Send":"Locked";$("chatInput").placeholder=ready?"Ask Klizonion to build, inspect, debug, or explain…":"Waiting for Studio and model…"}
+function addMessage(role,text){$("emptyChat").style.display="none";const row=document.createElement("div");row.className="msg "+role;const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=text;row.appendChild(bubble);$("messages").appendChild(row);$("messages").scrollTop=$("messages").scrollHeight}
+async function loadMe(){const r=await fetch(API+"/api/v1/me",{headers:auth});const d=await r.json().catch(()=>({}));if(!r.ok||!d.authenticated){clearSession();return}me=d;workspaceId=d.workspaces?.[0]?.id||`${d.user.id}:default`;$('avatar').textContent=(d.user.username||'K')[0].toUpperCase();$('miniUser').textContent=d.user.username;$('miniEmail').textContent=d.user.email;$('accountLine').textContent=d.user.email;$('workspaceName').textContent=d.workspaces?.[0]?.name||'Default'}
+async function refreshStatus(){try{const r=await fetch(API+"/api/v1/system/status",{headers:auth});const d=await r.json();if(!r.ok)throw new Error("session");bridgeConnected=!!d.bridge?.connected;modelConnected=!!d.ai?.ready;$("bridgeTitle").textContent=bridgeConnected?"Studio connected":"Not connected";$("bridgeDesc").textContent=bridgeConnected?"Your Studio bridge is live.":"Generate a code, then enter it in the Studio plugin.";$("bridgeDot").classList.toggle("good",bridgeConnected);$("modelTitle").textContent=modelConnected?"Ready":"Not ready";$("modelDesc").textContent=modelConnected?"The Klizonion model gateway is responding.":"The Klizonion model is not reachable yet.";$("modelDot").classList.toggle("good",modelConnected);$("modelState").textContent=modelConnected?"Online":"Offline";$("topStudioDot").classList.toggle("good",bridgeConnected);$("topModelDot").classList.toggle("good",modelConnected);$("topStudio").textContent=bridgeConnected?"Studio ready":"Studio";$("topModel").textContent=modelConnected?"Model ready":"Model";updateReady()}catch{clearSession()}}
+async function loadCounts(){const p=await fetch(API+`/api/v1/projects?workspace_id=${encodeURIComponent(workspaceId)}`,{headers:auth});const pd=await p.json().catch(()=>({}));$('projectCount').textContent=String(pd.projects?.length||0);const m=await fetch(API+`/api/v1/memory?workspace_id=${encodeURIComponent(workspaceId)}`,{headers:auth});const md=await m.json().catch(()=>({}));$('memoryCount').textContent=String(md.memories?.length||0)}
+$("generateCode").onclick=async()=>{const b=$("generateCode");b.disabled=true;b.textContent="Generating…";try{const r=await fetch(API+"/api/v1/bridge/pair-code",{method:"POST",headers:auth});const d=await r.json();if(!r.ok)throw new Error(d.error);pairCode=String(d.code);$("pairCode").textContent=pairCode;$("copyCode").disabled=false;$("codeMeta").textContent="Single use · expires in 10 minutes"}catch{$("codeMeta").textContent="Could not generate a code."}finally{b.disabled=false;b.textContent="Generate"}};
+$("copyCode").onclick=async()=>{if(!pairCode)return;try{await navigator.clipboard.writeText(pairCode);$("copyCode").textContent="Copied";setTimeout(()=>$("copyCode").textContent="Copy",1200)}catch{}};
+$("chatForm").addEventListener("submit",async e=>{e.preventDefault();if(!bridgeConnected||!modelConnected)return;const text=$("chatInput").value.trim();if(!text)return;history.push({role:"user",content:text});addMessage("user",text);$("chatInput").value="";$("sendButton").disabled=true;$("chatInput").disabled=true;$("sendButton").textContent="Thinking…";try{const r=await fetch(API+"/api/v1/chat",{method:"POST",headers:{"Content-Type":"application/json",...auth},body:JSON.stringify({messages:history,workspace_id:workspaceId})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"chat_failed");const answer=String(d.content||d.response||d.result?.response||"No response was returned.");history.push({role:"assistant",content:answer});addMessage("assistant",answer)}catch(err){addMessage("assistant",err.message==="studio_bridge_required"?"Connect Studio to continue.":err.message==="model_not_connected"?"The model is still coming online.":"Klizonion couldn't respond right now.")}finally{await refreshStatus()}});
+$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("chatForm").requestSubmit()}});
+async function loadConversation(){const r=await fetch(API+`/api/v1/conversations?workspace_id=${encodeURIComponent(workspaceId)}`,{headers:auth});const d=await r.json().catch(()=>({}));if(r.ok&&Array.isArray(d.conversations)){history=d.conversations.map(x=>({role:x.role,content:x.content}));for(const m of history)addMessage(m.role,m.content)}}
+async function refreshTree(){if(!bridgeConnected){$("tree").innerHTML='<div class="panel-message">Studio is not connected.</div>';return}$("treeMeta").textContent="Requesting the latest Studio hierarchy…";$("tree").innerHTML='<div class="panel-message">Syncing…</div>';try{const r=await fetch(API+"/api/v1/studio/tree",{method:"POST",headers:auth});const d=await r.json();if(!r.ok)throw new Error(d.error);const id=d.command_id;let done=null;for(let i=0;i<80;i++){await new Promise(x=>setTimeout(x,350));const rr=await fetch(API+`/api/v1/commands/${encodeURIComponent(id)}`,{headers:auth});const q=await rr.json();if(q.status==="completed"){done=q.result;break}}if(!done?.success)throw new Error(done?.message||"Studio sync failed");treeData=done.tree;$("treeMeta").textContent=`${done.node_count||0} instances synchronized`;renderTree()}catch(err){$("tree").innerHTML=`<div class="panel-message">${escapeHtml(err.message||"Could not sync Studio.")}</div>`;$("treeMeta").textContent="Sync unavailable"}}
+function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function renderTree(){if(!treeData){return}const q=$("treeSearch").value.trim().toLowerCase();$("tree").innerHTML="";function walk(node,parent,depth){const match=!q||node.name.toLowerCase().includes(q)||node.class_name.toLowerCase().includes(q)||node.full_name.toLowerCase().includes(q);if(match){const row=document.createElement("div");row.className="tree-row";row.style.paddingLeft=(7+depth*14)+"px";const has=Array.isArray(node.children)&&node.children.length>0;row.innerHTML=`<span class="twisty">${has?'▸':''}</span><span class="tree-icon">${node.class_name.includes('Script')?'◫':node.class_name==='Folder'?'□':'•'}</span><span>${escapeHtml(node.name)}</span><span class="class">${escapeHtml(node.class_name)}</span>`;row.onclick=()=>selectNode(node);parent.appendChild(row)}if(Array.isArray(node.children)){for(const child of node.children)walk(child,parent,depth+1)}}walk(treeData,$("tree"),0);if(!$('tree').children.length)$('tree').innerHTML='<div class="panel-message">No matching instances.</div>'}
+function selectNode(node){selectedNode=node;$("inspector").innerHTML=`<div class="inspector-card"><h4>${escapeHtml(node.name)}</h4><div class="panel-message">${escapeHtml(node.class_name)}<br>${escapeHtml(node.full_name)}</div></div>`}
+$("refreshTree").onclick=refreshTree;$("treeSearch").oninput=()=>renderTree();
+async function loadMemory(){const q=$("memorySearch").value.trim();const r=await fetch(API+`/api/v1/memory?workspace_id=${encodeURIComponent(workspaceId)}${q?`&q=${encodeURIComponent(q)}`:''}`,{headers:auth});const d=await r.json().catch(()=>({}));$("memoryList").innerHTML="";(d.memories||[]).forEach(x=>{const el=document.createElement('div');el.className='list-item';el.innerHTML=`<strong>${escapeHtml(x.kind)}</strong><p>${escapeHtml(x.content)}</p>`;$("memoryList").appendChild(el)});if(!(d.memories||[]).length)$("memoryList").innerHTML='<div class="panel-message">No memories yet.</div>';$('memoryCount').textContent=String(d.memories?.length||0)}
+$("saveMemory").onclick=async()=>{const text=$("memoryInput").value.trim();if(!text)return;await fetch(API+"/api/v1/memory",{method:'POST',headers:{'Content-Type':'application/json',...auth},body:JSON.stringify({workspace_id:workspaceId,kind:'fact',content:text})});$("memoryInput").value='';await loadMemory()};$("searchMemory").onclick=loadMemory;
+async function loadProjects(){const r=await fetch(API+`/api/v1/projects?workspace_id=${encodeURIComponent(workspaceId)}`,{headers:auth});const d=await r.json().catch(()=>({}));$("projectList").innerHTML="";(d.projects||[]).forEach(p=>{const el=document.createElement('div');el.className='list-item';el.innerHTML=`<strong>${escapeHtml(p.name)}</strong><p>${escapeHtml(p.description||'No description')}</p>`;$("projectList").appendChild(el)});if(!(d.projects||[]).length)$("projectList").innerHTML='<div class="panel-message">No projects yet.</div>';$("projectCount").textContent=String(d.projects?.length||0)}
+$("newProject").onclick=async()=>{const name=prompt('Project name');if(!name)return;await fetch(API+"/api/v1/projects",{method:'POST',headers:{'Content-Type':'application/json',...auth},body:JSON.stringify({workspace_id:workspaceId,name})});loadProjects()};
+for(const item of document.querySelectorAll('.nav-item'))item.onclick=async()=>{for(const x of document.querySelectorAll('.nav-item'))x.classList.remove('active');item.classList.add('active');for(const v of document.querySelectorAll('.view'))v.classList.remove('active');const name=item.dataset.view;$("view-"+name).classList.add('active');$("crumb").textContent=`Workspace / ${name.replace('-', ' ')}`;if(name==='explorer'&&treeData==null)await refreshTree();if(name==='memory')await loadMemory();if(name==='projects')await loadProjects()};
+$("logout").onclick=async()=>{await fetch(API+"/api/auth/logout",{method:'POST',headers:auth}).catch(()=>{});clearSession()};
+(async()=>{await loadMe();await refreshStatus();await loadConversation();await loadCounts();setInterval(refreshStatus,4000)})().catch(clearSession);
+</script></body></html>
