@@ -1,7 +1,131 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Klizonion</title><link rel="stylesheet" href="static/style.css"></head>
-<body><main class="shell hero">
-  <div class="hero-top"><div class="brand-row"><div class="logo">K</div><div class="brand">KLIZONION</div><div class="version">v1.0</div></div><div class="hero-actions"><a class="button ghost small" href="login.html">Log in</a><a class="button primary small" href="register.html">Create account</a></div></div>
-  <div class="hero-copy"><div class="eyebrow">ROBLOX DEVELOPMENT WORKSPACE</div><h1>Build with an AI that knows your Studio.</h1><p>Klizonion brings your chat, project context, Studio connection, and development tools into one focused workspace. Connect once, then build from a single screen.</p><div class="hero-actions"><a class="button primary" href="register.html">Start building</a><a class="button" href="login.html">Open workspace</a></div></div>
-  <section class="feature-grid"><article class="feature card"><div class="feature-icon">✦</div><h3>Focused AI workspace</h3><p>Keep your conversations, projects, and memory together instead of scattering them across tabs.</p></article><article class="feature card"><div class="feature-icon">⌗</div><h3>Studio connection</h3><p>Pair your Roblox Studio with a short-lived code and keep the bridge authenticated.</p></article><article class="feature card"><div class="feature-icon">⌁</div><h3>Live Studio tree</h3><p>Inspect the hierarchy of your connected experience directly inside Klizonion.</p></article><article class="feature card"><div class="feature-icon">◌</div><h3>Built to grow</h3><p>A real model gateway, persistent workspace, and controlled tools form the foundation for continued training.</p></article></section>
-</main></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070707">
+  <title>Klizonion · Roblox Development Workspace</title>
+  <link rel="stylesheet" href="static/style.css?v=v1-beta-check">
+</head>
+<body>
+  <div class="beta-strip">BETA · V1</div>
+
+  <header class="topbar shell">
+    <a class="brand-link" href="index.html" aria-label="Klizonion home">
+      <span class="logo">K</span>
+      <span class="brand">KLIZONION</span>
+      <span class="version">v1.0</span>
+    </a>
+
+    <nav class="nav">
+      <a href="#workspace">Workspace</a>
+      <a href="#studio">Studio</a>
+      <a href="#features">Features</a>
+      <a class="nav-button ghost" href="login.html">Log in</a>
+      <a class="nav-button solid" href="register.html">Create account</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero shell">
+      <div class="eyebrow">ROBLOX DEVELOPMENT WORKSPACE</div>
+      <h1>Build with an AI that<br><span>knows your Studio.</span></h1>
+      <p class="hero-copy">
+        Chat, project context, Studio state, memory, and controlled development tools in one focused workspace.
+      </p>
+
+      <div class="hero-actions">
+        <a class="nav-button solid large" href="register.html">Start building</a>
+        <a class="nav-button ghost large" href="login.html">Open workspace</a>
+      </div>
+
+      <div class="hero-status">
+        <span class="status-dot"></span>
+        <span>Klizonion V1 beta is live</span>
+      </div>
+    </section>
+
+    <section id="workspace" class="workspace-preview shell">
+      <div class="preview-top">
+        <div>
+          <div class="preview-kicker">KLIZONION WORKSPACE</div>
+          <h2>One screen. Your whole build.</h2>
+        </div>
+        <div class="preview-chip">BETA BUILD</div>
+      </div>
+
+      <div class="preview-window">
+        <aside class="mini-sidebar">
+          <div class="mini-brand"><span class="logo small">K</span><span>KLIZONION</span></div>
+          <div class="mini-nav active">Chat</div>
+          <div class="mini-nav">Studio Explorer</div>
+          <div class="mini-nav">Memory</div>
+          <div class="mini-nav">Projects</div>
+          <div class="mini-spacer"></div>
+          <div class="mini-user">Workspace ready</div>
+        </aside>
+
+        <section class="mini-main">
+          <div class="mini-head">
+            <div>
+              <div class="mini-muted">WORKSPACE</div>
+              <strong>Default</strong>
+            </div>
+            <div class="mini-status"><span class="status-dot"></span> Studio linked</div>
+          </div>
+
+          <div class="chat-preview">
+            <div class="chat-welcome">
+              <div class="chat-orb">K</div>
+              <h3>How can I help you build?</h3>
+              <p>Ask about your Roblox project, scripts, Studio tree, debugging, or next task.</p>
+            </div>
+            <div class="fake-message user-msg">Inspect my current workspace.</div>
+            <div class="fake-message ai-msg">I can inspect the connected Studio tree and work from your project context.</div>
+          </div>
+
+          <div class="composer-preview">
+            <span>Ask Klizonion anything…</span>
+            <button aria-label="Send" type="button">↗</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="features" class="features shell">
+      <div class="section-heading">
+        <div class="eyebrow">BUILT AROUND THE WORK</div>
+        <h2>Less jumping between tools.</h2>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card">
+          <div class="feature-icon">✦</div>
+          <h3>Focused AI workspace</h3>
+          <p>Keep conversations, projects, and memory together instead of scattering context across tabs.</p>
+        </article>
+        <article id="studio" class="feature-card">
+          <div class="feature-icon">⌘</div>
+          <h3>Studio connection</h3>
+          <p>Pair Roblox Studio with a short-lived code and keep the bridge authenticated.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">⌗</div>
+          <h3>Live Studio tree</h3>
+          <p>Inspect your connected hierarchy so Klizonion can reason from what is actually inside Studio.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">◌</div>
+          <h3>Built to grow</h3>
+          <p>A real model gateway, persistent workspace, controlled tools, and room for continued training.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer shell">
+    <div class="brand-link footer-brand"><span class="logo small">K</span><span class="brand">KLIZONION</span></div>
+    <div class="footer-meta">BETA · V1 · Roblox development workspace</div>
+  </footer>
+</body>
+</html>
