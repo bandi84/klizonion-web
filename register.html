@@ -2,156 +2,73 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#08090c">
+
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1">
+
+    <meta name="theme-color"
+          content="#070707">
+
     <title>Create account · Klizonion</title>
 
-    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet"
+          href="static/style.css?v=1.1">
 
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js"
             async
             defer>
     </script>
-
-    <style>
-        [hidden] {
-            display: none !important;
-        }
-
-        .auth-card {
-            width: min(520px, calc(100vw - 32px));
-        }
-
-        .auth-step {
-            transition: opacity .18s ease, transform .18s ease;
-        }
-
-        .verification-view {
-            text-align: center;
-        }
-
-        .verification-icon {
-            width: 58px;
-            height: 58px;
-            margin: 0 auto 18px;
-            display: grid;
-            place-items: center;
-            border-radius: 18px;
-            background: #ffffff;
-            color: #08090c;
-            font-size: 25px;
-            font-weight: 800;
-        }
-
-        .verification-email {
-            margin: 8px auto 0;
-            color: #aeb4c2;
-            font-size: 13px;
-            line-height: 1.6;
-            word-break: break-word;
-        }
-
-        .verify-code {
-            text-align: center;
-            letter-spacing: .22em;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 18px !important;
-            font-weight: 700;
-        }
-
-        .code-help {
-            margin-top: 8px;
-            color: #777e8d;
-            font-size: 12px;
-            text-align: center;
-            line-height: 1.5;
-        }
-
-        .message {
-            min-height: 20px;
-        }
-
-        .success-message {
-            color: #80e5a5 !important;
-        }
-
-        .turnstile-slot {
-            min-height: 70px;
-            display: grid;
-            place-items: center;
-            margin: 4px 0;
-        }
-
-        .switch-panel {
-            margin-top: 18px;
-            text-align: center;
-            color: #858c9a;
-            font-size: 13px;
-        }
-
-            .switch-panel a {
-                color: #f2f4f8;
-            }
-
-        .back {
-            color: #8d94a2;
-            text-decoration: none;
-        }
-
-            .back:hover {
-                color: #ffffff;
-            }
-
-        .inline-note {
-            margin-top: 10px;
-            padding: 11px 13px;
-            border: 1px solid #252a35;
-            border-radius: 12px;
-            background: #0c0e12;
-            color: #777f90;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .action-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        @media (max-width: 560px) {
-            .action-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
 
 <body>
-    <main class="shell auth">
-        <section class="auth-card card">
+
+    <main class="auth">
+
+        <section class="auth-card">
+
+            <!-- ============================================= -->
+            <!-- HEADER                                        -->
+            <!-- ============================================= -->
 
             <div class="auth-top">
-                <a class="back" href="index.html">← Klizonion</a>
+
+                <a class="back"
+                   href="index.html">
+                    ← Klizonion
+                </a>
 
                 <div class="brand-row"
-                     style="margin-top:18px">
-                    <div class="logo">K</div>
-                    <div class="brand">KLIZONION</div>
-                    <div class="version">v1.0</div>
+                     style="margin-top:20px">
+
+                    <div class="logo">
+                        K
+                    </div>
+
+                    <div class="brand">
+                        KLIZONION
+                    </div>
+
+                    <div class="version">
+                        v1.0
+                    </div>
+
                 </div>
 
-                <h1 class="auth-title">Create your workspace.</h1>
+                <h1 class="auth-title">
+                    Create your workspace.
+                </h1>
 
                 <p class="auth-sub">
-                    Create one account, verify your email,
-                    and your workspace is ready.
+                    One account. One workspace.
+                    Your projects stay connected to you.
                 </p>
+
             </div>
 
-            <!-- ================================================= -->
-            <!-- STEP 1: ACCOUNT CREATION                          -->
-            <!-- ================================================= -->
+
+            <!-- ============================================= -->
+            <!-- CREATE ACCOUNT                                -->
+            <!-- ============================================= -->
 
             <section id="registerPanel"
                      class="auth-step">
@@ -161,6 +78,7 @@
                       novalidate>
 
                     <div class="field">
+
                         <label for="usernameInput">
                             Username
                         </label>
@@ -170,10 +88,14 @@
                                autocomplete="username"
                                minlength="2"
                                maxlength="32"
+                               placeholder="Choose a username"
                                required>
+
                     </div>
 
+
                     <div class="field">
+
                         <label for="emailInput">
                             Email
                         </label>
@@ -182,10 +104,14 @@
                                type="email"
                                autocomplete="email"
                                inputmode="email"
+                               placeholder="you@example.com"
                                required>
+
                     </div>
 
+
                     <div class="field">
+
                         <label for="passwordInput">
                             Password
                         </label>
@@ -194,10 +120,14 @@
                                type="password"
                                autocomplete="new-password"
                                minlength="8"
+                               placeholder="Create a password"
                                required>
+
                     </div>
 
+
                     <div class="field">
+
                         <label for="confirmInput">
                             Confirm password
                         </label>
@@ -206,64 +136,80 @@
                                type="password"
                                autocomplete="new-password"
                                minlength="8"
+                               placeholder="Enter it again"
                                required>
+
                     </div>
+
+
+                    <!-- TURNSTILE -->
 
                     <div id="turnstile"
                          class="turnstile-slot">
                     </div>
 
+
                     <button id="registerButton"
                             class="button primary"
                             type="submit">
+
                         Create account
+
                     </button>
+
 
                     <div id="message"
                          class="message"
                          role="alert">
                     </div>
+
                 </form>
 
+
                 <div class="inline-note">
-                    You'll receive a unique 16-digit
-                    verification code at the email address
-                    you enter above.
+                    We'll send a unique 16-digit
+                    verification code to this email.
                 </div>
+
             </section>
 
-            <!-- ================================================= -->
-            <!-- STEP 2: EMAIL VERIFICATION                        -->
-            <!-- ================================================= -->
+
+            <!-- ============================================= -->
+            <!-- VERIFICATION                                  -->
+            <!-- IMPORTANT: HIDDEN BY DEFAULT                  -->
+            <!-- ============================================= -->
 
             <section id="verifyPanel"
-                     class="auth-step verification-view"
+                     class="verification-view"
                      hidden>
 
                 <div class="verification-icon">
                     ✓
                 </div>
 
-                <h2 style="margin:0;font-size:24px">
+                <h2>
                     Check your inbox.
                 </h2>
 
-                <p id="verifyText"
-                   class="auth-sub"
+                <p class="auth-sub"
                    style="margin-top:10px">
-                    We sent your verification code.
+
+                    Your account is almost ready.
+
                 </p>
 
                 <div id="verifyEmail"
                      class="verification-email">
                 </div>
 
+
                 <form id="verifyForm"
                       class="form"
-                      style="margin-top:22px"
+                      style="margin-top:24px"
                       novalidate>
 
                     <div class="field">
+
                         <label for="codeInput">
                             16-digit verification code
                         </label>
@@ -277,669 +223,874 @@
                                pattern="[0-9]{16}"
                                placeholder="0000000000000000"
                                required>
+
                     </div>
 
+
                     <div class="code-help">
-                        The code expires after 10 minutes and
-                        can only be used once.
+                        The code expires after 10 minutes
+                        and can only be used once.
                     </div>
+
 
                     <button id="verifyButton"
                             class="button primary"
-                            type="submit"
-                            style="margin-top:16px">
+                            type="submit">
+
                         Verify account
+
                     </button>
+
 
                     <div id="verifyMessage"
                          class="message"
                          role="alert">
                     </div>
+
                 </form>
 
+
                 <div class="inline-note">
-                    Copy the 16-digit number from your email
-                    and paste it here. Once verified, you'll
-                    be signed in automatically.
+                    Paste the 16-digit number from the
+                    email we sent you.
                 </div>
+
             </section>
 
-            <!-- ================================================= -->
-            <!-- FOOTER                                            -->
-            <!-- ================================================= -->
 
-            <div class="switch-panel">
+            <!-- ============================================= -->
+            <!-- FOOTER                                        -->
+            <!-- ============================================= -->
+
+            <div class="auth-footer">
+
                 Already have an account?
-                <a href="login.html">Log in</a>
+
+                <a href="login.html">
+                    Log in
+                </a>
+
             </div>
 
         </section>
+
     </main>
 
+
     <script>
-    /*
-      Klizonion v1 Account Registration
-      ---------------------------------
-      Registration:
-        1. Validate form
-        2. Validate Turnstile
-        3. Send account request
-        4. Backend sends 16-digit email code
-        5. Hide registration UI
-        6. Show verification UI
-        7. Verify code
-        8. Store session
-        9. Redirect to dashboard
-    */
 
-    const API =
-      "https://klizonion-agent.umamaheswara-bandi84.workers.dev";
+const API =
+  "https://klizonion-agent.umamaheswara-bandi84.workers.dev";
 
-    const TURNSTILE_SITE_KEY =
-      "PASTE_YOUR_TURNSTILE_SITE_KEY_HERE";
 
-    const registerPanel =
-      document.getElementById("registerPanel");
+/* =====================================================
+   ELEMENTS
+   ===================================================== */
 
-    const verifyPanel =
-      document.getElementById("verifyPanel");
+const registerPanel =
+  document.getElementById(
+    "registerPanel"
+  );
 
-    const registerForm =
-      document.getElementById("registerForm");
+const verifyPanel =
+  document.getElementById(
+    "verifyPanel"
+  );
 
-    const verifyForm =
-      document.getElementById("verifyForm");
+const registerForm =
+  document.getElementById(
+    "registerForm"
+  );
 
-    const usernameInput =
-      document.getElementById("usernameInput");
+const verifyForm =
+  document.getElementById(
+    "verifyForm"
+  );
 
-    const emailInput =
-      document.getElementById("emailInput");
+const usernameInput =
+  document.getElementById(
+    "usernameInput"
+  );
 
-    const passwordInput =
-      document.getElementById("passwordInput");
+const emailInput =
+  document.getElementById(
+    "emailInput"
+  );
 
-    const confirmInput =
-      document.getElementById("confirmInput");
+const passwordInput =
+  document.getElementById(
+    "passwordInput"
+  );
 
-    const codeInput =
-      document.getElementById("codeInput");
+const confirmInput =
+  document.getElementById(
+    "confirmInput"
+  );
 
-    const registerButton =
-      document.getElementById("registerButton");
+const codeInput =
+  document.getElementById(
+    "codeInput"
+  );
 
-    const verifyButton =
-      document.getElementById("verifyButton");
+const registerButton =
+  document.getElementById(
+    "registerButton"
+  );
 
-    const message =
-      document.getElementById("message");
+const verifyButton =
+  document.getElementById(
+    "verifyButton"
+  );
 
-    const verifyMessage =
-      document.getElementById("verifyMessage");
+const message =
+  document.getElementById(
+    "message"
+  );
 
-    const verifyText =
-      document.getElementById("verifyText");
+const verifyMessage =
+  document.getElementById(
+    "verifyMessage"
+  );
 
-    const verifyEmail =
-      document.getElementById("verifyEmail");
+const verifyEmail =
+  document.getElementById(
+    "verifyEmail"
+  );
 
-    let widgetId = null;
-    let pendingId = null;
+let pendingId =
+  null;
 
-    // -------------------------------------------------------
-    // Already logged in?
-    // -------------------------------------------------------
+let turnstileWidget =
+  null;
 
-    const existingToken =
-      localStorage.getItem(
-        "klizonion_token"
+
+/* =====================================================
+   INITIAL STATE
+   ===================================================== */
+
+/*
+  HARD GUARANTEE:
+  The verification screen is never visible
+  when register.html first loads.
+*/
+
+registerPanel.hidden = false;
+verifyPanel.hidden = true;
+
+
+/* =====================================================
+   ALREADY LOGGED IN
+   ===================================================== */
+
+const existingToken =
+  localStorage.getItem(
+    "klizonion_token"
+  );
+
+if (existingToken) {
+
+  location.replace(
+    "dashboard.html"
+  );
+
+}
+
+
+/* =====================================================
+   HELPERS
+   ===================================================== */
+
+function setMessage(
+  element,
+  text,
+  type = "error"
+) {
+
+  element.textContent =
+    text || "";
+
+  element.className =
+    "message " +
+    type;
+}
+
+
+function clearMessage(
+  element
+) {
+
+  element.textContent =
+    "";
+
+  element.className =
+    "message";
+
+}
+
+
+function digitsOnly(
+  value
+) {
+
+  return String(
+    value || ""
+  )
+    .replace(/\D/g, "")
+    .slice(0, 16);
+
+}
+
+
+/* =====================================================
+   TURNSTILE
+   ===================================================== */
+
+function initialiseTurnstile() {
+
+  if (
+    !window.turnstile
+  ) {
+
+    return;
+
+  }
+
+  /*
+    IMPORTANT:
+    Replace the placeholder with your actual
+    Turnstile SITE key once the Cloudflare widget
+    is created.
+  */
+
+  const siteKey =
+    "PASTE_YOUR_TURNSTILE_SITE_KEY_HERE";
+
+  if (
+    siteKey.includes(
+      "PASTE_YOUR"
+    )
+  ) {
+
+    return;
+
+  }
+
+  try {
+
+    turnstileWidget =
+      window.turnstile.render(
+        "#turnstile",
+        {
+          sitekey:
+            siteKey,
+
+          theme:
+            "dark",
+
+          callback:
+            function() {
+
+              clearMessage(
+                message
+              );
+
+            }
+        }
       );
 
-    if (existingToken) {
-      location.replace("dashboard.html");
-    }
+  } catch (
+    error
+  ) {
 
-    // -------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------
+    console.error(
+      "Turnstile error:",
+      error
+    );
 
-    function showMessage(
-      element,
-      text,
-      type = "error"
+  }
+
+}
+
+
+window.addEventListener(
+  "load",
+  initialiseTurnstile
+);
+
+
+/* =====================================================
+   REGISTER
+   ===================================================== */
+
+registerForm.addEventListener(
+  "submit",
+  async function(
+    event
+  ) {
+
+    event.preventDefault();
+
+    clearMessage(
+      message
+    );
+
+    const username =
+      usernameInput.value.trim();
+
+    const email =
+      emailInput.value.trim();
+
+    const password =
+      passwordInput.value;
+
+    const confirmation =
+      confirmInput.value;
+
+
+    /* -----------------------------------------------
+       VALIDATION
+       ----------------------------------------------- */
+
+    if (
+      username.length < 2
     ) {
-      element.textContent = text;
-      element.className =
-        "message " + type;
-    }
 
-    function clearMessage(element) {
-      element.textContent = "";
-      element.className = "message";
-    }
-
-    function setButtonBusy(
-      button,
-      busy,
-      busyText,
-      normalText
-    ) {
-      button.disabled = busy;
-      button.textContent =
-        busy ? busyText : normalText;
-    }
-
-    function cleanDigits(value) {
-      return String(value || "")
-        .replace(/\D/g, "")
-        .slice(0, 16);
-    }
-
-    async function waitForTurnstile() {
-      let attempts = 0;
-
-      while (
-        !window.turnstile &&
-        attempts < 80
-      ) {
-        await new Promise(resolve =>
-          setTimeout(resolve, 250)
-        );
-
-        attempts++;
-      }
-
-      return Boolean(
-        window.turnstile
+      setMessage(
+        message,
+        "Username must be at least 2 characters."
       );
+
+      usernameInput.focus();
+
+      return;
+
     }
 
-    // -------------------------------------------------------
-    // Turnstile
-    // -------------------------------------------------------
 
-    async function setupTurnstile() {
-      const ready =
-        await waitForTurnstile();
+    if (
+      !/^\S+@\S+\.\S+$/.test(
+        email
+      )
+    ) {
 
-      if (
-        !ready ||
-        TURNSTILE_SITE_KEY.includes(
-          "PASTE_"
-        )
-      ) {
-        return;
-      }
+      setMessage(
+        message,
+        "Enter a valid email address."
+      );
+
+      emailInput.focus();
+
+      return;
+
+    }
+
+
+    if (
+      password.length < 8
+    ) {
+
+      setMessage(
+        message,
+        "Password must be at least 8 characters."
+      );
+
+      passwordInput.focus();
+
+      return;
+
+    }
+
+
+    if (
+      password !==
+      confirmation
+    ) {
+
+      setMessage(
+        message,
+        "Passwords do not match."
+      );
+
+      confirmInput.focus();
+
+      return;
+
+    }
+
+
+    /* -----------------------------------------------
+       TURNSTILE
+       ----------------------------------------------- */
+
+    let turnstileToken =
+      "";
+
+    if (
+      turnstileWidget !==
+      null
+    ) {
 
       try {
-        widgetId =
-          window.turnstile.render(
-            "#turnstile",
-            {
-              sitekey:
-                TURNSTILE_SITE_KEY,
-              theme: "dark",
-              callback: function() {
-                clearMessage(
-                  message
-                );
-              }
-            }
+
+        turnstileToken =
+          window.turnstile.getResponse(
+            turnstileWidget
           );
-      } catch (error) {
-        console.error(
-          "Turnstile initialization failed:",
-          error
-        );
+
+      } catch {
+
+        turnstileToken =
+          "";
+
       }
+
+
+      if (
+        !turnstileToken
+      ) {
+
+        setMessage(
+          message,
+          "Complete the security check first."
+        );
+
+        return;
+
+      }
+
     }
 
-    window.addEventListener(
-      "load",
-      setupTurnstile
-    );
 
-    // -------------------------------------------------------
-    // Registration
-    // -------------------------------------------------------
+    /* -----------------------------------------------
+       SEND REGISTRATION
+       ----------------------------------------------- */
 
-    registerForm.addEventListener(
-      "submit",
-      async function(event) {
-        event.preventDefault();
+    registerButton.disabled =
+      true;
 
-        clearMessage(message);
+    registerButton.textContent =
+      "Creating account…";
 
-        const username =
-          usernameInput.value.trim();
 
-        const email =
-          emailInput.value.trim();
+    try {
 
-        const password =
-          passwordInput.value;
+      const response =
+        await fetch(
+          API +
+            "/api/auth/register",
+          {
 
-        const confirm =
-          confirmInput.value;
+            method:
+              "POST",
 
-        if (username.length < 2) {
-          showMessage(
-            message,
-            "Username must be at least 2 characters."
-          );
-          usernameInput.focus();
-          return;
-        }
-
-        if (!/^\S+@\S+\.\S+$/.test(email)) {
-          showMessage(
-            message,
-            "Enter a valid email address."
-          );
-          emailInput.focus();
-          return;
-        }
-
-        if (password.length < 8) {
-          showMessage(
-            message,
-            "Password must be at least 8 characters."
-          );
-          passwordInput.focus();
-          return;
-        }
-
-        if (password !== confirm) {
-          showMessage(
-            message,
-            "Passwords do not match."
-          );
-          confirmInput.focus();
-          return;
-        }
-
-        let turnstileToken = "";
-
-        if (widgetId !== null) {
-          try {
-            turnstileToken =
-              window.turnstile.getResponse(
-                widgetId
-              );
-          } catch {
-            turnstileToken = "";
-          }
-
-          if (!turnstileToken) {
-            showMessage(
-              message,
-              "Please complete the verification check."
-            );
-            return;
-          }
-        } else if (
-          TURNSTILE_SITE_KEY.includes(
-            "PASTE_"
-          )
-        ) {
-          showMessage(
-            message,
-            "Account protection is not configured yet."
-          );
-          return;
-        }
-
-        setButtonBusy(
-          registerButton,
-          true,
-          "Sending code…",
-          "Create account"
-        );
-
-        try {
-          const response =
-            await fetch(
-              API +
-                "/api/auth/register",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body:
-                  JSON.stringify({
-                    username,
-                    email,
-                    password,
-                    turnstile_token:
-                      turnstileToken
-                  })
-              }
-            );
-
-          const data =
-            await response
-              .json()
-              .catch(
-                () => ({})
-              );
-
-          if (!response.ok) {
-            throw new Error(
-              data.error ||
-                "registration_failed"
-            );
-          }
-
-          if (!data.pending_id) {
-            throw new Error(
-              "verification_request_missing"
-            );
-          }
-
-          pendingId =
-            data.pending_id;
-
-          /*
-            IMPORTANT:
-            The verification panel is hidden initially.
-            It becomes visible ONLY after the backend
-            successfully accepts registration and returns
-            a real pending verification id.
-          */
-
-          registerPanel.hidden =
-            true;
-
-          verifyPanel.hidden =
-            false;
-
-          verifyEmail.textContent =
-            email;
-
-          verifyText.textContent =
-            "We sent a unique 16-digit verification code to your email. It expires in 10 minutes.";
-
-          clearMessage(
-            verifyMessage
-          );
-
-          codeInput.value = "";
-
-          codeInput.focus();
-
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-          });
-
-        } catch (error) {
-          console.error(
-            "Registration error:",
-            error
-          );
-
-          const errors = {
-            invalid_email:
-              "Enter a valid email address.",
-
-            invalid_username:
-              "Username must be at least 2 characters.",
-
-            password_too_short:
-              "Password must be at least 8 characters.",
-
-            email_already_registered:
-              "That email is already registered.",
-
-            username_already_registered:
-              "That username is already registered.",
-
-            turnstile_required:
-              "Please complete the verification check.",
-
-            turnstile_failed:
-              "Verification failed. Try again.",
-
-            turnstile_not_configured:
-              "Account protection is not configured yet.",
-
-            email_service_not_configured:
-              "Email delivery is not configured yet.",
-
-            verification_email_failed:
-              "We couldn't send the verification email.",
-
-            rate_limited:
-              "Too many attempts. Try again later.",
-
-            verification_request_missing:
-              "The verification request was not created correctly."
-          };
-
-          showMessage(
-            message,
-            errors[
-              error.message
-            ] ||
-              "Could not create the account."
-          );
-
-          if (
-            widgetId !== null &&
-            window.turnstile
-          ) {
-            try {
-              window.turnstile.reset(
-                widgetId
-              );
-            } catch {}
-          }
-
-        } finally {
-          setButtonBusy(
-            registerButton,
-            false,
-            "Sending code…",
-            "Create account"
-          );
-        }
-      }
-    );
-
-    // -------------------------------------------------------
-    // Verification input
-    // -------------------------------------------------------
-
-    codeInput.addEventListener(
-      "input",
-      function() {
-        codeInput.value =
-          cleanDigits(
-            codeInput.value
-          );
-
-        clearMessage(
-          verifyMessage
-        );
-      }
-    );
-
-    codeInput.addEventListener(
-      "paste",
-      function() {
-        setTimeout(() => {
-          codeInput.value =
-            cleanDigits(
-              codeInput.value
-            );
-        }, 0);
-      }
-    );
-
-    // -------------------------------------------------------
-    // Verification
-    // -------------------------------------------------------
-
-    verifyForm.addEventListener(
-      "submit",
-      async function(event) {
-        event.preventDefault();
-
-        clearMessage(
-          verifyMessage
-        );
-
-        const code =
-          cleanDigits(
-            codeInput.value
-          );
-
-        codeInput.value =
-          code;
-
-        if (code.length !== 16) {
-          showMessage(
-            verifyMessage,
-            "Enter all 16 digits."
-          );
-          codeInput.focus();
-          return;
-        }
-
-        if (!pendingId) {
-          showMessage(
-            verifyMessage,
-            "This verification request is no longer active. Please start again."
-          );
-          return;
-        }
-
-        setButtonBusy(
-          verifyButton,
-          true,
-          "Verifying…",
-          "Verify account"
-        );
-
-        try {
-          const response =
-            await fetch(
-              API +
-                "/api/auth/verify",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body:
-                  JSON.stringify({
-                    pending_id:
-                      pendingId,
-                    code
-                  })
-              }
-            );
-
-          const data =
-            await response
-              .json()
-              .catch(
-                () => ({})
-              );
-
-          if (!response.ok) {
-            throw new Error(
-              data.error ||
-                "verification_failed"
-            );
-          }
-
-          if (!data.token) {
-            throw new Error(
-              "session_missing"
-            );
-          }
-
-          localStorage.setItem(
-            "klizonion_token",
-            data.token
-          );
-
-          if (data.user) {
-            localStorage.setItem(
-              "klizonion_user",
-              JSON.stringify(
-                data.user
-              )
-            );
-          }
-
-          showMessage(
-            verifyMessage,
-            "Email verified. Opening your workspace…",
-            "success-message"
-          );
-
-          setTimeout(
-            function() {
-              location.replace(
-                "dashboard.html"
-              );
+            headers: {
+              "Content-Type":
+                "application/json"
             },
-            400
+
+            body:
+              JSON.stringify({
+
+                username,
+
+                email,
+
+                password,
+
+                turnstile_token:
+                  turnstileToken
+
+              })
+
+          }
+        );
+
+
+      const data =
+        await response
+          .json()
+          .catch(
+            () => ({})
           );
 
-        } catch (error) {
-          console.error(
-            "Verification error:",
-            error
-          );
 
-          const errors = {
-            invalid_verification_code:
-              "That code isn't correct.",
+      if (
+        !response.ok
+      ) {
 
-            verification_expired:
-              "That code expired. Start registration again.",
+        throw new Error(
+          data.error ||
+          "registration_failed"
+        );
 
-            verification_not_found:
-              "That verification request no longer exists.",
-
-            too_many_verification_attempts:
-              "Too many attempts. Start registration again.",
-
-            rate_limited:
-              "Too many attempts. Try again later.",
-
-            session_missing:
-              "The account was verified, but no session was returned. Please log in."
-          };
-
-          showMessage(
-            verifyMessage,
-            errors[
-              error.message
-            ] ||
-              "Verification failed."
-          );
-
-        } finally {
-          setButtonBusy(
-            verifyButton,
-            false,
-            "Verifying…",
-            "Verify account"
-          );
-        }
       }
+
+
+      /*
+        THE ONLY WAY THE VERIFICATION PANEL
+        BECOMES VISIBLE.
+      */
+
+      if (
+        !data.pending_id
+      ) {
+
+        throw new Error(
+          "verification_request_missing"
+        );
+
+      }
+
+
+      pendingId =
+        data.pending_id;
+
+
+      registerPanel.hidden =
+        true;
+
+      verifyPanel.hidden =
+        false;
+
+
+      verifyEmail.textContent =
+        email;
+
+
+      clearMessage(
+        verifyMessage
+      );
+
+
+      codeInput.value =
+        "";
+
+      codeInput.focus();
+
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+
+    } catch (
+      error
+    ) {
+
+      console.error(
+        "Registration failed:",
+        error
+      );
+
+
+      const errors = {
+
+        invalid_email:
+          "Enter a valid email address.",
+
+        invalid_username:
+          "Username must be at least 2 characters.",
+
+        password_too_short:
+          "Password must be at least 8 characters.",
+
+        email_already_registered:
+          "That email is already registered.",
+
+        username_already_registered:
+          "That username is already registered.",
+
+        turnstile_required:
+          "Complete the security check first.",
+
+        turnstile_failed:
+          "The security check failed. Try again.",
+
+        rate_limited:
+          "Too many attempts. Try again later.",
+
+        email_service_not_configured:
+          "Email verification is not configured yet.",
+
+        verification_email_failed:
+          "We couldn't send the verification email."
+
+      };
+
+
+      setMessage(
+        message,
+        errors[
+          error.message
+        ] ||
+        "Could not create the account."
+      );
+
+
+      if (
+        turnstileWidget !==
+        null &&
+        window.turnstile
+      ) {
+
+        try {
+
+          window.turnstile.reset(
+            turnstileWidget
+          );
+
+        } catch {}
+
+      }
+
+    } finally {
+
+      registerButton.disabled =
+        false;
+
+      registerButton.textContent =
+        "Create account";
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   VERIFICATION INPUT
+   ===================================================== */
+
+codeInput.addEventListener(
+  "input",
+  function() {
+
+    codeInput.value =
+      digitsOnly(
+        codeInput.value
+      );
+
+    clearMessage(
+      verifyMessage
     );
+
+  }
+);
+
+
+/* =====================================================
+   VERIFY ACCOUNT
+   ===================================================== */
+
+verifyForm.addEventListener(
+  "submit",
+  async function(
+    event
+  ) {
+
+    event.preventDefault();
+
+    clearMessage(
+      verifyMessage
+    );
+
+
+    const code =
+      digitsOnly(
+        codeInput.value
+      );
+
+
+    if (
+      code.length !== 16
+    ) {
+
+      setMessage(
+        verifyMessage,
+        "Enter all 16 digits."
+      );
+
+      codeInput.focus();
+
+      return;
+
+    }
+
+
+    if (
+      !pendingId
+    ) {
+
+      setMessage(
+        verifyMessage,
+        "This verification request is no longer active."
+      );
+
+      return;
+
+    }
+
+
+    verifyButton.disabled =
+      true;
+
+    verifyButton.textContent =
+      "Verifying…";
+
+
+    try {
+
+      const response =
+        await fetch(
+          API +
+            "/api/auth/verify",
+          {
+
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+
+                pending_id:
+                  pendingId,
+
+                code
+
+              })
+
+          }
+        );
+
+
+      const data =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+
+      if (
+        !response.ok
+      ) {
+
+        throw new Error(
+          data.error ||
+          "verification_failed"
+        );
+
+      }
+
+
+      if (
+        !data.token
+      ) {
+
+        throw new Error(
+          "session_missing"
+        );
+
+      }
+
+
+      localStorage.setItem(
+        "klizonion_token",
+        data.token
+      );
+
+
+      if (
+        data.user
+      ) {
+
+        localStorage.setItem(
+          "klizonion_user",
+          JSON.stringify(
+            data.user
+          )
+        );
+
+      }
+
+
+      setMessage(
+        verifyMessage,
+        "Verified. Opening your workspace…",
+        "success-message"
+      );
+
+
+      setTimeout(
+        function() {
+
+          location.replace(
+            "dashboard.html"
+          );
+
+        },
+        450
+      );
+
+
+    } catch (
+      error
+    ) {
+
+      console.error(
+        "Verification failed:",
+        error
+      );
+
+
+      const errors = {
+
+        invalid_verification_code:
+          "That code is incorrect.",
+
+        verification_expired:
+          "That code has expired. Start again.",
+
+        verification_not_found:
+          "That verification request no longer exists.",
+
+        too_many_verification_attempts:
+          "Too many attempts. Start again.",
+
+        rate_limited:
+          "Too many attempts. Try again later."
+
+      };
+
+
+      setMessage(
+        verifyMessage,
+        errors[
+          error.message
+        ] ||
+        "Verification failed."
+      );
+
+    } finally {
+
+      verifyButton.disabled =
+        false;
+
+      verifyButton.textContent =
+        "Verify account";
+
+    }
+
+  }
+);
+
     </script>
+
 </body>
 </html>
