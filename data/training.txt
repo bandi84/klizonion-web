@@ -1,0 +1,9 @@
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+The model learns by predicting the next token from a sequence of tokens.
+Training uses a transformer with causal self attention.
+The training loop measures loss and saves checkpoints.
+A checkpoint allows training to continue later.
+Good engineering means measuring results before making changes.
+The Builder can eventually connect model training with automated experiments.
+This is a training smoke test, not a production dataset.

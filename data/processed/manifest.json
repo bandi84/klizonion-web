@@ -1,0 +1,32 @@
+{
+  "format": "klizonion-text-dataset-v2",
+  "tokenizer_type": "byte_bpe",
+  "vocab_size": 32000,
+  "merges": 500,
+  "tokenizer_training": {
+    "sample_chars": 100000,
+    "max_merges": 500
+  },
+  "sources": [
+    {
+      "path": "C:\\Users\\reddy\\Downloads\\KLIZONION-BUILDER\\KLIZONION-BUILDER\\data\\raw\\klizonion_train.txt",
+      "characters": 2645998,
+      "sha256": "5cc82624b0435ef50896a72086ae042dd30642c1708b9cf04c793bcc0907296d"
+    },
+    {
+      "path": "C:\\Users\\reddy\\Downloads\\KLIZONION-BUILDER\\KLIZONION-BUILDER\\data\\raw\\training.txt",
+      "characters": 536,
+      "sha256": "6c8c15863f5a76abe92e5823978cde6c19fdc8532533fa7061c86fcbae6487b4"
+    }
+  ],
+  "characters": {
+    "train": 2593078,
+    "validation": 53456,
+    "total": 2646534
+  },
+  "notes": [
+    "Tokenizer merges were learned from a bounded sample for speed.",
+    "The full corpus is still used for training/validation output.",
+    "Verify dataset licensing before serious training."
+  ]
+}

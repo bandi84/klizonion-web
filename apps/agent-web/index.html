@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#070707">
+  <title>KLIZONION Builder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <header class="topbar">
+      <div class="brand-group">
+        <div class="brand-mark">K</div>
+        <div class="brand-word">KLIZONION</div>
+        <div class="version-pill">BETA · V0.2</div>
+      </div>
+
+      <div class="topbar-actions">
+        <div id="connectionPill" class="connection-pill offline">
+          <span class="dot"></span>
+          <span id="connectionText">Builder offline</span>
+        </div>
+
+        <button id="newProjectBtn" class="ghost-btn">
+          New project
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+
+      <aside class="sidebar left-sidebar">
+        <div class="section-label">BUILD</div>
+
+        <button class="nav-item active" data-mode="anything">
+          <span class="nav-icon">✦</span>
+          Build anything
+        </button>
+
+        <button class="nav-item" data-mode="web">
+          <span class="nav-icon">◫</span>
+          Web app
+        </button>
+
+        <button class="nav-item" data-mode="ai">
+          <span class="nav-icon">◎</span>
+          AI model
+        </button>
+
+        <button class="nav-item" data-mode="roblox">
+          <span class="nav-icon">▦</span>
+          Roblox / Studio
+        </button>
+
+        <button class="nav-item" data-mode="backend">
+          <span class="nav-icon">⌁</span>
+          Backend / API
+        </button>
+
+        <div class="sidebar-spacer"></div>
+
+        <div class="project-mini">
+          <div class="section-label">PROJECT</div>
+          <div class="project-name" id="projectName">Untitled build</div>
+          <div class="project-meta">Local workspace</div>
+        </div>
+      </aside>
+
+      <section class="main-canvas">
+
+        <div class="hero-row">
+          <div>
+            <div class="eyebrow">KLIZONION BUILDER</div>
+
+            <h1>
+              Describe it.
+              <br>
+              Build it.
+              <br>
+              See it live.
+            </h1>
+
+            <p class="hero-copy">
+              Turn an idea into a real project while watching the Builder
+              plan, inspect, build, test, and prepare the result for preview.
+            </p>
+          </div>
+
+          <div class="hero-badge">
+            BETA · V0.2
+          </div>
+        </div>
+
+        <div class="command-card">
+
+          <div class="command-head">
+            <div class="command-title">
+              What do you want to build?
+            </div>
+
+            <div class="command-hint">
+              Natural language
+            </div>
+          </div>
+
+          <textarea
+            id="promptInput"
+            spellcheck="false"
+            placeholder="Example: Build a Roblox Studio companion that shows my place hierarchy, lets me edit Luau scripts, and keeps a live preview of the project."
+          ></textarea>
+
+          <div class="prompt-footer">
+
+            <div class="prompt-tools">
+              <button class="chip active" data-template="anything">
+                Anything
+              </button>
+
+              <button class="chip" data-template="web">
+                Web
+              </button>
+
+              <button class="chip" data-template="ai">
+                AI model
+              </button>
+
+              <button class="chip" data-template="roblox">
+                Roblox
+              </button>
+
+              <button class="chip" data-template="backend">
+                Backend
+              </button>
+            </div>
+
+            <button id="buildBtn" class="build-btn">
+              <span>Build</span>
+              <span class="arrow">↗</span>
+            </button>
+
+          </div>
+        </div>
+
+        <div class="suggestions">
+
+          <button
+            class="suggestion"
+            data-prompt="Build a polished landing page for an AI developer tool with a dark coal theme and an interactive dashboard."
+          >
+            AI developer landing page
+          </button>
+
+          <button
+            class="suggestion"
+            data-prompt="Build a from-scratch decoder-only language model project with a tokenizer, training loop, checkpoints, evaluation tools, and inference."
+          >
+            Your own AI model
+          </button>
+
+          <button
+            class="suggestion"
+            data-prompt="Build a Roblox Studio companion that mirrors my project hierarchy and provides safe Luau script editing tools."
+          >
+            Roblox Studio companion
+          </button>
+
+          <button
+            class="suggestion"
+            data-prompt="Build a full-stack app with authentication, an API, a database layer, tests, and a clean developer dashboard."
+          >
+            Full-stack app
+          </button>
+
+        </div>
+
+        <div class="agent-shell">
+
+          <div class="agent-topbar">
+            <div>
+              <div class="pane-kicker">KLIZONION AGENT</div>
+              <div class="agent-title">
+                Live engineering session
+              </div>
+            </div>
+
+            <div id="missionBadge" class="mission-badge idle">
+              IDLE
+            </div>
+          </div>
+
+          <div class="agent-layout">
+
+            <section class="chat-panel">
+
+              <div class="chat-header">
+                <span>Agent Chat</span>
+                <span id="missionIdLabel">No mission</span>
+              </div>
+
+              <div id="chatMessages" class="chat-messages">
+
+                <div class="chat-message agent">
+                  <div class="message-label">KLIZONION</div>
+
+                  <div class="message-body">
+                    Tell me what you want to build. I'll turn it into an
+                    engineering mission.
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="chat-compose">
+                <textarea
+                  id="chatInput"
+                  rows="2"
+                  placeholder="Ask the Builder to change, explain, or improve something..."
+                ></textarea>
+
+                <button id="chatSendBtn" class="chat-send-btn">
+                  Send
+                </button>
+              </div>
+
+            </section>
+
+            <section class="workflow-panel">
+
+              <div class="workflow-header">
+                <div>
+                  <div class="pane-kicker">WORKFLOW</div>
+                  <div class="pane-title">Agent activity</div>
+                </div>
+
+                <span id="workflowMode" class="workflow-mode">
+                  Waiting
+                </span>
+              </div>
+
+              <div id="workflowSteps" class="workflow-steps">
+
+                <div class="workflow-step active" data-step="understand">
+                  <div class="step-icon">01</div>
+
+                  <div class="step-content">
+                    <b>Understand</b>
+                    <small>Parse the request</small>
+                  </div>
+
+                  <div class="step-state">READY</div>
+                </div>
+
+                <div class="workflow-connector"></div>
+
+                <div class="workflow-step" data-step="plan">
+                  <div class="step-icon">02</div>
+
+                  <div class="step-content">
+                    <b>Plan</b>
+                    <small>Create the engineering plan</small>
+                  </div>
+
+                  <div class="step-state">WAIT</div>
+                </div>
+
+                <div class="workflow-connector"></div>
+
+                <div class="workflow-step" data-step="inspect">
+                  <div class="step-icon">03</div>
+
+                  <div class="step-content">
+                    <b>Inspect</b>
+                    <small>Understand the workspace</small>
+                  </div>
+
+                  <div class="step-state">WAIT</div>
+                </div>
+
+                <div class="workflow-connector"></div>
+
+                <div class="workflow-step" data-step="build">
+                  <div class="step-icon">04</div>
+
+                  <div class="step-content">
+                    <b>Build</b>
+                    <small>Create project changes</small>
+                  </div>
+
+                  <div class="step-state">WAIT</div>
+                </div>
+
+                <div class="workflow-connector"></div>
+
+                <div class="workflow-step" data-step="test">
+                  <div class="step-icon">05</div>
+
+                  <div class="step-content">
+                    <b>Test</b>
+                    <small>Verify the result</small>
+                  </div>
+
+                  <div class="step-state">WAIT</div>
+                </div>
+
+                <div class="workflow-connector"></div>
+
+                <div class="workflow-step" data-step="preview">
+                  <div class="step-icon">06</div>
+
+                  <div class="step-content">
+                    <b>Preview</b>
+                    <small>Prepare the live result</small>
+                  </div>
+
+                  <div class="step-state">WAIT</div>
+                </div>
+
+                <div class="workflow-connector"></div>
+
+                <div class="workflow-step" data-step="ready">
+                  <div class="step-icon">07</div>
+
+                  <div class="step-content">
+                    <b>Ready</b>
+                    <small>Mission completed</small>
+                  </div>
+
+                  <div class="step-state">WAIT</div>
+                </div>
+
+              </div>
+
+            </section>
+
+          </div>
+
+          <div class="agent-console">
+
+            <div class="console-header">
+              <div>
+                <div class="pane-kicker">ACTIVITY STREAM</div>
+                <div class="pane-title">What the Builder is doing</div>
+              </div>
+
+              <span id="jobBadge" class="job-badge idle">
+                IDLE
+              </span>
+            </div>
+
+            <div id="activityLog" class="activity-log"></div>
+
+          </div>
+
+        </div>
+
+        <div class="preview-shell">
+
+          <div class="preview-topbar">
+
+            <div class="preview-title">
+              <span class="live-dot"></span>
+              Live preview
+            </div>
+
+            <div class="preview-actions">
+              <span id="previewStatus" class="preview-status">
+                Waiting for a build
+              </span>
+
+              <button
+                id="refreshPreviewBtn"
+                class="icon-btn"
+                aria-label="Refresh preview"
+              >
+                ↻
+              </button>
+            </div>
+
+          </div>
+
+          <div class="preview-frame-wrap">
+            <iframe
+              id="previewFrame"
+              title="KLIZONION live preview"
+              sandbox="allow-scripts"
+            ></iframe>
+          </div>
+
+        </div>
+
+      </section>
+
+      <aside class="sidebar right-sidebar">
+
+        <div class="section-label">
+          ENVIRONMENT
+        </div>
+
+        <div class="environment-card">
+
+          <div class="environment-status">
+            <span class="environment-dot" id="environmentDot"></span>
+
+            <div>
+              <b id="runnerState">Checking…</b>
+              <small>Builder runner</small>
+            </div>
+          </div>
+
+          <div class="environment-line">
+            <span>Workspace</span>
+            <b id="workspacePath">Not connected</b>
+          </div>
+
+          <div class="environment-line">
+            <span>Hardware</span>
+            <b id="hardwareState">Detecting…</b>
+          </div>
+
+        </div>
+
+        <div class="section-label section-spaced">
+          PROJECT
+        </div>
+
+        <div class="side-card">
+
+          <div class="side-card-title" id="sideProjectTitle">
+            Untitled build
+          </div>
+
+          <div class="side-card-copy">
+            The Builder will eventually work inside your authorized
+            VS Code workspace and hand model-training work to the
+            self-trainer.
+          </div>
+
+        </div>
+
+        <div class="section-label section-spaced">
+          MISSION
+        </div>
+
+        <div class="mission-card">
+
+          <div class="mission-line">
+            <span>Status</span>
+            <b id="missionState">Idle</b>
+          </div>
+
+          <div class="mission-line">
+            <span>Mode</span>
+            <b id="missionMode">Anything</b>
+          </div>
+
+          <div class="mission-line">
+            <span>ID</span>
+            <b id="missionIdSide">—</b>
+          </div>
+
+        </div>
+
+      </aside>
+
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+KLIZONION is an experimental language model.
+A language model learns patterns from sequences of tokens.
+Transformers use attention to process context.
+KLIZONION Builder can create software projects.
+The model uses a tokenizer and a training loop.
+Training updates model parameters to reduce prediction error.
+Checkpoints allow training to continue after interruption.
+Evaluation measures how well the model performs on unseen text.
+Software should be tested before deployment.
+A future KLIZONION trainer can use CPU or GPU acceleration.

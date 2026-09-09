@@ -1,0 +1,1199 @@
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 1.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 2.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 3.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 4.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 5.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 6.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 7.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 8.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 9.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 10.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 11.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 12.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 13.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 14.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 15.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 16.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 17.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 18.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 19.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 20.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 21.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 22.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 23.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 24.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 25.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 26.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 27.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 28.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 29.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 30.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 31.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 32.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 33.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 34.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 35.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 36.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 37.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 38.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 39.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 40.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 41.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 42.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 43.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 44.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 45.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 46.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 47.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 48.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 49.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 50.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 51.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 52.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 53.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 54.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 55.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 56.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 57.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 58.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 59.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 60.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 61.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 62.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 63.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 64.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 65.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 66.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 67.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 68.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 69.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 70.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 71.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 72.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 73.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 74.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 75.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 76.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 77.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 78.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 79.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 80.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 81.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 82.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 83.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 84.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 85.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 86.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 87.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 88.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 89.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 90.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 91.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 92.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 93.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 94.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 95.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 96.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 97.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 98.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 99.
+
+KLIZONION is an experimental language model project.
+KLIZONION Builder is an engineering system for creating software.
+A transformer predicts the next token from previous tokens.
+Causal attention prevents the model from reading future tokens.
+Training measures loss and updates the model parameters.
+Checkpoints allow training to resume after interruption.
+Evaluation measures whether the model is improving.
+Good engineering uses tests, measurements, and reproducible experiments.
+The self trainer can eventually compare different configurations.
+A language model becomes useful by learning from large amounts of text.
+Experiment copy 100.
