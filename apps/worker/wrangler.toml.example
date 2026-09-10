@@ -3,5 +3,33 @@ main = "src/index.js"
 compatibility_date = "2026-09-09"
 
 [vars]
-BUILDER_PROTOCOL_VERSION = "0.1"
-# Set RUNNER_SHARED_SECRET as a Worker secret, never in this file.
+BUILDER_PROTOCOL_VERSION = "0.2"
+ENVIRONMENT = "production"
+
+# PUBLIC: Cloudflare Turnstile Sitekey (safe to expose publicly in client requests)
+# Replace with your actual sitekey from Cloudflare Dashboard > Turnstile
+TURNSTILE_SITEKEY = "1x00000000000000000000AA"
+
+# CONFIG: Email Service Settings
+EMAIL_API_URL = "https://api.resend.com/emails"
+EMAIL_FROM = "KLIZONION <onboarding@resend.dev>"
+
+# ==============================================================================
+# SECRETS (NEVER commit secrets in wrangler.toml or version control)
+# Set these encrypted secrets using Wrangler CLI before deploying:
+#
+# 1. Turnstile Secret:
+#    npx wrangler secret put TURNSTILE_SECRET
+#
+# 2. Email API Provider Key (e.g. Resend re_...):
+#    npx wrangler secret put EMAIL_API_KEY
+#
+# 3. Runner Authentication Secret:
+#    npx wrangler secret put RUNNER_SHARED_SECRET
+#
+# Note: For native Cloudflare Email routing, bind the send_email service:
+# [[send_email]]
+# name = "EMAIL"
+# ==============================================================================
+
+
