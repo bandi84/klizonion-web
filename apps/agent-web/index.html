@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#070707">
-  <meta name="description" content="KLIZONION Builder — Describe it. Build it. See it live.">
-  <title>KLIZONION Builder</title>
+  <meta name="description" content="KLIZONION — Describe it. Build it. See it live. AI engineering platform.">
+  <title>KLIZONION</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
@@ -13,319 +13,539 @@
 <body>
   <div class="app-shell">
 
-    <!-- TOPBAR -->
+    <!-- UNIVERSAL TOPBAR -->
     <header class="topbar">
       <div class="brand-group">
-        <div class="brand-mark">K</div>
-        <div class="brand-word">KLIZONION</div>
+        <a href="#home" class="brand-link">
+          <div class="brand-mark">K</div>
+          <div class="brand-word">KLIZONION</div>
+        </a>
         <div class="version-pill">BETA · V0.2</div>
       </div>
 
-      <div class="topbar-actions">
-        <!-- Runner connection state -->
+      <!-- Public Navigation (Visible on #home, #register, #login) -->
+      <nav id="publicNav" class="topbar-nav">
+        <a href="#home" class="nav-link">Overview</a>
+        <a href="#login" class="nav-link">Sign In</a>
+        <a href="#register" class="ghost-btn highlight">Create Account</a>
+      </nav>
+
+      <!-- Authenticated Dashboard Actions (Visible only on #dashboard) -->
+      <div id="dashboardActions" class="topbar-actions hidden">
         <div id="connectionPill" class="connection-pill offline" title="Runner connection status">
           <span class="dot"></span>
           <span id="connectionText">Builder offline</span>
         </div>
-
-        <!-- Auth button / profile badge -->
-        <button id="authModalBtn" class="ghost-btn" aria-label="Account and Verification">
-          <span id="authBtnIcon">👤</span>
-          <span id="authBtnText">Account / Register</span>
-        </button>
-
-        <button id="newProjectBtn" class="ghost-btn">
+        <button id="newProjectBtn" class="ghost-btn" title="Reset workspace and state for a new project">
           <span>+</span> New project
+        </button>
+        <button id="authModalBtn" class="ghost-btn" aria-label="Account details">
+          <span id="authBtnIcon">👤</span>
+          <span id="authBtnText">Account</span>
+        </button>
+        <button id="topbarLogoutBtn" class="ghost-btn danger" title="Sign out of your session">
+          Sign out
         </button>
       </div>
     </header>
 
-    <!-- MAIN WORKSPACE -->
-    <main class="workspace">
+    <!-- ===================================================================== -->
+    <!-- VIEW 1: PUBLIC LANDING PAGE (#home)                                   -->
+    <!-- ===================================================================== -->
+    <section id="viewHome" class="view-panel">
+      <div class="landing-container">
+        <!-- Hero Header -->
+        <div class="landing-hero">
+          <div class="eyebrow">KLIZONION AI ENGINEERING PLATFORM</div>
+          <h1 class="landing-headline">
+            Describe it.<br>
+            Build it.<br>
+            <span class="text-gradient">See it live.</span>
+          </h1>
+          <p class="landing-subhead">
+            The autonomous engineering agent system that plans, inspects, writes, tests,
+            and iterates inside an authorized workspace with a live synchronized preview.
+          </p>
 
-      <!-- LEFT SIDEBAR -->
-      <aside class="sidebar left-sidebar">
-        <div class="section-label">BUILD CATEGORY</div>
-        <button class="nav-item active" data-mode="anything">
-          <span class="nav-icon">✦</span>
-          <span>Build anything</span>
-        </button>
-        <button class="nav-item" data-mode="web">
-          <span class="nav-icon">◫</span>
-          <span>Web app</span>
-        </button>
-        <button class="nav-item" data-mode="ai">
-          <span class="nav-icon">◎</span>
-          <span>AI model</span>
-        </button>
-        <button class="nav-item" data-mode="roblox">
-          <span class="nav-icon">▦</span>
-          <span>Roblox / Studio</span>
-        </button>
-        <button class="nav-item" data-mode="backend">
-          <span class="nav-icon">⌁</span>
-          <span>Backend / API</span>
-        </button>
-
-        <div class="sidebar-spacer"></div>
-
-        <!-- Active model controls widget -->
-        <div class="sidebar-model-controls">
-          <div class="section-label">MODEL CONTROLS</div>
-          <button id="saveModelBtnSide" class="tool-action-btn" title="Preserve current model config and checkpoint state">
-            <span>💾</span> Save Model
-          </button>
-          <button id="publishModelBtnSide" class="tool-action-btn primary-tool" title="Download packaged custom model source & config ZIP">
-            <span>📦</span> Publish Custom Model (ZIP)
-          </button>
-        </div>
-
-        <div class="project-mini">
-          <div class="section-label">PROJECT</div>
-          <div class="project-name" id="projectName">Untitled build</div>
-          <div class="project-meta">Local authorized workspace</div>
-        </div>
-      </aside>
-
-      <!-- MAIN CANVAS -->
-      <section class="main-canvas">
-
-        <div class="hero-row">
-          <div>
-            <div class="eyebrow">KLIZONION BUILDER</div>
-            <h1>
-              Describe it.<br>
-              Build it.<br>
-              See it live.
-            </h1>
-            <p class="hero-copy">
-              Autonomous engineering agent system inside your authorized workspace.
-              Plan, inspect, build, test, and iterate with a synchronized live preview.
-            </p>
+          <div class="landing-cta-row">
+            <button id="landingStartBtn" class="primary-btn big-btn">
+              <span>Start Building</span>
+              <span class="arrow">↗</span>
+            </button>
+            <a href="#login" class="ghost-btn big-btn">
+              Sign In to Workspace
+            </a>
           </div>
-          <div class="hero-badge-wrap">
-            <div class="hero-badge">BETA · V0.2</div>
-            <div class="status-summary-chip" id="globalStatusChip">Engine Idle</div>
+
+          <div class="landing-status-badge">
+            <span class="dot live-dot"></span>
+            <span>BETA · V0.2 is live with Supervised Runner & Verification</span>
           </div>
         </div>
 
-        <!-- COMMAND CARD / PROMPT AREA -->
-        <div class="command-card">
-          <div class="command-head">
-            <div class="command-title">What do you want to build?</div>
-            <div class="command-hint">Natural language engineering prompt</div>
-          </div>
-
-          <textarea
-            id="promptInput"
-            spellcheck="false"
-            placeholder="Example: Build a clean Roblox Studio companion that shows my place hierarchy, lets me edit Luau scripts, and keeps a live preview of the project."
-          ></textarea>
-
-          <div class="prompt-footer">
-            <div class="prompt-tools">
-              <button class="chip active" data-template="anything">Anything</button>
-              <button class="chip" data-template="web">Web</button>
-              <button class="chip" data-template="ai">AI model</button>
-              <button class="chip" data-template="roblox">Roblox</button>
-              <button class="chip" data-template="backend">Backend</button>
+        <!-- Interactive Build Categories Showcase -->
+        <div class="landing-categories">
+          <div class="section-label center">SUPPORTED BUILD TARGETS</div>
+          <div class="categories-grid">
+            <div class="category-card" data-mode="web">
+              <div class="category-icon">◫</div>
+              <h3>Web Applications</h3>
+              <p>Responsive frontend interfaces, backend endpoints, database layers, and sandboxed previews.</p>
+              <div class="category-tag">Sandboxed Preview</div>
             </div>
 
-            <!-- CONTROLS: Effort, Stop, Build -->
-            <div class="prompt-actions">
-              <!-- Effort popover trigger -->
-              <div class="effort-wrapper">
-                <button id="effortBtn" class="effort-btn" title="Configure Agent reasoning and execution effort">
-                  <span class="effort-label">Effort:</span>
-                  <span id="effortValue" class="effort-value">Medium</span>
-                  <span class="chevron">▾</span>
-                </button>
-                <div id="effortMenu" class="effort-menu hidden">
-                  <div class="effort-menu-head">Agent Reasoning Effort</div>
-                  <button class="effort-opt" data-effort="low">
-                    <b>Low</b>
-                    <small>Fastest iteration, fewer reflection steps</small>
-                  </button>
-                  <button class="effort-opt selected" data-effort="medium">
-                    <b>Medium</b>
-                    <small>Balanced planning, syntax validation, tests</small>
-                  </button>
-                  <button class="effort-opt" data-effort="high">
-                    <b>High</b>
-                    <small>Deep analysis, full workspace inspection, tests</small>
-                  </button>
-                  <button class="effort-opt" data-effort="maximum">
-                    <b>Maximum</b>
-                    <small>Thorough evaluation, multi-pass refinement</small>
-                  </button>
-                </div>
+            <div class="category-card" data-mode="roblox">
+              <div class="category-icon">▦</div>
+              <h3>Roblox & Studio</h3>
+              <p>Place hierarchy exploration, Luau script generation, and structured companion tooling.</p>
+              <div class="category-tag">Luau & Studio Bridge</div>
+            </div>
+
+            <div class="category-card" data-mode="ai">
+              <div class="category-icon">◎</div>
+              <h3>Custom AI Models</h3>
+              <p>True decoder-only Transformers, custom tokenizers, PyTorch training pipelines, and evaluation.</p>
+              <div class="category-tag">58.6M Decoder Transformer</div>
+            </div>
+
+            <div class="category-card" data-mode="backend">
+              <div class="category-icon">⌁</div>
+              <h3>Backend & APIs</h3>
+              <p>Production-shaped services, authenticated routes, data models, and automated test validation.</p>
+              <div class="category-tag">Cloudflare & Node APIs</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- How the Autonomous Loop Works -->
+        <div class="landing-loop-section">
+          <div class="section-label center">THE AUTONOMOUS ENGINEERING LOOP</div>
+          <h2 class="center-title">Supervised, Atomic, Verified</h2>
+          <div class="loop-cards-row">
+            <div class="loop-card">
+              <div class="loop-num">01</div>
+              <h4>Understand & Plan</h4>
+              <p>Natural language prompts are converted into atomic milestones and boundary contracts.</p>
+            </div>
+            <div class="loop-card">
+              <div class="loop-num">02</div>
+              <h4>Inspect & Sandbox</h4>
+              <p>Supervised runner validates directory path containment before touching workspace files.</p>
+            </div>
+            <div class="loop-card">
+              <div class="loop-num">03</div>
+              <h4>Build & Test</h4>
+              <p>Atomic file patching backed by allowlisted syntax checks and test execution.</p>
+            </div>
+            <div class="loop-card">
+              <div class="loop-num">04</div>
+              <h4>Live Preview</h4>
+              <p>Results render immediately in an isolated sandbox iframe inside your dashboard.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom CTA Bar -->
+        <div class="landing-bottom-cta">
+          <div>
+            <h3>Ready to build your next project?</h3>
+            <p>Create an account to access the authenticated KLIZONION Builder dashboard.</p>
+          </div>
+          <button id="landingBottomStartBtn" class="primary-btn">
+            <span>Get Started</span>
+            <span class="arrow">↗</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 2: AUTHENTICATION FLOW (#register, #login, #verify)              -->
+    <!-- ===================================================================== -->
+    <section id="viewAuth" class="view-panel hidden">
+      <div class="auth-page-container">
+        <div class="auth-card">
+          <!-- Register View -->
+          <div id="authRegisterView" class="auth-subview">
+            <div class="auth-header">
+              <h2>Create your workspace account</h2>
+              <p>One account. One workspace. A 16-digit verification code will be sent to your email.</p>
+            </div>
+
+            <form id="registerForm" class="auth-form">
+              <div class="field">
+                <label for="regUsername">Username</label>
+                <input id="regUsername" autocomplete="username" placeholder="developer" required maxlength="32">
+              </div>
+              <div class="field">
+                <label for="regEmail">Email address</label>
+                <input id="regEmail" type="email" autocomplete="email" placeholder="you@domain.com" required>
+              </div>
+              <div class="field">
+                <label for="regPassword">Password</label>
+                <input id="regPassword" type="password" autocomplete="new-password" placeholder="Minimum 8 characters" required minlength="8">
+              </div>
+              <div class="field">
+                <label for="regConfirm">Confirm password</label>
+                <input id="regConfirm" type="password" autocomplete="new-password" placeholder="Confirm password" required minlength="8">
               </div>
 
-              <!-- Stop active mission button -->
-              <button id="stopBtn" class="stop-btn" disabled title="Stop running agent mission">
-                <span class="stop-icon">■</span>
-                <span>Stop</span>
-              </button>
+              <!-- Turnstile Widget -->
+              <div class="field turnstile-field">
+                <label>Security verification</label>
+                <div id="turnstileWidget" class="turnstile-container"></div>
+                <div id="turnstileError" class="auth-feedback error" style="display:none"></div>
+              </div>
 
-              <!-- Build / Execute button -->
-              <button id="buildBtn" class="build-btn">
-                <span>Build</span>
-                <span class="arrow">↗</span>
+              <button id="regSubmitBtn" class="primary-btn auth-btn" type="submit">
+                Create account & Send 16-digit code
               </button>
+              <div id="regMsg" class="auth-feedback"></div>
+            </form>
+
+            <div class="auth-switch">
+              Already have an account? <a href="#login">Sign in</a>
+            </div>
+          </div>
+
+          <!-- Login View -->
+          <div id="authLoginView" class="auth-subview hidden">
+            <div class="auth-header">
+              <h2>Sign in to KLIZONION</h2>
+              <p>Enter your verified credentials to access the Builder workspace.</p>
+            </div>
+
+            <form id="loginForm" class="auth-form">
+              <div class="field">
+                <label for="loginEmail">Email address</label>
+                <input id="loginEmail" type="email" autocomplete="email" placeholder="you@domain.com" required>
+              </div>
+              <div class="field">
+                <label for="loginPassword">Password</label>
+                <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required>
+              </div>
+
+              <button id="loginSubmitBtn" class="primary-btn auth-btn" type="submit">
+                Sign In to Workspace
+              </button>
+              <div id="loginMsg" class="auth-feedback"></div>
+            </form>
+
+            <div class="auth-switch">
+              Don't have an account? <a href="#register">Create an account</a>
+            </div>
+          </div>
+
+          <!-- Verify View (16-Digit Code) -->
+          <div id="authVerifyView" class="auth-subview hidden">
+            <div class="auth-header">
+              <h2>Verify your email address</h2>
+              <p>Enter the 16-digit numeric verification code sent to your email. The code expires in 10 minutes.</p>
+            </div>
+
+            <form id="verifyForm" class="auth-form">
+              <div class="field">
+                <label for="verificationCodeInput">16-Digit Verification Code</label>
+                <input
+                  id="verificationCodeInput"
+                  class="code-input"
+                  inputmode="numeric"
+                  maxlength="19"
+                  autocomplete="one-time-code"
+                  placeholder="0000-0000-0000-0000"
+                  required
+                >
+              </div>
+
+              <div class="verify-btn-row">
+                <button id="verifySubmitBtn" class="primary-btn auth-btn flex-2" type="submit">
+                  Verify & Open Dashboard
+                </button>
+                <button id="resendCodeBtn" class="ghost-btn flex-1" type="button">
+                  Resend Code
+                </button>
+              </div>
+              <div id="verifyMsg" class="auth-feedback"></div>
+            </form>
+
+            <div class="auth-switch">
+              Need to use another email? <a href="#register">Register again</a>
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- QUICK PROMPT SUGGESTIONS -->
-        <div class="suggestions">
-          <button
-            class="suggestion"
-            data-prompt="Build a polished landing page for an AI developer tool with a dark coal theme and an interactive dashboard."
-          >
-            AI developer landing page
+    <!-- ===================================================================== -->
+    <!-- VIEW 3: AUTHENTICATED BUILDER DASHBOARD (#dashboard)                  -->
+    <!-- ===================================================================== -->
+    <section id="viewDashboard" class="view-panel hidden">
+      <div class="dashboard-shell">
+        
+        <!-- DASHBOARD SIDEBAR -->
+        <aside class="sidebar left-sidebar">
+          <div class="section-label">BUILD CATEGORY</div>
+          <button class="nav-item active" data-mode="anything" title="Build anything from natural language">
+            <span class="nav-icon">✦</span>
+            <span>Build anything</span>
           </button>
-          <button
-            class="suggestion"
-            data-prompt="Build a from-scratch decoder-only language model project with a tokenizer, training loop, checkpoints, evaluation tools, and inference."
-          >
-            Your own AI model
+          <button class="nav-item" data-mode="web" title="Target web application architecture">
+            <span class="nav-icon">◫</span>
+            <span>Web app</span>
           </button>
-          <button
-            class="suggestion"
-            data-prompt="Build a Roblox Studio companion that mirrors my project hierarchy and provides safe Luau script editing tools."
-          >
-            Roblox Studio companion
+          <button class="nav-item" data-mode="ai" title="Target custom language model project">
+            <span class="nav-icon">◎</span>
+            <span>AI model</span>
           </button>
-          <button
-            class="suggestion"
-            data-prompt="Build a full-stack app with authentication, an API, a database layer, tests, and a clean developer dashboard."
-          >
-            Full-stack app
+          <button class="nav-item" data-mode="roblox" title="Target Roblox Studio Luau hierarchy">
+            <span class="nav-icon">▦</span>
+            <span>Roblox / Studio</span>
           </button>
-        </div>
+          <button class="nav-item" data-mode="backend" title="Target backend APIs and services">
+            <span class="nav-icon">⌁</span>
+            <span>Backend / API</span>
+          </button>
 
-        <!-- AGENT ENGINEERING WORKSPACE: CHAT & WORKFLOW -->
-        <div class="agent-shell">
-          <div class="agent-topbar">
-            <div>
-              <div class="pane-kicker">KLIZONION AGENT</div>
-              <div class="agent-title">Supervised engineering loop</div>
+          <div class="sidebar-spacer"></div>
+
+          <!-- Real Model Operations -->
+          <div class="sidebar-model-controls">
+            <div class="section-label">CUSTOM MODEL</div>
+            <button id="saveModelBtnSide" class="tool-action-btn" title="Persist current 58.6M model config and step metadata">
+              <span>💾</span> Save Model
+            </button>
+            <button id="publishModelBtnSide" class="tool-action-btn primary-tool" title="Download packaged custom model source & config ZIP">
+              <span>📦</span> Publish Source & Config (ZIP)
+            </button>
+            <div id="modelActionMsgSide" class="model-msg"></div>
+          </div>
+
+          <!-- Active Workspace Info -->
+          <div class="project-mini">
+            <div class="section-label">ACTIVE WORKSPACE</div>
+            <div class="project-name" id="projectName">Untitled build</div>
+            <div class="project-meta" id="workspacePathDisplay">Connecting to runner…</div>
+          </div>
+        </aside>
+
+        <!-- DASHBOARD WORKSPACE: BUILDER + INTEGRATED LIVE PREVIEW -->
+        <main class="dashboard-main">
+
+          <!-- Workspace Header Bar -->
+          <div class="dashboard-top-row">
+            <div class="workspace-title-group">
+              <span class="eyebrow">ENGINEERING WORKSPACE</span>
+              <h2 id="workspaceHeading">Describe it. Build it. See it live.</h2>
             </div>
-            <div class="agent-top-indicators">
+            <div class="workspace-status-chips">
+              <span id="missionBadge" class="mission-badge idle">IDLE</span>
               <span id="jobBadge" class="job-badge idle">IDLE</span>
-              <div id="missionBadge" class="mission-badge idle">IDLE</div>
+              <span id="effortBadge" class="effort-indicator-chip">Effort: Medium</span>
             </div>
           </div>
 
-          <div class="agent-layout">
-            <!-- CHAT CONSOLE -->
-            <section class="chat-panel">
-              <div class="chat-header">
-                <span>Agent Dialogue</span>
+          <!-- COMMAND PROMPT COMPOSER -->
+          <div class="command-card">
+            <div class="command-head">
+              <div class="command-title">Engineering Mission Prompt</div>
+              <div class="command-hint">Natural language · Press Ctrl+Enter to build</div>
+            </div>
+
+            <textarea
+              id="promptInput"
+              spellcheck="false"
+              placeholder="Example: Build a clean Roblox Studio companion that shows my place hierarchy, lets me edit Luau scripts, and keeps a live preview of the project."
+            ></textarea>
+
+            <div class="prompt-footer">
+              <div class="prompt-tools">
+                <button class="chip active" data-template="anything">Anything</button>
+                <button class="chip" data-template="web">Web</button>
+                <button class="chip" data-template="ai">AI model</button>
+                <button class="chip" data-template="roblox">Roblox</button>
+                <button class="chip" data-template="backend">Backend</button>
+              </div>
+
+              <!-- Controls: Effort, Stop, Build -->
+              <div class="prompt-actions">
+                <!-- Effort popover control -->
+                <div class="effort-wrapper">
+                  <button id="effortBtn" class="effort-btn" title="Configure Agent reasoning effort">
+                    <span class="effort-label">Effort:</span>
+                    <span id="effortValue" class="effort-value">Medium</span>
+                    <span class="chevron">▾</span>
+                  </button>
+                  <div id="effortMenu" class="effort-menu hidden">
+                    <div class="effort-menu-head">Agent Reasoning Effort</div>
+                    <button class="effort-opt" data-effort="low">
+                      <b>Low</b>
+                      <small>Fastest iteration, fewer reflection passes</small>
+                    </button>
+                    <button class="effort-opt selected" data-effort="medium">
+                      <b>Medium</b>
+                      <small>Balanced planning, syntax validation, tests</small>
+                    </button>
+                    <button class="effort-opt" data-effort="high">
+                      <b>High</b>
+                      <small>Deep analysis, full workspace inspection</small>
+                    </button>
+                    <button class="effort-opt" data-effort="maximum">
+                      <b>Maximum</b>
+                      <small>Thorough evaluation, multi-pass refinement</small>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Stop Button -->
+                <button id="stopBtn" class="stop-btn" disabled title="Cancel running build mission">
+                  <span class="stop-icon">■</span>
+                  <span>Stop</span>
+                </button>
+
+                <!-- Build Button -->
+                <button id="buildBtn" class="primary-btn build-btn" title="Execute mission inside authorized workspace">
+                  <span>Build</span>
+                  <span class="arrow">↗</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Suggestion Chips -->
+          <div class="suggestions">
+            <button class="suggestion" data-prompt="Build a polished landing page for an AI developer tool with a dark coal theme and an interactive dashboard.">
+              AI developer landing page
+            </button>
+            <button class="suggestion" data-prompt="Build a from-scratch decoder-only language model project with a tokenizer, training loop, checkpoints, evaluation tools, and inference.">
+              Your own AI model
+            </button>
+            <button class="suggestion" data-prompt="Build a Roblox Studio companion that mirrors my project hierarchy and provides safe Luau script editing tools.">
+              Roblox Studio companion
+            </button>
+            <button class="suggestion" data-prompt="Build a full-stack app with authentication, an API, a database layer, tests, and a clean developer dashboard.">
+              Full-stack app
+            </button>
+          </div>
+
+          <!-- SPLIT WORKSPACE: BUILDER AGENT & LIVE PREVIEW (INSIDE DASHBOARD) -->
+          <div class="dashboard-split-workspace">
+            
+            <!-- LEFT HALF: AGENT CHAT + WORKFLOW PIPELINE -->
+            <div class="dashboard-agent-column">
+              <!-- Agent Shell Header -->
+              <div class="agent-topbar">
+                <div>
+                  <div class="pane-kicker">KLIZONION AGENT</div>
+                  <div class="agent-title">Supervised Loop</div>
+                </div>
                 <span id="missionIdLabel" class="mission-tag">No mission</span>
               </div>
-              <div id="chatMessages" class="chat-messages">
-                <div class="chat-message agent">
-                  <div class="message-label">KLIZONION BUILDER</div>
-                  <div class="message-body">
-                    Welcome. Describe any project above or choose a mode. I will plan, inspect the workspace, implement code, verify with tests, and display the live result.
+
+              <!-- Chat Console -->
+              <div class="chat-panel">
+                <div id="chatMessages" class="chat-messages">
+                  <div class="chat-message agent">
+                    <div class="message-label">KLIZONION BUILDER</div>
+                    <div class="message-body">
+                      Welcome to your Builder workspace. Describe a feature, select an effort level, and press Build to begin.
+                    </div>
+                  </div>
+                </div>
+                <div class="chat-compose">
+                  <textarea id="chatInput" rows="2" placeholder="Direct the Builder: update files, explain steps, run tests..."></textarea>
+                  <button id="chatSendBtn" class="chat-send-btn">Send</button>
+                </div>
+              </div>
+
+              <!-- Workflow Execution Visualizer -->
+              <div class="workflow-panel">
+                <div class="workflow-header">
+                  <div>
+                    <div class="pane-kicker">PIPELINE EXECUTION</div>
+                    <div class="pane-title">Milestones</div>
+                  </div>
+                  <span id="workflowMode" class="workflow-mode">Waiting</span>
+                </div>
+
+                <div id="workflowSteps" class="workflow-steps">
+                  <div class="workflow-step active" data-step="understand">
+                    <div class="step-icon">01</div>
+                    <div class="step-content"><b>Understand</b><small>Parse natural language goals</small></div>
+                    <div class="step-state">READY</div>
+                  </div>
+                  <div class="workflow-connector"></div>
+
+                  <div class="workflow-step" data-step="plan">
+                    <div class="step-icon">02</div>
+                    <div class="step-content"><b>Plan</b><small>Formulate engineering milestones</small></div>
+                    <div class="step-state">WAIT</div>
+                  </div>
+                  <div class="workflow-connector"></div>
+
+                  <div class="workflow-step" data-step="inspect">
+                    <div class="step-icon">03</div>
+                    <div class="step-content"><b>Inspect</b><small>Analyze workspace files & git</small></div>
+                    <div class="step-state">WAIT</div>
+                  </div>
+                  <div class="workflow-connector"></div>
+
+                  <div class="workflow-step" data-step="build">
+                    <div class="step-icon">04</div>
+                    <div class="step-content"><b>Build</b><small>Safe atomic file changes</small></div>
+                    <div class="step-state">WAIT</div>
+                  </div>
+                  <div class="workflow-connector"></div>
+
+                  <div class="workflow-step" data-step="test">
+                    <div class="step-icon">05</div>
+                    <div class="step-content"><b>Test</b><small>Allowlisted test & syntax check</small></div>
+                    <div class="step-state">WAIT</div>
+                  </div>
+                  <div class="workflow-connector"></div>
+
+                  <div class="workflow-step" data-step="preview">
+                    <div class="step-icon">06</div>
+                    <div class="step-content"><b>Preview</b><small>Synchronize live sandbox preview</small></div>
+                    <div class="step-state">WAIT</div>
+                  </div>
+                  <div class="workflow-connector"></div>
+
+                  <div class="workflow-step" data-step="ready">
+                    <div class="step-icon">07</div>
+                    <div class="step-content"><b>Ready</b><small>Mission completed & validated</small></div>
+                    <div class="step-state">WAIT</div>
                   </div>
                 </div>
               </div>
-              <div class="chat-compose">
-                <textarea
-                  id="chatInput"
-                  rows="2"
-                  placeholder="Direct the Builder: modify files, run tests, explain decisions..."
-                ></textarea>
-                <button id="chatSendBtn" class="chat-send-btn">Send</button>
-              </div>
-            </section>
+            </div>
 
-            <!-- WORKFLOW PIPELINE VISUALIZATION (Understand -> Plan -> Inspect -> Build -> Test -> Preview -> Ready) -->
-            <section class="workflow-panel">
-              <div class="workflow-header">
-                <div>
-                  <div class="pane-kicker">PIPELINE</div>
-                  <div class="pane-title">Workflow Execution</div>
-                </div>
-                <span id="workflowMode" class="workflow-mode">Waiting</span>
-              </div>
-
-              <div id="workflowSteps" class="workflow-steps">
-                <div class="workflow-step active" data-step="understand">
-                  <div class="step-icon">01</div>
-                  <div class="step-content">
-                    <b>Understand</b>
-                    <small>Parse natural language goals</small>
+            <!-- RIGHT HALF: FIRST-CLASS LIVE PREVIEW (INSIDE DASHBOARD) -->
+            <div class="dashboard-preview-column">
+              <div class="preview-shell">
+                <div class="preview-topbar">
+                  <div class="preview-title">
+                    <span class="live-dot"></span>
+                    <span>Live Preview</span>
                   </div>
-                  <div class="step-state">READY</div>
-                </div>
-                <div class="workflow-connector"></div>
-
-                <div class="workflow-step" data-step="plan">
-                  <div class="step-icon">02</div>
-                  <div class="step-content">
-                    <b>Plan</b>
-                    <small>Formulate engineering milestones</small>
+                  <div class="preview-actions">
+                    <span id="previewStatus" class="preview-status">Waiting for a build</span>
+                    <button id="refreshPreviewBtn" class="icon-btn" aria-label="Refresh preview">↻</button>
                   </div>
-                  <div class="step-state">WAIT</div>
                 </div>
-                <div class="workflow-connector"></div>
 
-                <div class="workflow-step" data-step="inspect">
-                  <div class="step-icon">03</div>
-                  <div class="step-content">
-                    <b>Inspect</b>
-                    <small>Analyze workspace files & git</small>
-                  </div>
-                  <div class="step-state">WAIT</div>
-                </div>
-                <div class="workflow-connector"></div>
-
-                <div class="workflow-step" data-step="build">
-                  <div class="step-icon">04</div>
-                  <div class="step-content">
-                    <b>Build</b>
-                    <small>Safe atomic file changes</small>
-                  </div>
-                  <div class="step-state">WAIT</div>
-                </div>
-                <div class="workflow-connector"></div>
-
-                <div class="workflow-step" data-step="test">
-                  <div class="step-icon">05</div>
-                  <div class="step-content">
-                    <b>Test</b>
-                    <small>Allowlisted test & syntax check</small>
-                  </div>
-                  <div class="step-state">WAIT</div>
-                </div>
-                <div class="workflow-connector"></div>
-
-                <div class="workflow-step" data-step="preview">
-                  <div class="step-icon">06</div>
-                  <div class="step-content">
-                    <b>Preview</b>
-                    <small>Update sandbox preview render</small>
-                  </div>
-                  <div class="step-state">WAIT</div>
-                </div>
-                <div class="workflow-connector"></div>
-
-                <div class="workflow-step" data-step="ready">
-                  <div class="step-icon">07</div>
-                  <div class="step-content">
-                    <b>Ready</b>
-                    <small>Mission completed & validated</small>
-                  </div>
-                  <div class="step-state">WAIT</div>
+                <div class="preview-frame-wrap">
+                  <iframe
+                    id="previewFrame"
+                    title="KLIZONION live preview"
+                    sandbox="allow-scripts"
+                  ></iframe>
                 </div>
               </div>
-            </section>
+            </div>
+
           </div>
 
-          <!-- STREAMING ACTIVITY LOG / CONSOLE -->
+          <!-- STREAMING ACTIVITY LOG CONSOLE -->
           <div class="agent-console">
             <div class="console-header">
               <div>
@@ -336,219 +556,118 @@
             </div>
             <div id="activityLog" class="activity-log"></div>
           </div>
-        </div>
 
-        <!-- LIVE PREVIEW SURFACE -->
-        <div class="preview-shell">
-          <div class="preview-topbar">
-            <div class="preview-title">
-              <span class="live-dot"></span>
-              Live preview
+        </main>
+
+        <!-- DASHBOARD RIGHT SIDEBAR -->
+        <aside class="sidebar right-sidebar">
+          <!-- Runner Environment Card -->
+          <div class="section-label">ENVIRONMENT</div>
+          <div class="environment-card">
+            <div class="environment-status">
+              <span class="environment-dot" id="environmentDot"></span>
+              <div>
+                <b id="runnerState">Checking…</b>
+                <small>Supervised runner</small>
+              </div>
             </div>
-            <div class="preview-actions">
-              <span id="previewStatus" class="preview-status">Waiting for a build</span>
-              <button id="refreshPreviewBtn" class="icon-btn" aria-label="Refresh preview">↻</button>
+            <div class="environment-line">
+              <span>Workspace</span>
+              <b id="workspacePath">Not connected</b>
             </div>
-          </div>
-
-          <div class="preview-frame-wrap">
-            <iframe
-              id="previewFrame"
-              title="KLIZONION live preview"
-              sandbox="allow-scripts"
-            ></iframe>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- RIGHT SIDEBAR: ENVIRONMENT & MISSION & MODEL -->
-      <aside class="sidebar right-sidebar">
-        <!-- RUNNER ENVIRONMENT -->
-        <div class="section-label">ENVIRONMENT</div>
-        <div class="environment-card">
-          <div class="environment-status">
-            <span class="environment-dot" id="environmentDot"></span>
-            <div>
-              <b id="runnerState">Checking…</b>
-              <small>Builder runner</small>
+            <div class="environment-line">
+              <span>Hardware</span>
+              <b id="hardwareState">Detecting…</b>
             </div>
           </div>
-          <div class="environment-line">
-            <span>Workspace</span>
-            <b id="workspacePath">Not connected</b>
-          </div>
-          <div class="environment-line">
-            <span>Hardware</span>
-            <b id="hardwareState">Detecting…</b>
-          </div>
-        </div>
 
-        <!-- CURRENT PROJECT -->
-        <div class="section-label section-spaced">PROJECT</div>
-        <div class="side-card">
-          <div class="side-card-title" id="sideProjectTitle">Untitled build</div>
-          <div class="side-card-copy">
-            The Builder works directly inside your authorized workspace with strict path containment.
+          <!-- Mission State Card -->
+          <div class="section-label section-spaced">MISSION STATE</div>
+          <div class="mission-card">
+            <div class="mission-line">
+              <span>Status</span>
+              <b id="missionState">Idle</b>
+            </div>
+            <div class="mission-line">
+              <span>Mode</span>
+              <b id="missionMode">Anything</b>
+            </div>
+            <div class="mission-line">
+              <span>Effort</span>
+              <b id="missionEffortDisplay">Medium</b>
+            </div>
+            <div class="mission-line">
+              <span>Mission ID</span>
+              <b id="missionIdSide">—</b>
+            </div>
           </div>
-        </div>
 
-        <!-- MISSION METRICS -->
-        <div class="section-label section-spaced">MISSION</div>
-        <div class="mission-card">
-          <div class="mission-line">
-            <span>Status</span>
-            <b id="missionState">Idle</b>
+          <!-- Model Card -->
+          <div class="section-label section-spaced">CUSTOM MODEL</div>
+          <div class="model-card">
+            <div class="model-line">
+              <span>Architecture</span>
+              <b>Decoder Transformer</b>
+            </div>
+            <div class="model-line">
+              <span>Parameters</span>
+              <b>58.6M (Tied Embeds)</b>
+            </div>
+            <div class="model-line">
+              <span>Weights Status</span>
+              <b title="Binary checkpoint weights reside separately on disk (~703MB)">Disk Artifact (703MB)</b>
+            </div>
+            <div class="model-line">
+              <span>Checkpoint</span>
+              <b id="modelStepDisplay">Step 15 (Loss: 5.44)</b>
+            </div>
+            <div class="model-actions-grid">
+              <button id="saveModelBtn" class="model-btn" title="Save current model configuration to backend">
+                <span>💾</span> Save Model
+              </button>
+              <button id="publishModelBtn" class="model-btn primary" title="Download packaged source and configuration ZIP">
+                <span>📦</span> Publish Source & Config (ZIP)
+              </button>
+            </div>
+            <div id="modelActionMsg" class="model-msg"></div>
           </div>
-          <div class="mission-line">
-            <span>Mode</span>
-            <b id="missionMode">Anything</b>
-          </div>
-          <div class="mission-line">
-            <span>Effort</span>
-            <b id="missionEffortDisplay">Medium</b>
-          </div>
-          <div class="mission-line">
-            <span>ID</span>
-            <b id="missionIdSide">—</b>
-          </div>
-        </div>
 
-        <!-- MODEL STATUS & ACTIONS -->
-        <div class="section-label section-spaced">CUSTOM MODEL</div>
-        <div class="model-card">
-          <div class="model-line">
-            <span>Model Arch</span>
-            <b>Decoder Transformer</b>
+          <!-- User Session Card -->
+          <div class="section-label section-spaced">ACCOUNT SESSION</div>
+          <div class="side-card">
+            <div class="user-line"><span>User</span><b id="sideUsername">—</b></div>
+            <div class="user-line"><span>Email</span><b id="sideEmail">—</b></div>
+            <div class="user-line"><span>Status</span><b class="text-green">Verified & Active</b></div>
+            <button id="sideLogoutBtn" class="ghost-btn danger full-width" style="margin-top:8px">Sign Out</button>
           </div>
-          <div class="model-line">
-            <span>Params</span>
-            <b>58.6M (Tied Embeds)</b>
-          </div>
-          <div class="model-line">
-            <span>Weights State</span>
-            <b title="Binary weights stored separately on disk (~703MB)">Disk Artifact (703MB)</b>
-          </div>
-          <div class="model-line">
-            <span>Last Step</span>
-            <b id="modelStepDisplay">Step 15 (Loss: 5.44)</b>
-          </div>
-          <div class="model-actions-grid">
-            <button id="saveModelBtn" class="model-btn">
-              <span>💾</span> Save Model
-            </button>
-            <button id="publishModelBtn" class="model-btn primary" title="Exports model architecture, tokenizer, server, and training harness. Checkpoint weights are referenced in klizonion-model.json">
-              <span>📦</span> Publish Source & Config (ZIP)
-            </button>
-          </div>
-          <div id="modelActionMsg" class="model-msg"></div>
-        </div>
-      </aside>
+        </aside>
 
-    </main>
+      </div>
+    </section>
 
-    <!-- AUTHENTICATION & 16-DIGIT VERIFICATION MODAL -->
+    <!-- ACCOUNT / USER MODAL -->
     <div id="authModal" class="modal-backdrop hidden">
       <div class="modal-dialog">
         <button id="closeAuthModal" class="modal-close" aria-label="Close">✕</button>
-
         <div class="modal-brand">
           <div class="brand-mark small">K</div>
-          <div class="modal-title">KLIZONION Account & Verification</div>
+          <div class="modal-title">KLIZONION Account</div>
         </div>
-
-        <!-- Step 1: Registration Form -->
-        <div id="modalSignupView" class="auth-view">
-          <h3>Create your engineering workspace account</h3>
-          <p class="auth-desc">
-            A single-use 16-digit numeric verification code will be dispatched to your email address.
-          </p>
-
-          <form id="modalRegisterForm" class="auth-form">
-            <div class="field">
-              <label for="regUsername">Username</label>
-              <input id="regUsername" autocomplete="username" placeholder="developer" required maxlength="32">
-            </div>
-            <div class="field">
-              <label for="regEmail">Email address</label>
-              <input id="regEmail" type="email" autocomplete="email" placeholder="you@domain.com" required>
-            </div>
-            <div class="field">
-              <label for="regPassword">Password</label>
-              <input id="regPassword" type="password" autocomplete="new-password" placeholder="Minimum 8 characters" required minlength="8">
-            </div>
-            <div class="field">
-              <label for="regConfirm">Confirm password</label>
-              <input id="regConfirm" type="password" autocomplete="new-password" placeholder="Confirm password" required minlength="8">
-            </div>
-
-            <!-- Cloudflare Turnstile Widget -->
-            <div class="field turnstile-field">
-              <label>Security verification</label>
-              <div id="turnstileWidget" class="turnstile-container"></div>
-              <div id="turnstileError" class="auth-feedback error" style="display:none"></div>
-            </div>
-
-            <button id="regSubmitBtn" class="auth-submit-btn" type="submit">
-              Create account & Send 16-digit code
-            </button>
-            <div id="regMsg" class="auth-feedback"></div>
-          </form>
+        <div class="user-session-card">
+          <div class="user-line"><span>Username</span><b id="modalSessionUsername">—</b></div>
+          <div class="user-line"><span>Email</span><b id="modalSessionEmail">—</b></div>
+          <div class="user-line"><span>Role</span><b>Authorized Engineer</b></div>
+          <div class="user-line"><span>Account Status</span><b class="text-green">Verified & Active</b></div>
         </div>
-
-        <!-- Step 2: 16-Digit Verification Code View -->
-        <div id="modalVerifyView" class="auth-view hidden">
-          <h3>Verify your email address</h3>
-          <p class="auth-desc">
-            Enter the 16-digit numeric verification code dispatched to your email.
-            The code expires after 10 minutes.
-          </p>
-
-          <form id="modalVerifyForm" class="auth-form">
-            <div class="field">
-              <label for="verificationCodeInput">16-Digit Verification Code</label>
-              <input
-                id="verificationCodeInput"
-                class="code-input"
-                inputmode="numeric"
-                maxlength="19"
-                autocomplete="one-time-code"
-                placeholder="0000-0000-0000-0000"
-                required
-              >
-            </div>
-            <div class="verify-btn-row">
-              <button id="verifySubmitBtn" class="auth-submit-btn" type="submit">
-                Verify & Activate
-              </button>
-              <button id="resendCodeBtn" class="ghost-btn" type="button">
-                Resend Code
-              </button>
-            </div>
-            <div id="verifyMsg" class="auth-feedback"></div>
-          </form>
-        </div>
-
-        <!-- Step 3: Authenticated State View -->
-        <div id="modalUserView" class="auth-view hidden">
-          <h3>Active Session</h3>
-          <p class="auth-desc">You are authenticated as an authorized Builder user.</p>
-          <div class="user-session-card">
-            <div class="user-line"><span>Username</span><b id="sessionUsername">—</b></div>
-            <div class="user-line"><span>Email</span><b id="sessionEmail">—</b></div>
-            <div class="user-line"><span>Status</span><b class="text-green">Verified & Active</b></div>
-          </div>
-          <button id="logoutBtn" class="ghost-btn danger" type="button">Sign out</button>
-        </div>
+        <button id="modalLogoutBtn" class="ghost-btn danger full-width">Sign out of Workspace</button>
       </div>
     </div>
 
-    <!-- TOAST NOTIFICATION CONTAINER -->
+    <!-- TOAST NOTIFICATIONS -->
     <div id="toastContainer" class="toast-container"></div>
 
   </div>
 
-  <!-- In root or apps/agent-web, app.js is relative to current directory -->
   <script type="module" src="app.js"></script>
 </body>
 </html>

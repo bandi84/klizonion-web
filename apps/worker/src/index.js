@@ -24,6 +24,7 @@ const state = {
   savedModels: new Map(),
   verificationSessions: new Map(),
   users: new Map(),
+  authSessions: new Map(),
   rateLimits: new Map(),
 };
 
@@ -365,6 +366,10 @@ export default {
 
     // 4. Create Mission
     if (u.pathname === '/api/builder/missions' && req.method === 'POST') {
+      const authHeader = req.headers.get('authorization') || '';
+      const authToken = authHeader.replace(/^Bearer\s+/i, '').trim();
+      const activeSession = authToken ? state.authSessions.get(authToken) : null;
+
       const body = await req.json().catch(() => ({}));
       const prompt = body.prompt || body.mission || '';
       const mode = body.mode || 'anything';
@@ -378,6 +383,7 @@ export default {
       const mission = {
         id: missionId,
         missionId,
+        userId: activeSession ? activeSession.user.email : 'local_dev_user',
         prompt,
         mode,
         effort,
@@ -786,18 +792,121 @@ export default {
       const userRecord = {
         username: session.username,
         email: session.email,
+        passwordHash: session.passwordHash,
         verified: true,
         createdAt: new Date().toISOString(),
       };
       state.users.set(session.email, userRecord);
 
       const authToken = `tok_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      const safeUser = {
+        username: userRecord.username,
+        email: userRecord.email,
+        verified: userRecord.verified,
+        createdAt: userRecord.createdAt,
+      };
+      state.authSessions.set(authToken, {
+        token: authToken,
+        user: safeUser,
+        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
 
       return json({
         success: true,
         token: authToken,
-        user: userRecord,
+        user: safeUser,
         message: 'Account successfully verified and activated.',
+      });
+    }
+
+    // 13. AUTH: Login with Email & Password (+ optional Turnstile)
+    if (u.pathname === '/api/auth/login' && req.method === 'POST') {
+      if (!checkRateLimit(`login_${clientIp}`, 10, 60000)) {
+        return json({ error: 'rate_limited', message: 'Too many login attempts. Please wait a minute.' }, 429);
+      }
+
+      const body = await req.json().catch(() => ({}));
+      const email = (body.email || '').trim().toLowerCase();
+      const password = body.password || '';
+
+      if (!email || !password) {
+        return json({ error: 'invalid_credentials', message: 'Email and password are required.' }, 400);
+      }
+
+      // Turnstile check on login if token provided or required in production
+      const turnstileToken = body.turnstileToken || body['cf-turnstile-response'];
+      if (turnstileToken) {
+        const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIp, env);
+        if (!turnstileResult.success) {
+          return json({
+            error: turnstileResult.error || 'invalid_turnstile',
+            message: turnstileResult.message || 'Security verification failed. Please try again.',
+          }, 400);
+        }
+      }
+
+      const userRecord = state.users.get(email);
+      if (!userRecord) {
+        return json({ error: 'invalid_credentials', message: 'Invalid email or password.' }, 401);
+      }
+
+      const enteredPasswordHash = await sha256(password);
+      if (enteredPasswordHash !== userRecord.passwordHash) {
+        return json({ error: 'invalid_credentials', message: 'Invalid email or password.' }, 401);
+      }
+
+      const authToken = `tok_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      const safeUser = {
+        username: userRecord.username,
+        email: userRecord.email,
+        verified: userRecord.verified,
+        createdAt: userRecord.createdAt,
+      };
+      state.authSessions.set(authToken, {
+        token: authToken,
+        user: safeUser,
+        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      return json({
+        success: true,
+        token: authToken,
+        user: safeUser,
+        message: 'Signed in successfully.',
+      });
+    }
+
+    // 14. AUTH: Current Session / Me
+    if (u.pathname === '/api/auth/me' && req.method === 'GET') {
+      const authHeader = req.headers.get('authorization') || '';
+      const authToken = authHeader.replace(/^Bearer\s+/i, '').trim();
+      if (!authToken) {
+        return json({ authenticated: false, message: 'No session token provided.' }, 401);
+      }
+
+      const session = state.authSessions.get(authToken);
+      if (!session || session.expiresAt < Date.now()) {
+        if (session) state.authSessions.delete(authToken);
+        return json({ authenticated: false, message: 'Session expired or invalid.' }, 401);
+      }
+
+      return json({
+        authenticated: true,
+        token: authToken,
+        user: session.user,
+      });
+    }
+
+    // 15. AUTH: Logout
+    if (u.pathname === '/api/auth/logout' && req.method === 'POST') {
+      const authHeader = req.headers.get('authorization') || '';
+      const authToken = authHeader.replace(/^Bearer\s+/i, '').trim();
+      if (authToken) {
+        state.authSessions.delete(authToken);
+      }
+      return json({
+        success: true,
+        message: 'Logged out successfully.',
       });
     }
 

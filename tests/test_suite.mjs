@@ -474,8 +474,83 @@ async function runAllTests() {
   }
   console.log('✓ Passed: Verified no email API key exists in any frontend file\n');
 
+  // ---------------------------------------------------------------------------
+  // ADDITIONAL ARCHITECTURE & DASHBOARD ROUTING TESTS (18 to 22)
+  // ---------------------------------------------------------------------------
+  console.log('--- ADDITIONAL ARCHITECTURE & DASHBOARD ROUTING TESTS ---\n');
+
+  // 18. Login with email & password -> authenticated session token
+  console.log('[DASH 1] Testing /api/auth/login with valid user credentials...');
+  res = await worker.fetch(new Request('http://localhost:8787/api/auth/login', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      email: 'resenduser@klizonion.dev',
+      password: 'password123!',
+    }),
+  }), baseEnv);
+  json = await res.json();
+  if (res.status !== 200 || !json.success || !json.token) {
+    throw new Error(`Login failed for verified user: ${JSON.stringify(json)}`);
+  }
+  const loggedInToken = json.token;
+  console.log('✓ Passed: User login succeeded, issued auth session token\n');
+
+  // 19. Session validation (/api/auth/me) with token and invalidation
+  console.log('[DASH 2] Testing /api/auth/me session check...');
+  res = await worker.fetch(new Request('http://localhost:8787/api/auth/me', {
+    headers: { authorization: `Bearer ${loggedInToken}` },
+  }), baseEnv);
+  json = await res.json();
+  if (res.status !== 200 || !json.authenticated || json.user.email !== 'resenduser@klizonion.dev') {
+    throw new Error(`Session check failed: ${JSON.stringify(json)}`);
+  }
+
+  // Without token -> 401
+  res = await worker.fetch(new Request('http://localhost:8787/api/auth/me'), baseEnv);
+  if (res.status !== 401) throw new Error('Expected 401 for unauthenticated session check');
+  console.log('✓ Passed: Session validation /api/auth/me works accurately\n');
+
+  // 20. Logout -> session invalidated
+  console.log('[DASH 3] Testing /api/auth/logout...');
+  res = await worker.fetch(new Request('http://localhost:8787/api/auth/logout', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${loggedInToken}` },
+  }), baseEnv);
+  json = await res.json();
+  if (res.status !== 200 || !json.success) throw new Error('Logout failed');
+
+  // Verify token is now invalid
+  res = await worker.fetch(new Request('http://localhost:8787/api/auth/me', {
+    headers: { authorization: `Bearer ${loggedInToken}` },
+  }), baseEnv);
+  if (res.status !== 401) throw new Error('Token remained valid after logout');
+  console.log('✓ Passed: Logout correctly invalidated server session token\n');
+
+  // 21. Live preview is embedded inside dashboard workspace in HTML
+  console.log('[DASH 4] Verifying Live Preview is inside #viewDashboard in index.html...');
+  const indexHtml = fs.readFileSync('index.html', 'utf8');
+  const dashboardStart = indexHtml.indexOf('id="viewDashboard"');
+  const previewStart = indexHtml.indexOf('id="previewFrame"');
+  const homeStart = indexHtml.indexOf('id="viewHome"');
+  if (dashboardStart === -1 || previewStart === -1 || homeStart === -1) {
+    throw new Error('Missing viewDashboard, previewFrame, or viewHome in index.html');
+  }
+  if (previewStart < dashboardStart) {
+    throw new Error('Live preview is placed outside of #viewDashboard!');
+  }
+  console.log('✓ Passed: Live preview is confirmed embedded inside the authenticated dashboard\n');
+
+  // 22. Root public view #viewHome does NOT expose the full Builder workspace
+  console.log('[DASH 5] Verifying #viewHome does NOT expose full Builder workspace...');
+  const homeSection = indexHtml.slice(homeStart, dashboardStart);
+  if (homeSection.includes('id="activityLog"') || homeSection.includes('id="workflowSteps"') || homeSection.includes('id="previewFrame"')) {
+    throw new Error('Security/Architecture violation: public home exposes internal Builder panels!');
+  }
+  console.log('✓ Passed: Public home is a dedicated landing page and does not expose active Builder panels\n');
+
   console.log('===========================================================');
-  console.log('ALL 17/17 PRODUCTION REGISTRATION & BUILDER TESTS PASSED!');
+  console.log('ALL PRODUCTION ARCHITECTURE & BUILDER TESTS PASSED!');
   console.log('===========================================================\n');
 }
 
