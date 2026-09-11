@@ -198,87 +198,150 @@ async function verifyTurnstileToken(token, clientIp, env) {
 async function deliverVerificationEmail(email, code, verificationToken, env) {
   const { text, html } = generateVerificationEmailContent(code);
   const subject = 'Your KLIZONION Verification Code';
-  const from = env?.EMAIL_FROM || 'KLIZONION <onboarding@resend.dev>';
+
+  // EMAIL_FROM must be an email address verified in Elastic Email.
+  const from =
+    env?.EMAIL_FROM ||
+    'KLIZONION <YOUR_VERIFIED_EMAIL_HERE>';
 
   // Provider A: Cloudflare Email Service binding (Worker EMAIL binding)
   if (env && env.EMAIL && typeof env.EMAIL.send === 'function') {
     try {
       await env.EMAIL.send({
         to: email,
-        from: env.EMAIL_FROM || 'no-reply@klizonion.vexr.dev',
+        from: env.EMAIL_FROM || 'YOUR_VERIFIED_EMAIL_HERE',
         subject,
         text,
       });
-      return { delivered: true, method: 'cloudflare_email_binding' };
+
+      return {
+        delivered: true,
+        method: 'cloudflare_email_binding',
+      };
     } catch (err) {
-      return { delivered: false, error: err.message, method: 'cloudflare_email_binding' };
+      return {
+        delivered: false,
+        error: err?.message || 'Cloudflare email delivery failed.',
+        method: 'cloudflare_email_binding',
+      };
     }
   }
 
-  // Provider B: External HTTPS Mail API (Resend, SendGrid, custom HTTP provider)
-  const apiKey = env?.EMAIL_API_KEY || env?.RESEND_API_KEY;
-  const apiUrl = env?.EMAIL_API_URL || (apiKey ? 'https://api.resend.com/emails' : null);
+  // Provider B: Elastic Email HTTP API
+  const apiKey = env?.EMAIL_API_KEY;
 
-  if (apiKey && apiUrl) {
+  if (apiKey) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const payload = {
-        from,
-        to: Array.isArray(email) ? email : [email],
-        subject,
-        html,
-        text,
-      };
-
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
+      const res = await fetch(
+        'https://api.elasticemail.com/v4/emails/transactional',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'X-ElasticEmail-ApiKey': apiKey,
+          },
+          body: JSON.stringify({
+            Recipients: {
+              To: Array.isArray(email) ? email : [email],
+            },
+            Content: {
+              Body: [
+                {
+                  ContentType: 'HTML',
+                  Charset: 'utf-8',
+                  Content: html,
+                },
+                {
+                  ContentType: 'PlainText',
+                  Charset: 'utf-8',
+                  Content: text,
+                },
+              ],
+              From: from,
+              Subject: subject,
+            },
+          }),
+          signal: controller.signal,
+        }
+      );
 
       clearTimeout(timeoutId);
 
+      const responseText = await res.text().catch(() => '');
+
       if (!res.ok) {
-        const errorText = await res.text().catch(() => '');
         let parsedMessage = '';
+
         try {
-          const parsed = JSON.parse(errorText);
-          parsedMessage = parsed.message || parsed.error || errorText;
+          const parsed = JSON.parse(responseText);
+          parsedMessage =
+            parsed.message ||
+            parsed.error ||
+            parsed.detail ||
+            responseText;
         } catch {
-          parsedMessage = errorText.slice(0, 200);
+          parsedMessage = responseText.slice(0, 500);
         }
+
         return {
           delivered: false,
-          error: `Mail provider returned HTTP ${res.status}: ${parsedMessage}`,
-          method: 'external_email_api',
+          error: `Elastic Email returned HTTP ${res.status}: ${parsedMessage}`,
+          method: 'elastic_email',
         };
       }
 
-      return { delivered: true, method: 'external_email_api' };
+      let providerResponse = null;
+
+      try {
+        providerResponse = responseText
+          ? JSON.parse(responseText)
+          : null;
+      } catch {
+        providerResponse = null;
+      }
+
+      return {
+        delivered: true,
+        method: 'elastic_email',
+        messageId:
+          providerResponse?.TransactionID ||
+          providerResponse?.transactionId ||
+          providerResponse?.MessageID ||
+          undefined,
+      };
     } catch (err) {
       return {
         delivered: false,
-        error: err.name === 'AbortError' ? 'Mail delivery timed out after 10s' : err.message,
-        method: 'external_email_api',
+        error:
+          err?.name === 'AbortError'
+            ? 'Elastic Email request timed out after 10 seconds.'
+            : err?.message || 'Elastic Email delivery failed.',
+        method: 'elastic_email',
       };
     }
   }
 
-  const isDev = !env || env.ENVIRONMENT === 'development' || !env.ENVIRONMENT || env.ENVIRONMENT === 'dev';
+  const isDev =
+    !env ||
+    env.ENVIRONMENT === 'development' ||
+    !env.ENVIRONMENT ||
+    env.ENVIRONMENT === 'dev';
+
   return {
     delivered: false,
     unconfigured: true,
     method: 'unconfigured_provider',
-    message: 'Email delivery provider is unconfigured in worker environment (EMAIL or EMAIL_API_URL/EMAIL_API_KEY).',
-    devNotice: isDev ? 'Development notice: Configure Cloudflare Email binding or EMAIL_API_KEY/RESEND_API_KEY in production.' : undefined,
+    message:
+      'Email delivery provider is unconfigured in worker environment. EMAIL_API_KEY is required.',
+    devNotice: isDev
+      ? 'Development notice: Configure the Elastic Email EMAIL_API_KEY secret in the production Worker.'
+      : undefined,
   };
 }
+
 
 export default {
   async fetch(req, env) {

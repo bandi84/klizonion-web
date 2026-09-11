@@ -1,0 +1,28 @@
+name = "klizonion-agent"
+main = "src/index.js"
+compatibility_date = "2026-09-09"
+
+[vars]
+BUILDER_PROTOCOL_VERSION = "0.2"
+ENVIRONMENT = "production"
+
+# Public Cloudflare Turnstile Sitekey
+TURNSTILE_SITEKEY = "0x4AAAAAAEu-k2LbW0bmTFZb"
+
+# Elastic Email
+# This must be the exact email address you verified in Elastic Email.
+EMAIL_FROM = "KLIZONION <bhuvansai.0901@gmail.com>"
+
+# ==============================================================================
+# SECRETS
+# NEVER put these values directly in this file.
+# Set them with Wrangler:
+#
+# npx wrangler secret put TURNSTILE_SECRET --name klizonion-agent
+# npx wrangler secret put EMAIL_API_KEY --name klizonion-agent
+# npx wrangler secret put RUNNER_SHARED_SECRET --name klizonion-agent
+#
+# EMAIL_API_KEY = Elastic Email API key
+# TURNSTILE_SECRET = Cloudflare Turnstile secret
+# RUNNER_SHARED_SECRET = Local runner authentication secret
+# ==============================================================================
