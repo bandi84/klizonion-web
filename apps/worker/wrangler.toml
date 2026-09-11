@@ -9,9 +9,25 @@ ENVIRONMENT = "production"
 # Public Cloudflare Turnstile Sitekey
 TURNSTILE_SITEKEY = "0x4AAAAAAEu-k2LbW0bmTFZb"
 
-# Elastic Email
-# This must be the exact email address you verified in Elastic Email.
-EMAIL_FROM = "KLIZONION <bhuvansai.0901@gmail.com>"
+# Email Configuration
+EMAIL_FROM = "KLIZONION <reddybhuvanlaxmi@gmail.com>"
+FRONTEND_ORIGIN = "https://klizonion.vexr.dev"
+VERIFICATION_FROM = "verify@klizonion.vexr.dev"
+
+# Cloudflare Workers AI Binding (anthropic/claude-fable-5.1)
+[ai]
+binding = "AI"
+
+# Secure Vault D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "model-backend"
+database_id = "17e6e6db-e50e-4978-a813-1d54a6dd513e"
+migrations_dir = "migrations"
+
+# Cloudflare Email Routing Binding
+[[send_email]]
+name = "EMAIL"
 
 # ==============================================================================
 # SECRETS

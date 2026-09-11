@@ -22,9 +22,6 @@ const state = {
   pendingActions: new Map(),
   activeMissionId: null,
   savedModels: new Map(),
-  verificationSessions: new Map(),
-  users: new Map(),
-  authSessions: new Map(),
   rateLimits: new Map(),
 };
 
@@ -44,6 +41,113 @@ async function sha256(str) {
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
+}
+
+
+// -----------------------------------------------------------------------------
+// Secure Vault helpers
+// Account secrets are NEVER stored in plaintext. Passwords use PBKDF2-SHA-256
+// with a per-password random salt. Bearer/verification tokens are stored only
+// as SHA-256 hashes in D1. API/provider keys belong in Worker secrets, not D1.
+// -----------------------------------------------------------------------------
+const PBKDF2_ITERATIONS = 120000;
+const PBKDF2_KEY_LENGTH = 32;
+
+function bytesToBase64Url(bytes) {
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlToBytes(value) {
+  const normalized = String(value).replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+}
+
+function randomBase64Url(byteLength = 32) {
+  const bytes = new Uint8Array(byteLength);
+  crypto.getRandomValues(bytes);
+  return bytesToBase64Url(bytes);
+}
+
+async function pbkdf2PasswordHash(password, saltBytes = null, iterations = PBKDF2_ITERATIONS) {
+  const salt = saltBytes || crypto.getRandomValues(new Uint8Array(16));
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits'],
+  );
+  const derived = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+    keyMaterial,
+    PBKDF2_KEY_LENGTH * 8,
+  );
+  return `pbkdf2-sha256$${iterations}$${bytesToBase64Url(salt)}$${bytesToBase64Url(new Uint8Array(derived))}`;
+}
+
+async function verifyPasswordHash(password, encoded) {
+  const parts = String(encoded || '').split('$');
+  if (parts.length !== 4 || parts[0] !== 'pbkdf2-sha256') return false;
+  const iterations = Number(parts[1]);
+  if (!Number.isSafeInteger(iterations) || iterations < 10000 || iterations > 2000000) return false;
+  try {
+    const expected = base64UrlToBytes(parts[3]);
+    const candidate = await pbkdf2PasswordHash(password, base64UrlToBytes(parts[2]), iterations);
+    const candidateBytes = base64UrlToBytes(candidate.split('$')[3]);
+    if (candidateBytes.length !== expected.length) return false;
+    let diff = 0;
+    for (let i = 0; i < expected.length; i++) diff |= expected[i] ^ candidateBytes[i];
+    return diff === 0;
+  } catch {
+    return false;
+  }
+}
+
+async function getUserByEmail(db, email) {
+  if (!db) return null;
+  return db.prepare(
+    'SELECT id, email, username, password_hash, verified, created_at FROM vault_users WHERE email = ?1 LIMIT 1'
+  ).bind(email).first();
+}
+
+async function getUserByUsername(db, username) {
+  if (!db) return null;
+  return db.prepare(
+    'SELECT id, email, username, password_hash, verified, created_at FROM vault_users WHERE username = ?1 LIMIT 1'
+  ).bind(username).first();
+}
+
+async function getAuthSessionUser(db, rawToken) {
+  if (!db || !rawToken) return null;
+  const tokenHash = await sha256(rawToken);
+  const row = await db.prepare(
+    `SELECT s.token_hash, s.expires_at, u.id, u.email, u.username, u.verified, u.created_at
+       FROM vault_auth_sessions s
+       JOIN vault_users u ON u.id = s.user_id
+      WHERE s.token_hash = ?1
+        AND s.expires_at > ?2
+      LIMIT 1`
+  ).bind(tokenHash, Date.now()).first();
+  return row || null;
+}
+
+function safeUserFromRow(row) {
+  return {
+    id: row.id,
+    username: row.username,
+    email: row.email,
+    verified: Boolean(row.verified),
+    createdAt: new Date(Number(row.created_at)).toISOString(),
+  };
+}
+
+async function requireDb(env) {
+  if (!env?.DB) throw new Error('Secure Vault D1 binding (DB) is not configured.');
+  return env.DB;
 }
 
 function checkRateLimit(key, maxRequests = 5, windowMs = 60000) {
@@ -201,6 +305,7 @@ async function deliverVerificationEmail(email, code, verificationToken, env) {
 
   // EMAIL_FROM must be an email address verified in Elastic Email.
   const from =
+    env?.VERIFICATION_FROM ||
     env?.EMAIL_FROM ||
     'KLIZONION <YOUR_VERIFIED_EMAIL_HERE>';
 
@@ -227,9 +332,40 @@ async function deliverVerificationEmail(email, code, verificationToken, env) {
     }
   }
 
-  // Provider B: Elastic Email HTTP API
-  const apiKey = env?.EMAIL_API_KEY;
+  // Provider B: Resend or Elastic Email HTTP API
+  const apiKey = env?.EMAIL_API_KEY || env?.RESEND_API_KEY;
 
+  if (apiKey && (apiKey.startsWith('re_') || env?.EMAIL_API_URL?.includes('resend.com'))) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(env?.EMAIL_API_URL || 'https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          from: from.includes('<') ? from : `KLIZONION <${from}>`,
+          to: Array.isArray(email) ? email : [email],
+          subject,
+          html,
+          text,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        return { delivered: false, error: `Resend returned HTTP ${res.status}: ${errText.slice(0, 300)}`, method: 'resend' };
+      }
+      return { delivered: true, method: 'resend' };
+    } catch (err) {
+      return { delivered: false, error: err?.message || 'Resend delivery failed.', method: 'resend' };
+    }
+  }
+
+  // Provider B2: Elastic Email HTTP API
   if (apiKey) {
     try {
       const controller = new AbortController();
@@ -342,7 +478,6 @@ async function deliverVerificationEmail(email, code, verificationToken, env) {
   };
 }
 
-
 export default {
   async fetch(req, env) {
     if (req.method === 'OPTIONS') {
@@ -373,6 +508,16 @@ export default {
       return json({
         turnstileSiteKey: env?.TURNSTILE_SITEKEY || '1x00000000000000000000AA',
       });
+    }
+
+    if (u.pathname === '/api/auth/vault-health' && req.method === 'GET') {
+      if (!env?.DB) return json({ ok: false, configured: false }, 503);
+      try {
+        await env.DB.prepare('SELECT 1 AS ok').first();
+        return json({ ok: true, configured: true, service: 'secure-vault' });
+      } catch {
+        return json({ ok: false, configured: true, message: 'D1 query failed.' }, 503);
+      }
     }
 
     // 2. Builder Status
@@ -428,10 +573,83 @@ export default {
     }
 
     // 4. Create Mission
+
+    // AI CHAT: Claude Fable 5.1 through Cloudflare Workers AI
+    if (u.pathname === '/api/agent/chat' && req.method === 'POST') {
+      const authHeader = req.headers.get('authorization') || '';
+      const authToken = authHeader.replace(/^Bearer\s+/i, '').trim();
+      let authSession = null;
+      try {
+        authSession = await getAuthSessionUser(env?.DB, authToken);
+      } catch (err) {
+        return json({ error: 'vault_unavailable', message: 'Secure Vault database is unavailable.' }, 503);
+      }
+
+      if (!authSession) {
+        return json({ error: 'unauthorized', message: 'Please sign in before chatting with the Builder.' }, 401);
+      }
+
+      if (!env?.AI || typeof env.AI.run !== 'function') {
+        return json({ error: 'ai_unconfigured', message: 'Cloudflare Workers AI binding (AI) is not configured.' }, 503);
+      }
+
+      const body = await req.json().catch(() => ({}));
+      const rawMessages = Array.isArray(body.messages) ? body.messages : [];
+
+      const messages = rawMessages
+        .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+        .slice(-30)
+        .map((m) => ({ role: m.role, content: m.content.slice(0, 20000) }));
+
+      const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
+      if (!messages.length && !prompt) {
+        return json({ error: 'missing_message', message: 'A message is required.' }, 400);
+      }
+      if (prompt) messages.push({ role: 'user', content: prompt.slice(0, 20000) });
+
+      const system = `You are KLIZONION Builder, an AI engineering assistant.
+You are conversational first. Do not start a build mission just because the user says hello, asks a question, or makes casual conversation.
+When the user requests an actual project, explain the plan briefly and identify the intended build target before tools are introduced.
+For now you can reason and respond, but you must never claim that files, code, previews, tests, or Roblox Studio changes were actually performed unless a real tool result in the conversation proves it.
+Be concise, technical when useful, and clear about what is happening.
+Current user: ${authSession.username || authSession.user?.username || 'user'} (${authSession.email || authSession.user?.email || ''}).`;
+
+      try {
+        const result = await env.AI.run('anthropic/claude-fable-5.1', {
+          max_tokens: Math.min(Number(body.max_tokens) || 2048, 8192),
+          system,
+          messages,
+        });
+
+        const text = typeof result?.response === 'string'
+          ? result.response
+          : typeof result?.content === 'string'
+            ? result.content
+            : Array.isArray(result?.content)
+              ? result.content.map((part) => typeof part === 'string' ? part : part?.text || '').join('')
+              : '';
+
+        if (!text) {
+          return json({ error: 'ai_empty_response', message: 'Claude returned an empty response.' }, 502);
+        }
+
+        return json({
+          success: true,
+          model: 'anthropic/claude-fable-5.1',
+          message: { role: 'assistant', content: text },
+        });
+      } catch (err) {
+        return json({
+          error: 'ai_request_failed',
+          message: err?.message || 'Cloudflare AI request failed.',
+        }, 502);
+      }
+    }
+
     if (u.pathname === '/api/builder/missions' && req.method === 'POST') {
       const authHeader = req.headers.get('authorization') || '';
       const authToken = authHeader.replace(/^Bearer\s+/i, '').trim();
-      const activeSession = authToken ? state.authSessions.get(authToken) : null;
+      const activeSession = authToken ? await getAuthSessionUser(env?.DB, authToken).catch(() => null) : null;
 
       const body = await req.json().catch(() => ({}));
       const prompt = body.prompt || body.mission || '';
@@ -446,7 +664,7 @@ export default {
       const mission = {
         id: missionId,
         missionId,
-        userId: activeSession ? activeSession.user.email : 'local_dev_user',
+        userId: activeSession ? activeSession.email : 'local_dev_user',
         prompt,
         mode,
         effort,
@@ -673,7 +891,6 @@ export default {
 
       const body = await req.json().catch(() => ({}));
 
-      // Turnstile Security Validation
       const turnstileToken = body.turnstileToken || body['cf-turnstile-response'];
       if (!turnstileToken) {
         return json({
@@ -690,6 +907,10 @@ export default {
         }, 400);
       }
 
+      if (!env?.DB) {
+        return json({ error: 'vault_unavailable', message: 'Secure Vault database is not configured on the Worker.' }, 503);
+      }
+
       const username = (body.username || '').trim();
       const email = (body.email || '').trim().toLowerCase();
       const password = body.password || '';
@@ -697,67 +918,83 @@ export default {
       if (!username || username.length < 3 || username.length > 32) {
         return json({ error: 'invalid_username', message: 'Username must be between 3 and 32 characters.' }, 400);
       }
-      if (!email || !email.includes('@') || !email.includes('.')) {
+      if (!/^[a-zA-Z0-9_.-]+$/.test(username)) {
+        return json({ error: 'invalid_username', message: 'Username contains unsupported characters.' }, 400);
+      }
+      if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return json({ error: 'invalid_email', message: 'Please enter a valid email address.' }, 400);
       }
-      if (!password || password.length < 8) {
-        return json({ error: 'invalid_password', message: 'Password must be at least 8 characters.' }, 400);
+      if (!password || password.length < 8 || password.length > 200) {
+        return json({ error: 'invalid_password', message: 'Password must be between 8 and 200 characters.' }, 400);
       }
 
-      if (state.users.has(email)) {
-        return json({ error: 'email_already_registered', message: 'That email is already registered.' }, 409);
-      }
+      try {
+        const [existingEmail, existingUsername] = await Promise.all([
+          getUserByEmail(env.DB, email),
+          getUserByUsername(env.DB, username),
+        ]);
 
-      const code = generate16DigitCode();
-      const codeHash = await sha256(code);
-      const verificationToken = `vtok_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
-      const passwordHash = await sha256(password);
+        if (existingEmail) {
+          return json({ error: 'email_already_registered', message: 'That email is already registered.' }, 409);
+        }
+        if (existingUsername) {
+          return json({ error: 'username_already_registered', message: 'That username is already registered.' }, 409);
+        }
 
-      const session = {
-        token: verificationToken,
-        email,
-        username,
-        passwordHash,
-        codeHash,
-        attempts: 0,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 10 * 60 * 1000,
-        verified: false,
-      };
+        const passwordHash = await pbkdf2PasswordHash(password);
+        const code = generate16DigitCode();
+        const codeHash = await sha256(code);
+        const verificationToken = `vtok_${randomBase64Url(32)}`;
+        const verificationTokenHash = await sha256(verificationToken);
+        const now = Date.now();
+        const expiresAt = now + 10 * 60 * 1000;
 
-      state.verificationSessions.set(verificationToken, session);
+        // One pending registration per email. The password is stored only as a password hash.
+        await env.DB.prepare(
+          `DELETE FROM vault_verification_sessions WHERE email = ?1`
+        ).bind(email).run();
 
-      const delivery = await deliverVerificationEmail(email, code, verificationToken, env);
+        await env.DB.prepare(
+          `INSERT INTO vault_verification_sessions
+            (token_hash, email, username, password_hash, code_hash, attempts, created_at, expires_at, verified)
+           VALUES (?1, ?2, ?3, ?4, ?5, 0, ?6, ?7, 0)`
+        ).bind(verificationTokenHash, email, username, passwordHash, codeHash, now, expiresAt).run();
 
-      // Hardened registration response:
-      // - If email delivery fails or provider is unconfigured, do NOT pretend it succeeded.
-      // - Never expose the 16-digit verification code to the client.
-      if (!delivery.delivered) {
+        const delivery = await deliverVerificationEmail(email, code, verificationToken, env);
+
+        if (!delivery.delivered) {
+          await env.DB.prepare(
+            `DELETE FROM vault_verification_sessions WHERE token_hash = ?1`
+          ).bind(verificationTokenHash).run();
+
+          return json({
+            success: false,
+            error: delivery.unconfigured ? 'email_provider_unconfigured' : 'verification_email_failed',
+            message: delivery.unconfigured
+              ? 'Registration could not be completed because email delivery is not configured.'
+              : `Registration could not be completed because email delivery failed (${delivery.error || 'delivery error'}).`,
+            verification_token: verificationToken,
+            emailDelivery: {
+              delivered: false,
+              unconfigured: Boolean(delivery.unconfigured),
+              method: delivery.method,
+            },
+          }, 503);
+        }
+
         return json({
-          success: false,
-          error: delivery.unconfigured ? 'email_provider_unconfigured' : 'verification_email_failed',
-          message: delivery.unconfigured
-            ? 'Registration pending: Email delivery provider is not configured. An EMAIL binding or EMAIL_API_URL is required to deliver your 16-digit verification code.'
-            : `Registration pending: Email delivery failed (${delivery.error || 'delivery error'}).`,
+          success: true,
           verification_token: verificationToken,
+          message: 'Account registered. A 16-digit verification code has been dispatched to your email.',
           emailDelivery: {
-            delivered: false,
-            unconfigured: Boolean(delivery.unconfigured),
+            delivered: true,
             method: delivery.method,
-            devNotice: delivery.devNotice,
           },
-        }, 503);
+        }, 201);
+      } catch (err) {
+        console.error('Secure Vault registration error', err);
+        return json({ error: 'vault_error', message: 'Unable to create the account right now.' }, 503);
       }
-
-      return json({
-        success: true,
-        verification_token: verificationToken,
-        message: 'Account registered. A 16-digit verification code has been dispatched to your email.',
-        emailDelivery: {
-          delivered: true,
-          method: delivery.method,
-        },
-      }, 201);
     }
 
     // 11. AUTH: Resend Verification Code
@@ -765,19 +1002,39 @@ export default {
       if (!checkRateLimit(`resend_${clientIp}`, 3, 60000)) {
         return json({ error: 'rate_limited', message: 'Too many resend attempts. Please wait a minute.' }, 429);
       }
+      if (!env?.DB) {
+        return json({ error: 'vault_unavailable', message: 'Secure Vault database is not configured on the Worker.' }, 503);
+      }
 
       const body = await req.json().catch(() => ({}));
-      const token = body.token || '';
-      const session = state.verificationSessions.get(token);
+      const token = String(body.token || '').trim();
+      if (!token) {
+        return json({ error: 'verification_expired_or_invalid', message: 'Missing verification token.' }, 400);
+      }
+
+      const tokenHash = await sha256(token);
+      const session = await env.DB.prepare(
+        `SELECT token_hash, email, username, password_hash, code_hash, attempts, created_at, expires_at, verified
+           FROM vault_verification_sessions WHERE token_hash = ?1 LIMIT 1`
+      ).bind(tokenHash).first();
 
       if (!session || session.verified) {
         return json({ error: 'verification_expired_or_invalid', message: 'Verification session invalid or already used.' }, 400);
       }
+      if (Number(session.expires_at) < Date.now()) {
+        await env.DB.prepare(`DELETE FROM vault_verification_sessions WHERE token_hash = ?1`).bind(tokenHash).run();
+        return json({ error: 'verification_expired_or_invalid', message: 'Verification session expired. Please register again.' }, 400);
+      }
 
       const newCode = generate16DigitCode();
-      session.codeHash = await sha256(newCode);
-      session.expiresAt = Date.now() + 10 * 60 * 1000;
-      session.attempts = 0;
+      const newCodeHash = await sha256(newCode);
+      const newExpiresAt = Date.now() + 10 * 60 * 1000;
+
+      await env.DB.prepare(
+        `UPDATE vault_verification_sessions
+            SET code_hash = ?1, expires_at = ?2, attempts = 0, created_at = ?3
+          WHERE token_hash = ?4`
+      ).bind(newCodeHash, newExpiresAt, Date.now(), tokenHash).run();
 
       const delivery = await deliverVerificationEmail(session.email, newCode, token, env);
 
@@ -786,13 +1043,12 @@ export default {
           success: false,
           error: delivery.unconfigured ? 'email_provider_unconfigured' : 'verification_email_failed',
           message: delivery.unconfigured
-            ? 'Resend unavailable: Email delivery provider is not configured on the server.'
+            ? 'Email delivery provider is not configured on the server.'
             : 'Email dispatch failed. Please try again later.',
           emailDelivery: {
             delivered: false,
             unconfigured: Boolean(delivery.unconfigured),
             method: delivery.method,
-            devNotice: delivery.devNotice,
           },
         }, 503);
       }
@@ -812,10 +1068,13 @@ export default {
       if (!checkRateLimit(`ver_${clientIp}`, 10, 60000)) {
         return json({ error: 'rate_limited', message: 'Too many verification attempts.' }, 429);
       }
+      if (!env?.DB) {
+        return json({ error: 'vault_unavailable', message: 'Secure Vault database is not configured on the Worker.' }, 503);
+      }
 
       const body = await req.json().catch(() => ({}));
-      const token = body.token || '';
-      const enteredCode = (body.code || '').replace(/\s+/g, '');
+      const token = String(body.token || '').trim();
+      const enteredCode = String(body.code || '').replace(/\s+/g, '');
 
       if (!token) {
         return json({ error: 'verification_expired_or_invalid', message: 'Missing verification token.' }, 400);
@@ -824,68 +1083,82 @@ export default {
         return json({ error: 'verification_code_invalid', message: 'Verification code must be exactly 16 decimal digits.' }, 400);
       }
 
-      const session = state.verificationSessions.get(token);
+      const tokenHash = await sha256(token);
+      const session = await env.DB.prepare(
+        `SELECT token_hash, email, username, password_hash, code_hash, attempts, created_at, expires_at, verified
+           FROM vault_verification_sessions WHERE token_hash = ?1 LIMIT 1`
+      ).bind(tokenHash).first();
+
       if (!session) {
         return json({ error: 'verification_expired_or_invalid', message: 'Verification session not found or expired.' }, 400);
       }
-
       if (session.verified) {
         return json({ error: 'verification_already_used', message: 'This verification code has already been used.' }, 400);
       }
-
-      if (Date.now() > session.expiresAt) {
-        state.verificationSessions.delete(token);
+      if (Number(session.expires_at) < Date.now()) {
+        await env.DB.prepare(`DELETE FROM vault_verification_sessions WHERE token_hash = ?1`).bind(tokenHash).run();
         return json({ error: 'verification_expired_or_invalid', message: 'Verification code expired after 10 minutes. Please request a new one.' }, 400);
       }
 
-      session.attempts += 1;
-      if (session.attempts > 5) {
-        state.verificationSessions.delete(token);
+      const attempts = Number(session.attempts || 0) + 1;
+      await env.DB.prepare(
+        `UPDATE vault_verification_sessions SET attempts = ?1 WHERE token_hash = ?2`
+      ).bind(attempts, tokenHash).run();
+
+      if (attempts > 5) {
+        await env.DB.prepare(`DELETE FROM vault_verification_sessions WHERE token_hash = ?1`).bind(tokenHash).run();
         return json({ error: 'rate_limited', message: 'Too many incorrect attempts. Please register again.' }, 429);
       }
 
       const enteredHash = await sha256(enteredCode);
-      if (enteredHash !== session.codeHash) {
+      if (enteredHash !== session.code_hash) {
         return json({ error: 'verification_code_invalid', message: 'Incorrect 16-digit verification code.' }, 400);
       }
 
-      session.verified = true;
-      state.verificationSessions.delete(token);
+      const userId = `usr_${randomBase64Url(18)}`;
+      const now = Date.now();
+      const insertUser = await env.DB.prepare(
+        `INSERT OR IGNORE INTO vault_users
+          (id, email, username, password_hash, verified, created_at)
+         VALUES (?1, ?2, ?3, ?4, 1, ?5)`
+      ).bind(userId, session.email, session.username, session.password_hash, now).run();
 
-      const userRecord = {
-        username: session.username,
-        email: session.email,
-        passwordHash: session.passwordHash,
-        verified: true,
-        createdAt: new Date().toISOString(),
-      };
-      state.users.set(session.email, userRecord);
+      if (!insertUser.success || Number(insertUser.meta?.changes || 0) !== 1) {
+        const existing = await getUserByEmail(env.DB, session.email);
+        if (existing) {
+          await env.DB.prepare(`DELETE FROM vault_verification_sessions WHERE token_hash = ?1`).bind(tokenHash).run();
+          return json({ error: 'email_already_registered', message: 'That email is already registered.' }, 409);
+        }
+        return json({ error: 'vault_error', message: 'Unable to activate the account.' }, 503);
+      }
 
-      const authToken = `tok_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
-      const safeUser = {
-        username: userRecord.username,
-        email: userRecord.email,
-        verified: userRecord.verified,
-        createdAt: userRecord.createdAt,
-      };
-      state.authSessions.set(authToken, {
-        token: authToken,
-        user: safeUser,
-        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+      const user = await getUserByEmail(env.DB, session.email);
+      await env.DB.prepare(`DELETE FROM vault_verification_sessions WHERE token_hash = ?1`).bind(tokenHash).run();
+
+      const authToken = `tok_${randomBase64Url(32)}`;
+      const authTokenHash = await sha256(authToken);
+      const expiresAt = now + 7 * 24 * 60 * 60 * 1000;
+
+      await env.DB.prepare(
+        `INSERT INTO vault_auth_sessions (token_hash, user_id, created_at, expires_at)
+         VALUES (?1, ?2, ?3, ?4)`
+      ).bind(authTokenHash, user.id, now, expiresAt).run();
 
       return json({
         success: true,
         token: authToken,
-        user: safeUser,
+        user: safeUserFromRow(user),
         message: 'Account successfully verified and activated.',
       });
     }
 
-    // 13. AUTH: Login with Email & Password (+ optional Turnstile)
+    // 13. AUTH: Login with Email & Password
     if (u.pathname === '/api/auth/login' && req.method === 'POST') {
       if (!checkRateLimit(`login_${clientIp}`, 10, 60000)) {
         return json({ error: 'rate_limited', message: 'Too many login attempts. Please wait a minute.' }, 429);
+      }
+      if (!env?.DB) {
+        return json({ error: 'vault_unavailable', message: 'Secure Vault database is not configured on the Worker.' }, 503);
       }
 
       const body = await req.json().catch(() => ({}));
@@ -896,7 +1169,6 @@ export default {
         return json({ error: 'invalid_credentials', message: 'Email and password are required.' }, 400);
       }
 
-      // Turnstile check on login if token provided or required in production
       const turnstileToken = body.turnstileToken || body['cf-turnstile-response'];
       if (turnstileToken) {
         const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIp, env);
@@ -908,33 +1180,30 @@ export default {
         }
       }
 
-      const userRecord = state.users.get(email);
-      if (!userRecord) {
+      const userRecord = await getUserByEmail(env.DB, email);
+      if (!userRecord || !userRecord.verified) {
         return json({ error: 'invalid_credentials', message: 'Invalid email or password.' }, 401);
       }
 
-      const enteredPasswordHash = await sha256(password);
-      if (enteredPasswordHash !== userRecord.passwordHash) {
+      const passwordOk = await verifyPasswordHash(password, userRecord.password_hash);
+      if (!passwordOk) {
         return json({ error: 'invalid_credentials', message: 'Invalid email or password.' }, 401);
       }
 
-      const authToken = `tok_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
-      const safeUser = {
-        username: userRecord.username,
-        email: userRecord.email,
-        verified: userRecord.verified,
-        createdAt: userRecord.createdAt,
-      };
-      state.authSessions.set(authToken, {
-        token: authToken,
-        user: safeUser,
-        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+      const authToken = `tok_${randomBase64Url(32)}`;
+      const authTokenHash = await sha256(authToken);
+      const now = Date.now();
+      const expiresAt = now + 7 * 24 * 60 * 60 * 1000;
+
+      await env.DB.prepare(
+        `INSERT INTO vault_auth_sessions (token_hash, user_id, created_at, expires_at)
+         VALUES (?1, ?2, ?3, ?4)`
+      ).bind(authTokenHash, userRecord.id, now, expiresAt).run();
 
       return json({
         success: true,
         token: authToken,
-        user: safeUser,
+        user: safeUserFromRow(userRecord),
         message: 'Signed in successfully.',
       });
     }
@@ -947,16 +1216,20 @@ export default {
         return json({ authenticated: false, message: 'No session token provided.' }, 401);
       }
 
-      const session = state.authSessions.get(authToken);
-      if (!session || session.expiresAt < Date.now()) {
-        if (session) state.authSessions.delete(authToken);
+      if (!env?.DB) {
+        return json({ authenticated: false, message: 'Secure Vault database is not configured.' }, 503);
+      }
+
+      const session = await getAuthSessionUser(env.DB, authToken);
+      if (!session) {
+        const tokenHash = await sha256(authToken);
+        await env.DB.prepare(`DELETE FROM vault_auth_sessions WHERE token_hash = ?1 AND expires_at <= ?2`).bind(tokenHash, Date.now()).run();
         return json({ authenticated: false, message: 'Session expired or invalid.' }, 401);
       }
 
       return json({
         authenticated: true,
-        token: authToken,
-        user: session.user,
+        user: safeUserFromRow(session),
       });
     }
 
@@ -964,8 +1237,9 @@ export default {
     if (u.pathname === '/api/auth/logout' && req.method === 'POST') {
       const authHeader = req.headers.get('authorization') || '';
       const authToken = authHeader.replace(/^Bearer\s+/i, '').trim();
-      if (authToken) {
-        state.authSessions.delete(authToken);
+      if (authToken && env?.DB) {
+        const tokenHash = await sha256(authToken);
+        await env.DB.prepare(`DELETE FROM vault_auth_sessions WHERE token_hash = ?1`).bind(tokenHash).run();
       }
       return json({
         success: true,
