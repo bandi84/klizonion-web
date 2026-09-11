@@ -1151,7 +1151,7 @@ function setupEventListeners() {
   // Chat console
   const chatInput = $('#chatInput');
   const chatSendBtn = $('#chatSendBtn');
-  const sendChat = () => {
+  const sendChat = async () => {
     if (!chatInput) return;
     const text = chatInput.value.trim();
     if (!text) return;
@@ -1159,11 +1159,30 @@ function setupEventListeners() {
     chatInput.value = '';
     log(`Chat message: ${text}`);
 
-    if (!state.missionId) {
-      addChatMessage('agent', 'Create a build mission first, then I can use this chat to direct workspace changes.');
+    if (!state.authToken) {
+      addChatMessage('agent', 'Please sign in to chat with the KLIZONION Builder agent.');
       return;
     }
-    addChatMessage('agent', 'Directive captured by agent loop.');
+
+    try {
+      const res = await fetch(`${API}/api/agent/chat`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${state.authToken}`,
+        },
+        body: JSON.stringify({ prompt: text }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.message?.content) {
+        addChatMessage('agent', data.message.content);
+      } else {
+        const fallback = data.message || data.error || (state.missionId ? 'Directive captured by agent loop.' : 'Describe a build mission above to begin.');
+        addChatMessage('agent', fallback);
+      }
+    } catch {
+      addChatMessage('agent', state.missionId ? 'Directive captured by agent loop.' : 'Describe a build mission above to begin.');
+    }
   };
 
   chatSendBtn?.addEventListener('click', sendChat);

@@ -1,9 +1,44 @@
 import fs from 'fs';
+import { DatabaseSync } from 'node:sqlite';
 import worker from '../apps/worker/src/index.js';
 import { SimpleZip } from '../apps/worker/src/zip.js';
 
+function createD1Mock() {
+  const rawDb = new DatabaseSync(':memory:');
+  const migrationSql = fs.readFileSync('apps/worker/migrations/0001_secure_vault.sql', 'utf8');
+  rawDb.exec(migrationSql);
+
+  return {
+    prepare(sql) {
+      let boundArgs = [];
+      return {
+        bind(...args) {
+          boundArgs = args;
+          return this;
+        },
+        first() {
+          const stmt = rawDb.prepare(sql);
+          return stmt.get(...boundArgs) || null;
+        },
+        all() {
+          const stmt = rawDb.prepare(sql);
+          const results = stmt.all(...boundArgs);
+          return { results };
+        },
+        run() {
+          const stmt = rawDb.prepare(sql);
+          const info = stmt.run(...boundArgs);
+          return { success: true, meta: { changes: info.changes } };
+        },
+      };
+    },
+  };
+}
+
 async function runAllTests() {
   console.log('=== KLIZONION BUILDER & AUTH PRODUCTION TEST SUITE ===\n');
+
+  const d1Db = createD1Mock();
 
   const baseEnv = {
     BUILDER_PROTOCOL_VERSION: '0.2',
@@ -11,6 +46,17 @@ async function runAllTests() {
     ENVIRONMENT: 'development',
     TURNSTILE_SITEKEY: '1x00000000000000000000AA',
     TURNSTILE_SECRET: '1x0000000000000000000000000000000AA', // Cloudflare always-pass test secret
+    DB: d1Db,
+    AI: {
+      run: async (model, options) => {
+        if (model === 'anthropic/claude-fable-5.1') {
+          return {
+            response: `KLIZONION Assistant [Claude Fable 5.1]: Ready to assist with ${options?.messages?.length || 0} messages.`,
+          };
+        }
+        throw new Error(`Unexpected model: ${model}`);
+      },
+    },
   };
 
   // ---------------------------------------------------------------------------
@@ -549,8 +595,41 @@ async function runAllTests() {
   }
   console.log('✓ Passed: Public home is a dedicated landing page and does not expose active Builder panels\n');
 
+  // 23. Cloudflare Workers AI with anthropic/claude-fable-5.1
+  console.log('[AI 1] Testing /api/agent/chat using anthropic/claude-fable-5.1...');
+  // First login a user to get an active token
+  const chatLoginRes = await worker.fetch(new Request('http://localhost:8787/api/auth/login', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email: 'resenduser@klizonion.dev', password: 'password123!' }),
+  }), baseEnv);
+  const chatToken = (await chatLoginRes.json()).token;
+
+  // Unauthenticated -> 401
+  let chatRes = await worker.fetch(new Request('http://localhost:8787/api/agent/chat', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ prompt: 'Build a game' }),
+  }), baseEnv);
+  if (chatRes.status !== 401) throw new Error(`Expected 401 unauthenticated chat, got ${chatRes.status}`);
+
+  // Authenticated -> 200 with Claude Fable 5.1
+  chatRes = await worker.fetch(new Request('http://localhost:8787/api/agent/chat', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${chatToken}`,
+    },
+    body: JSON.stringify({ prompt: 'How do I train a custom model from scratch in KLIZONION?' }),
+  }), baseEnv);
+  const chatJson = await chatRes.json();
+  if (chatRes.status !== 200 || !chatJson.success || chatJson.model !== 'anthropic/claude-fable-5.1' || !chatJson.message?.content) {
+    throw new Error(`Workers AI chat failed: ${JSON.stringify(chatJson)}`);
+  }
+  console.log('✓ Passed: Cloudflare Workers AI wired using anthropic/claude-fable-5.1\n');
+
   console.log('===========================================================');
-  console.log('ALL PRODUCTION ARCHITECTURE & BUILDER TESTS PASSED!');
+  console.log('ALL PRODUCTION ARCHITECTURE, VAULT & BUILDER TESTS PASSED!');
   console.log('===========================================================\n');
 }
 
