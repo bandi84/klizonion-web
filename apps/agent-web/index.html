@@ -2,478 +2,151 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#070707">
-  <meta name="description" content="KLIZONION — Describe it. Build it. See it live. AI engineering platform.">
-  <title>KLIZONION</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080c17">
+  <meta name="description" content="KLIZONION AI engineering workspace">
+  <title>KLIZONION AI BUILDER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
-
 <body>
   <div class="app-shell">
-
-    <!-- UNIVERSAL TOPBAR -->
     <header class="topbar">
       <div class="brand-group">
-        <a href="#home" class="brand-link">
-          <div class="brand-mark">K</div>
-          <div class="brand-word">KLIZONION</div>
+        <a href="#home" class="brand-link" aria-label="KLIZONION home">
+          <span class="brand-mark" aria-hidden="true"><i></i><b></b></span>
+          <span class="brand-word">KLIZONION</span>
         </a>
-        <div class="version-pill">BETA · V0.2</div>
+        <span class="product-label">AI BUILDER</span>
+        <span class="version-pill">BETA · V0.2</span>
       </div>
-
-      <!-- Public Navigation (Visible on #home, #register, #login) -->
       <nav id="publicNav" class="topbar-nav">
         <a href="#home" class="nav-link">Overview</a>
-        <a href="#login" class="nav-link">Sign In</a>
-        <a href="#register" class="ghost-btn highlight">Create Account</a>
+        <a href="#login" class="nav-link">Sign in</a>
+        <a href="#register" class="topbar-cta">Create account</a>
       </nav>
-
-      <!-- Authenticated Dashboard Actions (Visible only on #dashboard) -->
       <div id="dashboardActions" class="topbar-actions hidden">
-        <div id="connectionPill" class="connection-pill offline" title="Runner connection status">
-          <span class="dot"></span>
-          <span id="connectionText">Builder offline</span>
-        </div>
-        <button id="newProjectBtn" class="ghost-btn" title="Reset workspace and state for a new project">
-          <span>+</span> New project
-        </button>
-        <button id="authModalBtn" class="ghost-btn" aria-label="Account details">
-          <span id="authBtnIcon">👤</span>
-          <span id="authBtnText">Account</span>
-        </button>
-        <button id="topbarLogoutBtn" class="ghost-btn danger" title="Sign out of your session">
-          Sign out
-        </button>
+        <div class="topbar-search" role="search"><span aria-hidden="true">⌕</span><input aria-label="Search workspace" placeholder="Search workspace"><kbd>⌘ K</kbd></div>
+        <a class="topbar-icon-link" href="https://github.com/" target="_blank" rel="noreferrer" aria-label="Open GitHub">GH</a>
+        <div id="connectionPill" class="connection-pill offline" title="Runner connection status"><span class="status-dot"></span><span id="connectionText">Builder offline</span></div>
+        <button id="newProjectBtn" class="topbar-button topbar-button-primary" type="button"><span>＋</span> New project</button>
+        <button id="authModalBtn" class="account-button" type="button" aria-label="Account details"><span class="avatar">K</span><span id="authBtnText">Account</span><span>⌄</span></button>
+        <button id="topbarLogoutBtn" class="icon-action danger" type="button" aria-label="Sign out" title="Sign out">↗</button>
       </div>
     </header>
 
-    <!-- ===================================================================== -->
-    <!-- VIEW 1: PUBLIC LANDING PAGE (#home)                                   -->
-    <!-- ===================================================================== -->
-    <section id="viewHome" class="view-panel">
+    <section id="viewHome" class="view-panel public-view">
       <div class="landing-container">
-        <!-- Hero Header -->
         <div class="landing-hero">
-          <div class="eyebrow">KLIZONION AI ENGINEERING PLATFORM</div>
-          <h1 class="landing-headline">
-            Describe it.<br>
-            Build it.<br>
-            <span class="text-gradient">See it live.</span>
-          </h1>
-          <p class="landing-subhead">
-            The autonomous engineering agent system that plans, inspects, writes, tests,
-            and iterates inside an authorized workspace with a live synchronized preview.
-          </p>
-
-          <div class="landing-cta-row">
-            <button id="landingStartBtn" class="primary-btn big-btn">
-              <span>Start Building</span>
-              <span class="arrow">↗</span>
-            </button>
-            <a href="#login" class="ghost-btn big-btn">
-              Sign In to Workspace
-            </a>
-          </div>
-
-          <div class="landing-status-badge">
-            <span class="dot live-dot"></span>
-            <span>BETA · V0.2 is live with Supervised Runner & Verification</span>
-          </div>
+          <span class="eyebrow">SUPERVISED AI ENGINEERING</span>
+          <div class="hero-mark brand-mark large" aria-hidden="true"><i></i><b></b></div>
+          <h1>Describe it.<br><em>Build it.</em><br>See it live.</h1>
+          <p>The engineering agent that plans, inspects, writes, tests, and iterates inside an authorized workspace.</p>
+          <div class="landing-cta-row"><button id="landingStartBtn" class="button button-primary button-large" type="button">Start building <span>↗</span></button><a href="#login" class="button button-secondary button-large">Sign in to workspace</a></div>
+          <div class="landing-status"><span class="status-dot online"></span> Supervised runner and verification active</div>
+          <button id="landingBottomStartBtn" class="visually-hidden" type="button">Get started</button>
         </div>
-
-        <!-- Interactive Build Categories Showcase -->
-        <div class="landing-categories">
-          <div class="section-label center">SUPPORTED BUILD TARGETS</div>
-          <div class="categories-grid">
-            <div class="category-card" data-mode="web">
-              <div class="category-icon">◫</div>
-              <h3>Web Applications</h3>
-              <p>Responsive frontend interfaces, backend endpoints, database layers, and sandboxed previews.</p>
-              <div class="category-tag">Sandboxed Preview</div>
-            </div>
-
-            <div class="category-card" data-mode="roblox">
-              <div class="category-icon">▦</div>
-              <h3>Roblox & Studio</h3>
-              <p>Place hierarchy exploration, Luau script generation, and structured companion tooling.</p>
-              <div class="category-tag">Luau & Studio Bridge</div>
-            </div>
-
-            <div class="category-card" data-mode="ai">
-              <div class="category-icon">◎</div>
-              <h3>Custom AI Models</h3>
-              <p>True decoder-only Transformers, custom tokenizers, PyTorch training pipelines, and evaluation.</p>
-              <div class="category-tag">58.6M Decoder Transformer</div>
-            </div>
-
-            <div class="category-card" data-mode="backend">
-              <div class="category-icon">⌁</div>
-              <h3>Backend & APIs</h3>
-              <p>Production-shaped services, authenticated routes, data models, and automated test validation.</p>
-              <div class="category-tag">Cloudflare & Node APIs</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- How the Autonomous Loop Works -->
-        <div class="landing-loop-section">
-          <div class="section-label center">THE AUTONOMOUS ENGINEERING LOOP</div>
-          <h2 class="center-title">Supervised, Atomic, Verified</h2>
-          <div class="loop-cards-row">
-            <div class="loop-card">
-              <div class="loop-num">01</div>
-              <h4>Understand & Plan</h4>
-              <p>Natural language prompts are converted into atomic milestones and boundary contracts.</p>
-            </div>
-            <div class="loop-card">
-              <div class="loop-num">02</div>
-              <h4>Inspect & Sandbox</h4>
-              <p>Supervised runner validates directory path containment before touching workspace files.</p>
-            </div>
-            <div class="loop-card">
-              <div class="loop-num">03</div>
-              <h4>Build & Test</h4>
-              <p>Atomic file patching backed by allowlisted syntax checks and test execution.</p>
-            </div>
-            <div class="loop-card">
-              <div class="loop-num">04</div>
-              <h4>Live Preview</h4>
-              <p>Results render immediately in an isolated sandbox iframe inside your dashboard.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom CTA Bar -->
-        <div class="landing-bottom-cta">
-          <div>
-            <h3>Ready to build your next project?</h3>
-            <p>Create an account to access the authenticated KLIZONION Builder dashboard.</p>
-          </div>
-          <button id="landingBottomStartBtn" class="primary-btn">
-            <span>Get Started</span>
-            <span class="arrow">↗</span>
-          </button>
+        <div class="landing-grid">
+          <article class="landing-card"><span class="card-index">01</span><h3>Understand</h3><p>Turn a natural-language idea into a clear, executable plan.</p></article>
+          <article class="landing-card accent-card"><span class="card-index">02</span><h3>Build</h3><p>Make controlled changes inside an explicitly authorized workspace.</p></article>
+          <article class="landing-card"><span class="card-index">03</span><h3>Verify</h3><p>Run checks, observe results, and keep iterating until it works.</p></article>
         </div>
       </div>
     </section>
 
-    <!-- ===================================================================== -->
-    <!-- VIEW 2: AUTHENTICATION FLOW (#register, #login, #verify)              -->
-    <!-- ===================================================================== -->
     <section id="viewAuth" class="view-panel hidden">
       <div class="auth-page-container">
         <div class="auth-card">
-          <!-- Register View -->
+          <div class="auth-card-brand"><span class="brand-mark"><i></i><b></b></span><span>KLIZONION <small>AI BUILDER</small></span></div>
           <div id="authRegisterView" class="auth-subview">
-            <div class="auth-header">
-              <h2>Create your workspace account</h2>
-              <p>One account. One workspace. A 16-digit verification code will be sent to your email.</p>
-            </div>
-
+            <div class="auth-header"><span class="eyebrow">CREATE WORKSPACE</span><h2>Build from a blank canvas.</h2><p>Set up your engineering workspace. We will send a 16-digit verification code to your email.</p></div>
             <form id="registerForm" class="auth-form">
-              <div class="field">
-                <label for="regUsername">Username</label>
-                <input id="regUsername" autocomplete="username" placeholder="developer" required maxlength="32">
-              </div>
-              <div class="field">
-                <label for="regEmail">Email address</label>
-                <input id="regEmail" type="email" autocomplete="email" placeholder="you@domain.com" required>
-              </div>
-              <div class="field">
-                <label for="regPassword">Password</label>
-                <input id="regPassword" type="password" autocomplete="new-password" placeholder="Minimum 8 characters" required minlength="8">
-              </div>
-              <div class="field">
-                <label for="regConfirm">Confirm password</label>
-                <input id="regConfirm" type="password" autocomplete="new-password" placeholder="Confirm password" required minlength="8">
-              </div>
-
-              <!-- Turnstile Widget -->
-              <div class="field turnstile-field">
-                <label>Security verification</label>
-                <div id="turnstileWidget" class="turnstile-container"></div>
-                <div id="turnstileError" class="auth-feedback error" style="display:none"></div>
-              </div>
-
-              <button id="regSubmitBtn" class="primary-btn auth-btn" type="submit">
-                Create account & Send 16-digit code
-              </button>
-              <div id="regMsg" class="auth-feedback"></div>
-            </form>
-
-            <div class="auth-switch">
-              Already have an account? <a href="#login">Sign in</a>
-            </div>
+              <div class="field"><label for="regUsername">Username</label><input id="regUsername" autocomplete="username" placeholder="developer" required maxlength="32"></div>
+              <div class="field"><label for="regEmail">Email address</label><input id="regEmail" type="email" autocomplete="email" placeholder="you@domain.com" required></div>
+              <div class="form-row"><div class="field"><label for="regPassword">Password</label><input id="regPassword" type="password" autocomplete="new-password" placeholder="8+ characters" required minlength="8"></div><div class="field"><label for="regConfirm">Confirm</label><input id="regConfirm" type="password" autocomplete="new-password" placeholder="Repeat it" required minlength="8"></div></div>
+              <div class="field turnstile-field"><label>Security verification</label><div id="turnstileWidget" class="turnstile-container"></div><div id="turnstileError" class="auth-feedback error" style="display:none"></div></div>
+              <button id="regSubmitBtn" class="button button-primary auth-btn" type="submit">Create account <span>↗</span></button><div id="regMsg" class="auth-feedback"></div>
+            </form><div class="auth-switch">Already have an account? <a href="#login">Sign in</a></div>
           </div>
-
-          <!-- Login View -->
           <div id="authLoginView" class="auth-subview hidden">
-            <div class="auth-header">
-              <h2>Sign in to KLIZONION</h2>
-              <p>Enter your verified credentials to access the Builder workspace.</p>
-            </div>
-
-            <form id="loginForm" class="auth-form">
-              <div class="field">
-                <label for="loginEmail">Email address</label>
-                <input id="loginEmail" type="email" autocomplete="email" placeholder="you@domain.com" required>
-              </div>
-              <div class="field">
-                <label for="loginPassword">Password</label>
-                <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required>
-              </div>
-
-              <button id="loginSubmitBtn" class="primary-btn auth-btn" type="submit">
-                Sign In to Workspace
-              </button>
-              <div id="loginMsg" class="auth-feedback"></div>
-            </form>
-
-            <div class="auth-switch">
-              Don't have an account? <a href="#register">Create an account</a>
-            </div>
+            <div class="auth-header"><span class="eyebrow">WELCOME BACK</span><h2>Return to your workspace.</h2><p>Sign in with your verified KLIZONION account to continue building.</p></div>
+            <form id="loginForm" class="auth-form"><div class="field"><label for="loginEmail">Email address</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@domain.com" required></div><div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required></div><button id="loginSubmitBtn" class="button button-primary auth-btn" type="submit">Sign in <span>↗</span></button><div id="loginMsg" class="auth-feedback"></div></form><div class="auth-switch">New to KLIZONION? <a href="#register">Create an account</a></div>
           </div>
-
-          <!-- Verify View (16-Digit Code) -->
           <div id="authVerifyView" class="auth-subview hidden">
-            <div class="auth-header">
-              <h2>Verify your email address</h2>
-              <p>Enter the 16-digit numeric verification code sent to your email. The code expires in 10 minutes.</p>
-            </div>
-
-            <form id="verifyForm" class="auth-form">
-              <div class="field">
-                <label for="verificationCodeInput">16-Digit Verification Code</label>
-                <input
-                  id="verificationCodeInput"
-                  class="code-input"
-                  inputmode="numeric"
-                  maxlength="19"
-                  autocomplete="one-time-code"
-                  placeholder="0000-0000-0000-0000"
-                  required
-                >
-              </div>
-
-              <div class="verify-btn-row">
-                <button id="verifySubmitBtn" class="primary-btn auth-btn flex-2" type="submit">
-                  Verify & Open Dashboard
-                </button>
-                <button id="resendCodeBtn" class="ghost-btn flex-1" type="button">
-                  Resend Code
-                </button>
-              </div>
-              <div id="verifyMsg" class="auth-feedback"></div>
-            </form>
-
-            <div class="auth-switch">
-              Need to use another email? <a href="#register">Register again</a>
-            </div>
+            <div class="auth-header"><span class="eyebrow">VERIFY EMAIL</span><h2>One last step.</h2><p>Enter the 16-digit code sent to your email. It expires after 10 minutes.</p></div>
+            <form id="verifyForm" class="auth-form"><div class="field"><label for="verificationCodeInput">Verification code</label><input id="verificationCodeInput" class="code-input" inputmode="numeric" maxlength="19" autocomplete="one-time-code" placeholder="0000-0000-0000-0000" required></div><div class="verify-btn-row"><button id="verifySubmitBtn" class="button button-primary auth-btn flex-2" type="submit">Verify workspace</button><button id="resendCodeBtn" class="button button-secondary flex-1" type="button">Resend</button></div><div id="verifyMsg" class="auth-feedback"></div></form><div class="auth-switch">Need another email? <a href="#register">Register again</a></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ===================================================================== -->
-    <!-- VIEW 3: AUTHENTICATED BUILDER DASHBOARD (#dashboard)                  -->
-    <!-- ===================================================================== -->
     <section id="viewDashboard" class="view-panel hidden">
-      <div class="claude-dashboard-shell">
-        <aside class="claude-sidebar" aria-label="KLIZONION navigation">
-          <div class="claude-brand-row">
-            <div class="claude-brand-mark">K</div>
-            <span class="claude-brand-word">KLIZONION</span>
-          </div>
-
-          <button class="claude-new-btn" data-new-project="true" type="button">
-            <span class="claude-new-icon">+</span>
-            <span>New</span>
-          </button>
-
-          <nav class="claude-nav" aria-label="Workspace">
-            <button class="claude-nav-item active" data-workspace-tab="chat" type="button"><span>◌</span> Chat</button>
-            <button class="claude-nav-item" data-workspace-tab="files" type="button"><span>⌁</span> Files</button>
-            <button class="claude-nav-item" data-workspace-tab="activity" type="button"><span>◷</span> Activity</button>
-            <button class="claude-nav-item" data-workspace-tab="preview" type="button"><span>▣</span> Preview</button>
-            <button class="claude-nav-item" data-workspace-tab="terminal" type="button"><span>›_</span> Terminal</button>
-            <button class="claude-nav-item" data-workspace-tab="projects" type="button"><span>□</span> Projects</button>
-            <button class="claude-nav-item" data-workspace-tab="settings" type="button"><span>⚙</span> Settings</button>
+      <div class="workspace-shell">
+        <aside class="workspace-sidebar" aria-label="KLIZONION navigation">
+          <div class="sidebar-brand"><span class="brand-mark"><i></i><b></b></span><div><strong>KLIZONION</strong><small>AI BUILDER</small></div></div>
+          <button class="new-project-button" data-new-project="true" type="button"><span>＋</span> New project</button>
+          <div class="sidebar-section-label">Workspace</div>
+          <nav class="workspace-nav" aria-label="Workspace sections">
+            <button class="workspace-nav-item active" data-workspace-tab="chat" type="button"><span class="nav-symbol">◌</span><span>Chat</span><kbd>⌘ 1</kbd></button>
+            <button class="workspace-nav-item" data-workspace-tab="projects" type="button"><span class="nav-symbol">▦</span><span>Projects</span></button>
+            <button class="workspace-nav-item" data-workspace-tab="files" type="button"><span class="nav-symbol">⌁</span><span>Files</span></button>
+            <button class="workspace-nav-item" data-workspace-tab="preview" type="button"><span class="nav-symbol">◫</span><span>Preview</span></button>
+            <button class="workspace-nav-item" data-workspace-tab="terminal" type="button"><span class="nav-symbol">›_</span><span>Terminal</span></button>
+            <button class="workspace-nav-item" data-workspace-tab="deploy" type="button"><span class="nav-symbol">↗</span><span>Deploy</span></button>
+            <button class="workspace-nav-item" data-workspace-tab="settings" type="button"><span class="nav-symbol">◒</span><span>Settings</span></button>
           </nav>
-
-          <div class="claude-sidebar-divider"></div>
-          <div class="claude-sidebar-label">Chats and tasks</div>
-          <div class="claude-recents">
-            <button class="claude-recent active" type="button"><span class="recent-dot"></span><span>KLIZONION Agent</span></button>
-            <button class="claude-recent" type="button"><span class="recent-dot hollow"></span><span>Build a new project</span></button>
-            <button class="claude-recent" type="button"><span class="recent-dot hollow"></span><span>Roblox Studio companion</span></button>
-            <button class="claude-recent" type="button"><span class="recent-dot hollow"></span><span>Custom AI model</span></button>
-          </div>
-
-          <div class="claude-sidebar-spacer"></div>
-          <button class="claude-design-btn" data-workspace-tab="settings" type="button"><span>◉</span> Design</button>
-          <div class="claude-account" data-open-account="true" role="button" tabindex="0" aria-label="Account details">
-            <div class="claude-avatar">K</div>
-            <div class="claude-account-copy">
-              <strong class="account-name">Account</strong>
-              <span id="sidebarEmail">—</span>
-            </div>
-            <span class="claude-account-chevron">⌄</span>
-          </div>
-          <button class="hidden" type="button">Sign out</button>
+          <div class="sidebar-divider"></div><div class="sidebar-section-label">Recent builds</div>
+          <div class="recent-list"><button class="recent-item active" type="button"><span class="recent-status"></span><span>KLIZONION Agent</span></button><button class="recent-item" type="button"><span class="recent-status muted"></span><span>Build a new project</span></button><button class="recent-item" type="button"><span class="recent-status muted"></span><span>Roblox companion</span></button></div>
+          <div class="sidebar-spacer"></div>
+          <button class="activity-link" data-workspace-tab="activity" type="button"><span>◷</span> Activity / technical details</button>
+          <div class="sidebar-account" data-open-account="true" role="button" tabindex="0" aria-label="Account details"><span class="avatar">K</span><div><strong class="account-name">Account</strong><span id="sidebarEmail">—</span><span id="sideEmail" class="visually-hidden">—</span></div><span class="account-chevron">⌄</span></div>
         </aside>
 
-        <main class="claude-main">
-          <header class="claude-main-header">
-            <div class="claude-header-project">
-              <span class="claude-header-kicker">WORKSPACE</span>
-              <span id="projectName" class="claude-project-name">Untitled build</span>
-              <span class="claude-connection-pill"><span class="dot"></span><span id="dashboardConnectionText">Builder offline</span></span>
-            </div>
-            <div class="claude-header-actions">
-              <span id="missionBadge" class="mission-badge idle">IDLE</span>
-              <span id="jobBadge" class="job-badge idle">IDLE</span>
-              <span id="effortBadge" class="effort-indicator-chip">Effort: Medium</span>
-              <button id="authModalBtnHeader" class="claude-icon-btn hidden" type="button">◎</button>
-            </div>
-          </header>
+        <main class="workspace-main">
+          <header class="workspace-header"><div class="workspace-heading"><span class="header-kicker">WORKSPACE</span><span id="projectName">Untitled build</span><span class="runner-status"><span class="status-dot"></span><span id="dashboardConnectionText">Builder offline</span></span></div><div class="workspace-header-meta"><span id="missionBadge" class="state-badge idle">IDLE</span><span id="jobBadge" class="state-badge idle">IDLE</span><span id="effortBadge" class="effort-badge">Effort: Medium</span></div></header>
 
           <section class="workspace-tab-panel active" data-workspace-panel="chat">
-            <div class="claude-chat-page">
-              <div class="claude-chat-spacer"></div>
-              <div id="chatMessages" class="claude-chat-messages" aria-live="polite">
-                <div class="claude-welcome">
-                  <div class="claude-welcome-mark">K</div>
-                  <h1>What do you want to build?</h1>
-                  <p>Describe a project, ask a question, or direct KLIZONION to work inside your authorized workspace.</p>
-                </div>
+            <div class="chat-layout">
+              <div class="chat-column">
+                <div class="chat-scroll" id="chatMessages" aria-live="polite"><div class="welcome-state"><div class="welcome-mark brand-mark"><i></i><b></b></div><span class="eyebrow">KLIZONION AGENT</span><h1>What do you want to build?</h1><p>Describe what you want to create and KLIZONION will help turn it into a working project.</p><div class="suggestion-grid"><button class="suggestion" data-prompt="Build a polished website for my idea."><span class="suggestion-icon">◫</span><span><b>Build a website</b><small>Start with a responsive web product</small></span><span>↗</span></button><button class="suggestion" data-prompt="Make a Roblox game with a clean Studio project structure."><span class="suggestion-icon">◇</span><span><b>Make a Roblox game</b><small>Plan a Studio-ready experience</small></span><span>↗</span></button><button class="suggestion" data-prompt="Build a developer tool that solves a workflow problem."><span class="suggestion-icon">⌁</span><span><b>Build a tool</b><small>Turn a workflow into software</small></span><span>↗</span></button><button class="suggestion" data-prompt="Improve the existing code in my authorized workspace."><span class="suggestion-icon">✦</span><span><b>Improve existing code</b><small>Inspect and make a focused change</small></span><span>↗</span></button><button class="suggestion" data-prompt="Teach me how to approach this engineering problem."><span class="suggestion-icon">?</span><span><b>Learn something</b><small>Think through a technical problem</small></span><span>↗</span></button><button class="suggestion" data-prompt="I have a custom project request."><span class="suggestion-icon">＋</span><span><b>Custom request</b><small>Start with your own direction</small></span><span>↗</span></button></div></div></div>
+                <div class="composer-wrap"><div class="composer"><textarea id="promptInput" rows="1" spellcheck="true" placeholder="Describe what you want to build..."></textarea><div class="composer-toolbar"><div class="composer-tools"><button class="composer-icon" type="button" aria-label="Attach a file" title="Attach a file">＋</button><button class="composer-tool" type="button"><span>◎</span> Web</button><div class="model-selector"><button class="composer-tool" type="button"><span class="model-dot"></span> Fable 5.1 <span>⌄</span></button></div><button class="claude-mode-pill active visually-hidden" data-template="anything" type="button">Build</button><button class="claude-mode-pill visually-hidden" data-template="web" type="button">Web</button><button class="claude-mode-pill visually-hidden" data-template="ai" type="button">AI</button><button class="claude-mode-pill visually-hidden" data-template="roblox" type="button">Roblox</button></div><div class="composer-actions"><div class="effort-wrapper"><button id="effortBtn" class="effort-button" type="button"><span id="effortValue">Medium</span><span>⌄</span></button><div id="effortMenu" class="effort-menu hidden"><div class="effort-menu-head">Agent reasoning effort</div><button class="effort-opt" data-effort="low" type="button"><b>Low</b><small>Fastest iteration</small></button><button class="effort-opt selected" data-effort="medium" type="button"><b>Medium</b><small>Balanced planning and verification</small></button><button class="effort-opt" data-effort="high" type="button"><b>High</b><small>Deep inspection and testing</small></button><button class="effort-opt" data-effort="maximum" type="button"><b>Maximum</b><small>Thorough multi-pass evaluation</small></button></div></div><button id="stopBtn" class="stop-button" disabled type="button" aria-label="Stop active build" title="Stop active build">■</button><button id="buildBtn" class="build-button" type="button">Build <span>↗</span></button><button id="mainChatSendBtn" class="send-button" type="button" aria-label="Send message">↑</button></div></div></div><div class="composer-hint"><span>Enter to send · Ctrl + Enter to build</span><span>KLIZONION Fable 5.1</span></div></div>
               </div>
-
-              <div class="claude-composer-wrap">
-                <div class="claude-composer">
-                  <textarea id="promptInput" rows="1" spellcheck="true" placeholder="How can KLIZONION help you today?"></textarea>
-                  <div class="claude-composer-bottom">
-                    <div class="claude-composer-left">
-                      <button class="claude-plus-btn" type="button" aria-label="Add">+</button>
-                      <button class="claude-mode-pill active" data-template="anything" type="button">Build</button>
-                      <button class="claude-mode-pill" data-template="web" type="button">Web</button>
-                      <button class="claude-mode-pill" data-template="ai" type="button">AI</button>
-                      <button class="claude-mode-pill" data-template="roblox" type="button">Roblox</button>
-                    </div>
-                    <div class="claude-composer-right">
-                      <div class="effort-wrapper">
-                        <button id="effortBtn" class="claude-effort-btn" type="button"><span id="effortValue">Medium</span><span>⌄</span></button>
-                        <div id="effortMenu" class="effort-menu hidden">
-                          <div class="effort-menu-head">Agent Reasoning Effort</div>
-                          <button class="effort-opt" data-effort="low"><b>Low</b><small>Fastest iteration</small></button>
-                          <button class="effort-opt selected" data-effort="medium"><b>Medium</b><small>Balanced planning and verification</small></button>
-                          <button class="effort-opt" data-effort="high"><b>High</b><small>Deep inspection and testing</small></button>
-                          <button class="effort-opt" data-effort="maximum"><b>Maximum</b><small>Thorough multi-pass evaluation</small></button>
-                        </div>
-                      </div>
-                      <button id="stopBtn" class="claude-stop-btn" disabled type="button" title="Stop active mission">■</button>
-                      <button id="buildBtn" class="claude-build-btn" type="button" title="Build inside the authorized workspace">Build ↗</button>
-                      <button id="mainChatSendBtn" class="claude-send-btn" type="button" aria-label="Send message">↑</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="claude-composer-hint">Enter to chat · Ctrl+Enter to build · Responses use KLIZONION Fable 5.1</div>
-              </div>
-              <div class="claude-suggestions">
-                <button class="suggestion" data-prompt="Build a polished landing page for an AI developer tool with a dark coal theme and an interactive dashboard.">Build a web app</button>
-                <button class="suggestion" data-prompt="Build a from-scratch decoder-only language model project with a tokenizer, training loop, checkpoints, evaluation tools, and inference.">Build an AI model</button>
-                <button class="suggestion" data-prompt="Build a Roblox Studio companion that mirrors my project hierarchy and provides safe Luau script editing tools.">Build a Roblox tool</button>
-                <button class="suggestion" data-prompt="Build a full-stack app with authentication, an API, a database layer, tests, and a clean developer dashboard.">Build a full-stack app</button>
-              </div>
+              <aside class="chat-rail" aria-label="Workspace status">
+                <div class="rail-card status-card"><div class="rail-card-head"><span><span class="live-pulse"></span> Agent status</span><button class="rail-more" data-workspace-tab="activity" type="button">•••</button></div><div class="status-heading"><strong id="missionState">Ready to build</strong><span id="workflowMode">READY</span></div><div class="agent-steps"><div class="agent-step active" data-step="understand"><span>01</span><b>Understanding request</b><i></i></div><div class="agent-step" data-step="inspect"><span>02</span><b>Inspecting project</b><i></i></div><div class="agent-step" data-step="plan"><span>03</span><b>Planning changes</b><i></i></div><div class="agent-step" data-step="build"><span>04</span><b>Implementing</b><i></i></div><div class="agent-step" data-step="test"><span>05</span><b>Testing</b><i></i></div><div class="agent-step" data-step="preview"><span>06</span><b>Verifying</b><i></i></div><div class="agent-step" data-step="ready"><span>07</span><b>Ready</b><i></i></div></div></div>
+                <div class="rail-card preview-card"><div class="rail-card-head"><span>Live preview</span><button data-workspace-tab="preview" class="rail-link" type="button">Open ↗</button></div><div class="mini-preview"><span class="empty-glyph">◫</span><b id="previewStatus">Waiting for a build</b><small>Your project preview will appear here.</small></div></div>
+                <div class="rail-card files-card"><div class="rail-card-head"><span>Project files</span><button data-workspace-tab="files" class="rail-link" type="button">View all ↗</button></div><div class="file-list"><div class="file-row folder"><span>⌄</span><b>workspace</b></div><div class="file-row"><span class="file-type html">&lt;/&gt;</span><span>index.html</span></div><div class="file-row"><span class="file-type css">#</span><span>styles.css</span></div><div class="file-row muted-row"><span>＋</span><span>Files appear after inspection</span></div></div></div>
+                <div class="rail-card terminal-card"><div class="rail-card-head"><span>Terminal</span><button data-workspace-tab="terminal" class="rail-link" type="button">Open ↗</button></div><div class="terminal-preview"><span class="terminal-prompt">$</span><span>Awaiting authorized runner…</span></div></div>
+              </aside>
             </div>
           </section>
 
-          <section class="workspace-tab-panel" data-workspace-panel="files">
-            <div class="workspace-page">
-              <div class="workspace-page-header"><div><span class="claude-header-kicker">PROJECT</span><h2>Files</h2><p>Authorized workspace artifacts and project structure.</p></div><span id="workspacePathDisplay" class="workspace-path-pill">Connecting…</span></div>
-              <div class="workspace-empty-card"><div class="workspace-empty-icon">⌁</div><h3>Workspace files</h3><p>Files will appear here when the supervised runner reports the authorized workspace.</p><div id="workspacePath">Not connected</div></div>
-            </div>
-          </section>
+          <section class="workspace-tab-panel" data-workspace-panel="projects"><div class="page-wrap"><div class="page-header"><div><span class="header-kicker">WORKSPACE</span><h1>Projects</h1><p>Recent workspaces and active engineering missions.</p></div><button id="projectsNewBtn" class="button button-primary" type="button">＋ New project</button></div><div class="project-grid"><article class="project-card active"><div class="project-card-top"><span class="project-icon">K</span><span class="project-status">Current</span></div><h3 id="sideProjectTitle">Untitled build</h3><p>Authorized workspace</p><div class="project-meta"><span>Updated just now</span><span>↗</span></div></article><article class="project-card empty-project"><span class="empty-glyph">＋</span><h3>Start a new project</h3><p>Describe what you want to build in Chat.</p></article></div></div></section>
 
-          <section class="workspace-tab-panel" data-workspace-panel="activity">
-            <div class="workspace-page">
-              <div class="workspace-page-header"><div><span class="claude-header-kicker">AGENT</span><h2>Activity</h2><p>Live agent and runner events.</p></div><button id="clearLogsBtn" class="claude-secondary-btn" type="button">Clear</button></div>
-              <div id="activityLog" class="claude-activity-log"></div>
-            </div>
-          </section>
+          <section class="workspace-tab-panel" data-workspace-panel="files"><div class="page-wrap"><div class="page-header"><div><span class="header-kicker">PROJECT</span><h1>Files</h1><p>Inspect the authorized workspace as the agent works.</p></div><div class="page-tools"><div class="inline-search">⌕ <input placeholder="Search files" aria-label="Search files"></div><span id="workspacePathDisplay" class="path-pill">Connecting…</span></div></div><div class="file-browser"><div class="file-tree"><div class="tree-title">EXPLORER <span>•••</span></div><div class="tree-empty"><span class="empty-glyph">⌁</span><b>Workspace not inspected</b><small>Files will appear after the runner reports the authorized project.</small><span id="workspacePath">Not connected</span></div></div><div class="file-viewer"><div class="viewer-tabs"><span>Welcome</span></div><div class="viewer-empty"><span class="empty-glyph">⌘</span><b>Select a file to inspect it</b><small>File contents remain inside the authorized workspace.</small></div></div></div></div></section>
 
-          <section class="workspace-tab-panel" data-workspace-panel="preview">
-            <div class="workspace-page preview-page">
-              <div class="workspace-page-header"><div><span class="claude-header-kicker">OUTPUT</span><h2>Preview</h2><p id="previewStatus">Waiting for a build</p></div><button id="refreshPreviewBtn" class="claude-secondary-btn" type="button">Refresh</button></div>
-              <div class="preview-dedicated-shell"><iframe id="previewFrame" title="KLIZONION live preview" sandbox="allow-scripts"></iframe></div>
-            </div>
-          </section>
+          <section class="workspace-tab-panel" data-workspace-panel="preview"><div class="page-wrap preview-page"><div class="page-header"><div><span class="header-kicker">OUTPUT</span><h1>Preview</h1><p>View the current project output in an isolated surface.</p></div><div class="page-tools"><button id="refreshPreviewBtn" class="button button-secondary" type="button">↻ Refresh</button><button class="button button-secondary" type="button">Open ↗</button></div></div><div class="browser-frame"><div class="browser-bar"><span class="browser-dots"><i></i><i></i><i></i></span><div class="address-bar">klizonion.local / preview</div><span class="browser-refresh">↻</span></div><div class="preview-dedicated-shell"><iframe id="previewFrame" title="KLIZONION live preview" sandbox="allow-scripts"></iframe></div></div></div></section>
 
-          <section class="workspace-tab-panel" data-workspace-panel="terminal">
-            <div class="workspace-page"><div class="workspace-page-header"><div><span class="claude-header-kicker">TOOLS</span><h2>Terminal</h2><p>Runner output will appear here when an authorized terminal tool is connected.</p></div></div><div class="terminal-placeholder"><span>$</span><div><strong>Terminal unavailable</strong><small>No unrestricted shell is exposed to the browser. Commands run through supervised structured tools.</small></div></div></div>
-          </section>
+          <section class="workspace-tab-panel" data-workspace-panel="terminal"><div class="page-wrap"><div class="page-header"><div><span class="header-kicker">TOOLS</span><h1>Terminal</h1><p>Supervised command output from the authorized runner.</p></div><span class="terminal-status"><span class="status-dot"></span> Runner offline</span></div><div class="terminal-window"><div class="terminal-tabs"><span class="active">runner output</span><span>＋</span><span class="terminal-lock">No unrestricted shell</span></div><div class="terminal-output"><div><span class="terminal-prompt">$</span><span>Waiting for a supervised runner connection.</span></div><div class="terminal-muted">Commands will be validated against the project tool policy before execution.</div></div><div class="terminal-command"><span>$</span><input placeholder="Terminal is unavailable until the runner connects" disabled><button disabled>Run</button></div></div></div></section>
 
-          <section class="workspace-tab-panel" data-workspace-panel="projects">
-            <div class="workspace-page"><div class="workspace-page-header"><div><span class="claude-header-kicker">PROJECTS</span><h2>Projects</h2><p>Start a fresh workspace or continue an existing mission.</p></div><button id="projectsNewBtn" class="claude-primary-btn" type="button">+ New project</button></div><div class="project-grid"><div class="project-tile active"><span>Current workspace</span><strong id="sideProjectTitle">Untitled build</strong><small>Authorized workspace</small></div></div></div>
-          </section>
+          <section class="workspace-tab-panel" data-workspace-panel="deploy"><div class="page-wrap"><div class="page-header"><div><span class="header-kicker">DELIVERY</span><h1>Deploy</h1><p>Deployment status and environment details for this project.</p></div><button class="button button-secondary" type="button" disabled>Deploy project</button></div><div class="deploy-grid"><div class="deploy-hero"><span class="deploy-icon">↗</span><span class="eyebrow">CURRENT ENVIRONMENT</span><h2>Not connected</h2><p>Connect an authorized project and deployment provider to make releases available here.</p><span class="path-pill">No deployment target configured</span></div><div class="deploy-list"><div class="section-heading"><b>Recent deployments</b><span>0 total</span></div><div class="empty-row"><span class="empty-glyph">◷</span><span><b>No deployments yet</b><small>Deployment history will appear here.</small></span></div><div class="section-heading"><b>Release checks</b><span>Waiting</span></div><div class="check-row"><span>○</span><span>Build and test verification</span><span>Pending</span></div><div class="check-row"><span>○</span><span>Preview health check</span><span>Pending</span></div></div></div></div></section>
 
-          <section class="workspace-tab-panel" data-workspace-panel="settings">
-            <div class="workspace-page settings-page">
-              <div class="workspace-page-header"><div><span class="claude-header-kicker">CONFIGURATION</span><h2>Settings</h2><p>Project, model, runner, and account controls.</p></div></div>
-              <div class="settings-grid">
-                <div class="settings-card"><h3>Mission</h3><div class="settings-row"><span>Status</span><b id="missionState">Idle</b></div><div class="settings-row"><span>Mode</span><b id="missionMode">Anything</b></div><div class="settings-row"><span>Effort</span><b id="missionEffortDisplay">Medium</b></div><div class="settings-row"><span>Mission ID</span><b id="missionIdSide">—</b></div></div>
-                <div class="settings-card"><h3>Runner</h3><div class="settings-row"><span>State</span><b id="runnerState">Checking…</b></div><div class="settings-row"><span>Hardware</span><b id="hardwareState">Detecting…</b></div><div class="settings-row"><span>Environment</span><b id="environmentDot" class="environment-dot"></b></div></div>
-                <div class="settings-card"><h3>Custom model</h3><div class="settings-row"><span>Architecture</span><b>Decoder Transformer</b></div><div class="settings-row"><span>Parameters</span><b>58.6M</b></div><div class="settings-row"><span>Checkpoint</span><b>Step 15 · Loss 5.44</b></div><div class="settings-actions"><button id="saveModelBtn" class="claude-secondary-btn" type="button">Save model</button><button id="publishModelBtn" class="claude-primary-btn" type="button">Publish ZIP</button></div><div id="modelActionMsg" class="model-msg"></div></div>
-                <div class="settings-card"><h3>Account</h3><div class="settings-row"><span>User</span><b class="settings-account-name">—</b></div><div class="settings-row"><span>Email</span><b class="settings-account-email">—</b></div><button id="sideLogoutBtn" class="claude-danger-btn" type="button">Sign out</button></div>
-              </div>
-              <div class="hidden-runtime-controls">
-                <button id="saveModelBtnSide" type="button">Save</button><button id="publishModelBtnSide" type="button">Publish</button><span id="modelActionMsgSide"></span>
-              </div>
-            </div>
-          </section>
+          <section class="workspace-tab-panel" data-workspace-panel="activity"><div class="page-wrap"><div class="page-header"><div><span class="header-kicker">OBSERVABILITY</span><h1>Activity</h1><p>Agent actions, tool calls, mission IDs, and technical diagnostics.</p></div><button id="clearLogsBtn" class="button button-secondary" type="button">Clear activity</button></div><div id="activityLog" class="activity-log"></div></div></section>
 
-          <div class="hidden-runtime-elements" aria-hidden="true">
-            <span id="missionIdLabel">No mission</span>
-            <span id="globalStatusChip">Engine Idle</span>
-            <span id="workflowMode">Waiting</span>
-            <div id="workflowSteps">
-              <div class="workflow-step active" data-step="understand"><span class="step-state">READY</span></div>
-              <div class="workflow-step" data-step="plan"><span class="step-state">WAIT</span></div>
-              <div class="workflow-step" data-step="inspect"><span class="step-state">WAIT</span></div>
-              <div class="workflow-step" data-step="build"><span class="step-state">WAIT</span></div>
-              <div class="workflow-step" data-step="test"><span class="step-state">WAIT</span></div>
-              <div class="workflow-step" data-step="preview"><span class="step-state">WAIT</span></div>
-              <div class="workflow-step" data-step="ready"><span class="step-state">WAIT</span></div>
-            </div>
-            <textarea id="chatInput"></textarea><button id="chatSendBtn" type="button">Send</button>
-          </div>
+          <section class="workspace-tab-panel" data-workspace-panel="settings"><div class="page-wrap settings-page"><div class="page-header"><div><span class="header-kicker">CONFIGURATION</span><h1>Settings</h1><p>Workspace preferences and agent controls.</p></div></div><div class="settings-layout"><div class="settings-nav"><button class="active">General</button><button>Appearance</button><button>Agent</button><button>Models</button><button>Workspace</button><button>Account</button></div><div class="settings-content"><div class="settings-card"><h3>Mission</h3><div class="settings-row"><span>Status</span><b id="missionStateSettings">Ready to build</b></div><div class="settings-row"><span>Mode</span><b id="missionMode">Anything</b></div><div class="settings-row"><span>Effort</span><b id="missionEffortDisplay">Medium</b></div><div class="settings-row"><span>Mission ID</span><b id="missionIdSide">—</b></div></div><div class="settings-card"><h3>Runner environment</h3><div class="settings-row"><span>State</span><b id="runnerState">Checking…</b></div><div class="settings-row"><span>Hardware</span><b id="hardwareState">Detecting…</b></div><div class="settings-row"><span>Workspace</span><b id="environmentDot" class="environment-dot"></b></div></div><div class="settings-card"><h3>Custom model</h3><div class="settings-row"><span>Architecture</span><b>Decoder Transformer</b></div><div class="settings-row"><span>Parameters</span><b>58.6M</b></div><div class="settings-row"><span>Checkpoint</span><b>Step 15 · Loss 5.44</b></div><div class="settings-actions"><button id="saveModelBtn" class="button button-secondary" type="button">Save model</button><button id="publishModelBtn" class="button button-primary" type="button">Publish ZIP</button></div><div id="modelActionMsg" class="model-msg"></div></div><div class="settings-card"><h3>Account</h3><div class="settings-row"><span>User</span><b class="settings-account-name">—</b></div><div class="settings-row"><span>Email</span><b class="settings-account-email">—</b></div><button id="sideLogoutBtn" class="button button-danger" type="button">Sign out</button></div></div></div></section>
+
+          <footer class="workspace-footer"><span><span class="status-dot online"></span> Ready to build</span><span>KLIZONION v1.0.0</span><span>All systems operational</span></footer>
+          <div class="hidden-runtime-elements" aria-hidden="true"><span id="missionIdLabel">No mission</span><span id="globalStatusChip">Engine Idle</span><div id="workflowSteps"><div class="workflow-step active" data-step="understand"><span class="step-state">READY</span></div><div class="workflow-step" data-step="plan"><span class="step-state">WAIT</span></div><div class="workflow-step" data-step="inspect"><span class="step-state">WAIT</span></div><div class="workflow-step" data-step="build"><span class="step-state">WAIT</span></div><div class="workflow-step" data-step="test"><span class="step-state">WAIT</span></div><div class="workflow-step" data-step="preview"><span class="step-state">WAIT</span></div><div class="workflow-step" data-step="ready"><span class="step-state">WAIT</span></div></div><textarea id="chatInput"></textarea><button id="chatSendBtn" type="button">Send</button></div>
+          <div class="hidden-runtime-elements" aria-hidden="true"><span id="sideUsername"></span><span id="modelActionMsgSide"></span><button id="saveModelBtnSide" type="button"></button><button id="publishModelBtnSide" type="button"></button></div>
         </main>
       </div>
     </section>
-    <!-- ACCOUNT / USER MODAL -->
-    <div id="authModal" class="modal-backdrop hidden">
-      <div class="modal-dialog">
-        <button id="closeAuthModal" class="modal-close" aria-label="Close">✕</button>
-        <div class="modal-brand">
-          <div class="brand-mark small">K</div>
-          <div class="modal-title">KLIZONION Account</div>
-        </div>
-        <div class="user-session-card">
-          <div class="user-line"><span>Username</span><b id="modalSessionUsername">—</b></div>
-          <div class="user-line"><span>Email</span><b id="modalSessionEmail">—</b></div>
-          <div class="user-line"><span>Role</span><b>Authorized Engineer</b></div>
-          <div class="user-line"><span>Account Status</span><b class="text-green">Verified & Active</b></div>
-        </div>
-        <button id="modalLogoutBtn" class="ghost-btn danger full-width">Sign out of Workspace</button>
-      </div>
-    </div>
 
-    <!-- TOAST NOTIFICATIONS -->
+    <div id="authModal" class="modal-backdrop hidden"><div class="modal-dialog"><button id="closeAuthModal" class="modal-close" type="button" aria-label="Close">×</button><div class="auth-card-brand"><span class="brand-mark"><i></i><b></b></span><span>KLIZONION <small>ACCOUNT</small></span></div><div class="user-session-card"><div class="user-line"><span>Username</span><b id="modalSessionUsername">—</b></div><div class="user-line"><span>Email</span><b id="modalSessionEmail">—</b></div><div class="user-line"><span>Role</span><b>Authorized Engineer</b></div><div class="user-line"><span>Status</span><b class="text-green">Verified & Active</b></div></div><button id="modalLogoutBtn" class="button button-danger full-width" type="button">Sign out of workspace</button></div></div>
     <div id="toastContainer" class="toast-container"></div>
-
   </div>
-
   <script type="module" src="app.js"></script>
   <script type="module" src="ui-enhancements.js"></script>
 </body>

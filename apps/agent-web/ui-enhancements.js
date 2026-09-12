@@ -2,8 +2,8 @@ const $ui = (s) => document.querySelector(s);
 const $$ui = (s) => [...document.querySelectorAll(s)];
 
 function activateWorkspaceTab(tab) {
-  $$('.claude-nav-item').forEach((item) => item.classList.toggle('active', item.dataset.workspaceTab === tab));
-  $$('.workspace-tab-panel').forEach((panel) => panel.classList.toggle('active', panel.dataset.workspacePanel === tab));
+  $$ui('[data-workspace-tab]').forEach((item) => item.classList.toggle('active', item.dataset.workspaceTab === tab));
+  $$ui('.workspace-tab-panel').forEach((panel) => panel.classList.toggle('active', panel.dataset.workspacePanel === tab));
 }
 
 $$ui('[data-workspace-tab]').forEach((item) => {

@@ -136,7 +136,7 @@ function setMissionState(status) {
 
 // Pipeline visualizer
 function resetWorkflow() {
-  $$('.workflow-step').forEach((step, index) => {
+  $$('.workflow-step, .agent-step').forEach((step, index) => {
     step.classList.remove('active', 'complete', 'failed');
     const stateElement = step.querySelector('.step-state');
     if (index === 0) {
@@ -152,7 +152,7 @@ function resetWorkflow() {
 
 function activateWorkflowStep(name) {
   let found = false;
-  $$('.workflow-step').forEach((step) => {
+  $$('.workflow-step, .agent-step').forEach((step) => {
     const stepName = step.dataset.step;
     const index = state.steps.indexOf(stepName);
     const targetIndex = state.steps.indexOf(name);
@@ -178,7 +178,7 @@ function activateWorkflowStep(name) {
 }
 
 function completeWorkflow() {
-  $$('.workflow-step').forEach((step) => {
+  $$('.workflow-step, .agent-step').forEach((step) => {
     step.classList.remove('active', 'failed');
     step.classList.add('complete');
     const stateElement = step.querySelector('.step-state');
@@ -189,7 +189,7 @@ function completeWorkflow() {
 }
 
 function failWorkflow(stepName) {
-  $$('.workflow-step').forEach((step) => {
+  $$('.workflow-step, .agent-step').forEach((step) => {
     step.classList.remove('active', 'complete');
     const stateElement = step.querySelector('.step-state');
     if (step.dataset.step === stepName) {
@@ -749,8 +749,7 @@ async function startBuild() {
   state.activeMissionRunning = true;
   if (buildBtn) {
     buildBtn.disabled = true;
-    const label = buildBtn.querySelector('span:first-child');
-    if (label) label.textContent = 'Building…';
+    buildBtn.textContent = 'Building…';
   }
   if (stopBtn) stopBtn.disabled = false;
 
@@ -803,44 +802,13 @@ async function startBuild() {
     }
 
     if (state.activeMissionRunning) {
-      setJob('running', 'BUILDING');
-      setMissionBadge('running', 'BUILDING');
+      setJob('running', 'AWAITING RUNNER');
+      setMissionBadge('running', 'ACTIVE');
       activateWorkflowStep('build');
-      setMissionState('Building components');
-
-      setTimeout(() => {
-        if (!state.activeMissionRunning) return;
-        activateWorkflowStep('test');
-        setMissionState('Running test validation');
-        log('Executing allowlisted syntax check and test pass…', 'info');
-
-        setTimeout(() => {
-          if (!state.activeMissionRunning) return;
-          activateWorkflowStep('preview');
-          setMissionState('Preview synchronized');
-          if (previewStatus) previewStatus.textContent = 'Live preview active';
-          renderPreview(prompt);
-
-          setTimeout(() => {
-            if (!state.activeMissionRunning) return;
-            completeWorkflow();
-            setJob('success', 'READY');
-            setMissionBadge('success', 'READY');
-            setMissionState('Mission complete');
-            if (stopBtn) stopBtn.disabled = true;
-            if (buildBtn) {
-              buildBtn.disabled = false;
-              const label = buildBtn.querySelector('span:first-child');
-              if (label) label.textContent = 'Build';
-            }
-            state.busy = false;
-            state.activeMissionRunning = false;
-            log('Mission completed successfully.', 'success');
-            addChatMessage('agent', 'All milestones verified. Your project is ready in the authorized workspace.');
-            showToast('Build completed successfully!', 'success');
-          }, 800);
-        }, 1000);
-      }, 1200);
+      setMissionState('Awaiting runner results');
+      if (previewStatus) previewStatus.textContent = 'Waiting for verified project output';
+      log('Mission actions submitted. Waiting for authoritative runner events before advancing status.', 'info');
+      addChatMessage('agent', 'The build request is active. KLIZONION is waiting for verified workspace and test results from the supervised runner.');
     }
   } catch (error) {
     setJob('failed', 'FAILED');
@@ -854,8 +822,7 @@ async function startBuild() {
     if (stopBtn) stopBtn.disabled = true;
     if (buildBtn) {
       buildBtn.disabled = false;
-      const label = buildBtn.querySelector('span:first-child');
-      if (label) label.textContent = 'Build';
+      buildBtn.textContent = 'Build ↗';
     }
     state.busy = false;
     state.activeMissionRunning = false;
@@ -1251,6 +1218,8 @@ function setupEventListeners() {
     renderPreview('');
     showToast('Workspace reset for new project.', 'info');
   });
+
+  $('#projectsNewBtn')?.addEventListener('click', () => $('#newProjectBtn')?.click());
 
   // Code input formatter for 16-digits
   const verificationCodeInput = $('#verificationCodeInput');
