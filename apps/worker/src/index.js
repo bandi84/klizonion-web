@@ -1,4 +1,6 @@
 import { SimpleZip } from './zip.js';
+import { STRUCTURED_OPERATIONS, validateToolRequest } from '../../../packages/core/tools.js';
+import { classifyRequest, evaluateRequirements, extractRequirements } from '../../../packages/core/requirements.js';
 
 // JSON Response helper with CORS
 const json = (data, status = 200) =>
@@ -15,6 +17,7 @@ const json = (data, status = 200) =>
 // In-memory state store for worker instance
 const state = {
   runner: false,
+  runnerState: 'UNAVAILABLE',
   runnerLastSeen: 0,
   hardware: 'Waiting for local runner',
   workspace: null,
@@ -24,6 +27,294 @@ const state = {
   savedModels: new Map(),
   rateLimits: new Map(),
 };
+
+function runnerCredentials(req, env) {
+  const authHeader = req.headers.get('authorization') || '';
+  const supplied = req.headers.get('x-runner-secret') || authHeader.replace(/^Bearer\s+/i, '').trim();
+  const expected = env?.RUNNER_SHARED_SECRET;
+  if (!expected) {
+    return { ok: false, response: json({ error: 'runner_unconfigured', message: 'Runner authentication is not configured.' }, 503) };
+  }
+  if (!supplied || supplied !== expected) {
+    return { ok: false, response: json({ error: 'unauthorized', message: 'Invalid runner shared secret' }, 401) };
+  }
+  return { ok: true };
+}
+
+function runnerIsOnline() {
+  return state.runner && Date.now() - state.runnerLastSeen < 60000;
+}
+
+async function requireBuilderSession(req, env) {
+  const authHeader = req.headers.get('authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+  if (!token || !env?.DB) {
+    return { error: json({ error: 'unauthorized', message: 'Authentication is required.' }, 401) };
+  }
+  const session = await getAuthSessionUser(env.DB, token).catch(() => null);
+  if (!session) return { error: json({ error: 'unauthorized', message: 'Authentication is required.' }, 401) };
+  if (session.disabled_at) return { error: json({ error: 'account_disabled', message: 'This account is permanently disabled.' }, 403) };
+  return { session };
+}
+
+function workspaceIdForPath(path) {
+  return `workspace_${Array.from(new TextEncoder().encode(String(path)))
+    .map((byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+}
+
+function parseJson(value, fallback = null) {
+  try { return value == null ? fallback : JSON.parse(value); } catch { return fallback; }
+}
+
+async function durableRunner(env, runnerId) {
+  if (!env?.DB) return null;
+  return env.DB.prepare(
+    `SELECT runner_id, workspace_id, workspace_path, status, hardware_json, last_seen, connected_at
+       FROM builder_runners WHERE runner_id = ?1 LIMIT 1`
+  ).bind(runnerId).first();
+}
+
+async function durableMission(env, missionId, userId = null) {
+  if (!env?.DB) return null;
+  const query = userId
+    ? `SELECT * FROM builder_missions WHERE id = ?1 AND user_id = ?2 LIMIT 1`
+    : `SELECT * FROM builder_missions WHERE id = ?1 LIMIT 1`;
+  const row = userId
+    ? await env.DB.prepare(query).bind(missionId, userId).first()
+    : await env.DB.prepare(query).bind(missionId).first();
+  if (!row) return null;
+  const actions = await env.DB.prepare(
+    `SELECT * FROM builder_actions WHERE mission_id = ?1 ORDER BY created_at, action_id`
+  ).bind(missionId).all();
+  const events = await env.DB.prepare(
+    `SELECT event_type, data_json, created_at FROM builder_events WHERE mission_id = ?1 ORDER BY event_id`
+  ).bind(missionId).all();
+  return {
+    id: row.id,
+    missionId: row.id,
+    userId: row.user_id,
+    prompt: row.prompt,
+    mode: row.mode,
+    effort: row.effort,
+    status: row.status,
+    currentStep: row.current_step,
+    workspaceId: row.workspace_id,
+    runnerId: row.runner_id,
+    iterationCount: Number(row.iteration_count || 0),
+    maxIterations: Number(row.max_iterations || 20),
+    agentMessage: row.agent_message || '',
+    error: row.error || null,
+    evaluation: parseJson(row.evaluation_json),
+    requestKind: row.request_kind,
+    requirements: parseJson(row.requirements_json, []),
+    createdAt: new Date(Number(row.created_at)).toISOString(),
+    updatedAt: new Date(Number(row.updated_at)).toISOString(),
+    actions: (actions.results || []).map((action) => ({
+      actionId: action.action_id,
+      missionId: action.mission_id,
+      runnerId: action.runner_id,
+      workspaceId: action.workspace_id,
+      operation: action.operation,
+      payload: parseJson(action.payload_json, {}),
+      status: action.status,
+      result: parseJson(action.result_json),
+      error: action.error,
+      attempts: Number(action.attempts || 0),
+      createdAt: new Date(Number(action.created_at)).toISOString(),
+      startedAt: action.started_at ? new Date(Number(action.started_at)).toISOString() : null,
+      completedAt: action.completed_at ? new Date(Number(action.completed_at)).toISOString() : null,
+    })),
+    events: (events.results || []).map((event) => ({
+      type: event.event_type,
+      at: new Date(Number(event.created_at)).toISOString(),
+      ...parseJson(event.data_json, {}),
+    })),
+  };
+}
+
+async function persistMission(env, mission) {
+  await env.DB.prepare(
+    `UPDATE builder_missions
+        SET status = ?1, current_step = ?2, runner_id = ?3, workspace_id = ?4,
+            iteration_count = ?5, max_iterations = ?6, agent_message = ?7,
+        error = ?8, evaluation_json = ?9, requirements_json = ?10, updated_at = ?11
+      WHERE id = ?12`
+  ).bind(
+    mission.status,
+    mission.currentStep,
+    mission.runnerId || null,
+    mission.workspaceId || null,
+    mission.iterationCount || 0,
+    mission.maxIterations || 20,
+    mission.agentMessage || null,
+    mission.error || null,
+    mission.evaluation ? JSON.stringify(mission.evaluation) : null,
+    JSON.stringify(mission.requirements || []),
+    Date.now(),
+    mission.id,
+  ).run();
+}
+
+async function persistEvent(env, missionId, event) {
+  await env.DB.prepare(
+    `INSERT INTO builder_events (mission_id, event_type, data_json, created_at) VALUES (?1, ?2, ?3, ?4)`
+  ).bind(missionId, event.type, JSON.stringify(event), Date.now()).run();
+}
+
+async function persistNewMissionActions(env, mission, existingActionIds = new Set()) {
+  for (const action of mission.actions || []) {
+    if (existingActionIds.has(action.actionId)) continue;
+    await env.DB.prepare(
+      `INSERT OR IGNORE INTO builder_actions
+        (action_id, mission_id, runner_id, workspace_id, operation, payload_json, status, created_at)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)`
+    ).bind(
+      action.actionId,
+      mission.id,
+      action.runnerId || mission.runnerId || null,
+      action.workspaceId || mission.workspaceId || null,
+      action.operation,
+      JSON.stringify(action.payload || {}),
+      action.status || 'pending',
+      Date.now(),
+    ).run();
+  }
+}
+
+function validatePlannedAction(action) {
+  return validateToolRequest(action).valid;
+}
+
+function parsePlannerResponse(result) {
+  const text = typeof result?.response === 'string'
+    ? result.response
+    : typeof result?.content === 'string'
+      ? result.content
+      : Array.isArray(result?.content)
+        ? result.content.map((part) => typeof part === 'string' ? part : part?.text || '').join('')
+        : '';
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+  try {
+    return JSON.parse(match[0]);
+  } catch {
+    return null;
+  }
+}
+
+function recordMissionEvent(mission, type, data = {}) {
+  mission.events = mission.events || [];
+  mission.events.push({ type, at: new Date().toISOString(), ...data });
+  if (mission.events.length > 200) mission.events.splice(0, mission.events.length - 200);
+}
+
+function evaluateMission(mission) {
+  return evaluateRequirements(mission.requirements || extractRequirements(mission.prompt), mission.actions || []);
+}
+
+async function continueMissionWithAgent(mission, env) {
+  mission.iterationCount = Number(mission.iterationCount || 0) + 1;
+  mission.maxIterations = Number(mission.maxIterations || 20);
+  if (mission.iterationCount > mission.maxIterations) {
+    mission.status = 'blocked';
+    mission.currentStep = 'blocked';
+    mission.error = 'Agent iteration limit reached before verification.';
+    recordMissionEvent(mission, 'agent.failed', { error: mission.error });
+    mission.updatedAt = new Date().toISOString();
+    return;
+  }
+  if (!env?.AI || typeof env.AI.run !== 'function') {
+    mission.status = 'blocked';
+    mission.currentStep = 'blocked';
+    mission.error = 'Agent planning is unavailable because the AI binding is not configured.';
+    recordMissionEvent(mission, 'agent.failed', { error: mission.error });
+    mission.updatedAt = new Date().toISOString();
+    return;
+  }
+
+  const actionHistory = mission.actions.slice(-50).map((action) => ({
+    operation: action.operation,
+    status: action.status,
+    result: action.result || null,
+    error: action.error || null,
+  }));
+  mission.evaluation = evaluateMission(mission);
+  recordMissionEvent(mission, 'evaluation.completed', { evaluation: mission.evaluation });
+  const system = `You are the controlled KLIZONION engineering planner. Decide the next safe structured actions for the user's request.
+Return JSON only: {"message":"natural concise update","actions":[{"operation":"...","payload":{}}]}.
+Allowed operations: ${Array.from(STRUCTURED_OPERATIONS).join(', ')}.
+File paths must be workspace-relative. Never request shell commands, secrets, absolute paths, or path traversal.
+If the request is fully implemented and verified, return an empty actions array. Never claim a change happened unless the action history proves it.`;
+
+  try {
+    const result = await env.AI.run('anthropic/claude-fable-5.1', {
+      max_tokens: 4096,
+      system,
+      messages: [{
+        role: 'user',
+        content: JSON.stringify({ prompt: String(mission.prompt).slice(0, 12000), mode: mission.mode, actionHistory, evaluation: mission.evaluation }),
+      }],
+    });
+    const plan = parsePlannerResponse(result);
+    const actions = Array.isArray(plan?.actions) ? plan.actions.slice(0, 8) : null;
+    if (!plan || !actions || !actions.every(validatePlannedAction)) {
+      throw new Error('The agent returned an invalid structured action plan.');
+    }
+
+    mission.agentMessage = typeof plan.message === 'string' ? plan.message.slice(0, 2000) : '';
+    if (actions.length === 0) {
+      if (!mission.evaluation.passed) {
+        throw new Error('The agent produced no further actions before the evaluator passed the task.');
+      }
+      mission.status = 'completed';
+      mission.currentStep = 'verify';
+      recordMissionEvent(mission, 'agent.completed', { evaluation: mission.evaluation });
+      mission.updatedAt = new Date().toISOString();
+      return;
+    }
+
+    const assignedRunner = await env.DB.prepare(
+      `SELECT runner_id, workspace_id FROM builder_runners
+        WHERE status IN ('READY', 'BUSY') AND last_seen > ?1 ORDER BY last_seen DESC LIMIT 1`
+    ).bind(Date.now() - 60000).first();
+    if (!assignedRunner) {
+      mission.status = 'waiting_for_runner';
+      mission.currentStep = 'inspect';
+      mission.error = 'Workspace execution is unavailable until a supervised runner connects.';
+      recordMissionEvent(mission, 'runner.disconnected', { reason: 'no_healthy_runner' });
+      mission.updatedAt = new Date().toISOString();
+      return;
+    }
+    mission.runnerId = assignedRunner.runner_id;
+    mission.workspaceId = assignedRunner.workspace_id;
+    const pending = state.pendingActions.get(mission.id) || [];
+    for (const planned of actions) {
+      const action = {
+        actionId: `act_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        missionId: mission.id,
+        operation: planned.operation,
+        payload: planned.payload || {},
+        runnerId: assignedRunner.runner_id,
+        workspaceId: assignedRunner.workspace_id,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      };
+      mission.actions.push(action);
+      pending.push(action);
+      recordMissionEvent(mission, 'tool.requested', { actionId: action.actionId, operation: action.operation });
+    }
+    state.pendingActions.set(mission.id, pending);
+    mission.status = 'running';
+    mission.currentStep = 'implement';
+    mission.updatedAt = new Date().toISOString();
+  } catch (error) {
+    mission.status = 'blocked';
+    mission.currentStep = 'blocked';
+    mission.error = error?.message || 'Agent planning failed.';
+    recordMissionEvent(mission, 'agent.failed', { error: mission.error });
+    mission.updatedAt = new Date().toISOString();
+  }
+}
 
 function generate16DigitCode() {
   const bytes = new Uint8Array(8);
@@ -110,14 +401,14 @@ async function verifyPasswordHash(password, encoded) {
 async function getUserByEmail(db, email) {
   if (!db) return null;
   return db.prepare(
-    'SELECT id, email, username, password_hash, verified, created_at FROM vault_users WHERE email = ?1 LIMIT 1'
+    'SELECT id, email, username, password_hash, verified, created_at, disabled_at, disabled_reason FROM vault_users WHERE email = ?1 LIMIT 1'
   ).bind(email).first();
 }
 
 async function getUserByUsername(db, username) {
   if (!db) return null;
   return db.prepare(
-    'SELECT id, email, username, password_hash, verified, created_at FROM vault_users WHERE username = ?1 LIMIT 1'
+    'SELECT id, email, username, password_hash, verified, created_at, disabled_at, disabled_reason FROM vault_users WHERE username = ?1 LIMIT 1'
   ).bind(username).first();
 }
 
@@ -125,7 +416,7 @@ async function getAuthSessionUser(db, rawToken) {
   if (!db || !rawToken) return null;
   const tokenHash = await sha256(rawToken);
   const row = await db.prepare(
-    `SELECT s.token_hash, s.expires_at, u.id, u.email, u.username, u.verified, u.created_at
+    `SELECT s.token_hash, s.expires_at, u.id, u.email, u.username, u.verified, u.created_at, u.disabled_at, u.disabled_reason
        FROM vault_auth_sessions s
        JOIN vault_users u ON u.id = s.user_id
       WHERE s.token_hash = ?1
@@ -135,12 +426,43 @@ async function getAuthSessionUser(db, rawToken) {
   return row || null;
 }
 
+async function recordSecurityEvent(db, userId, eventType, clientIp, details = {}) {
+  if (!db) return;
+  await db.prepare(
+    `INSERT INTO vault_security_events (user_id, event_type, request_ip, details_json, created_at)
+     VALUES (?1, ?2, ?3, ?4, ?5)`
+  ).bind(userId || null, eventType, clientIp || null, JSON.stringify(details), Date.now()).run();
+}
+
+async function permanentlyDisableAccount(db, userId, clientIp, reason, details = {}) {
+  if (!db || !userId) return;
+  const now = Date.now();
+  await db.prepare(
+    `UPDATE vault_users SET disabled_at = COALESCE(disabled_at, ?1), disabled_reason = COALESCE(disabled_reason, ?2) WHERE id = ?3`
+  ).bind(now, reason, userId).run();
+  await db.prepare(`DELETE FROM vault_auth_sessions WHERE user_id = ?1`).bind(userId).run();
+  await recordSecurityEvent(db, userId, 'account_permanently_disabled', clientIp, { reason, ...details });
+}
+
+async function recordOwnershipViolation(db, attemptedUserId, clientIp, resourceType, resourceId) {
+  if (!db || !attemptedUserId) return;
+  await recordSecurityEvent(db, attemptedUserId, 'ownership_violation', clientIp, { resourceType, resourceId });
+  const recent = await db.prepare(
+    `SELECT COUNT(*) AS count FROM vault_security_events
+      WHERE user_id = ?1 AND event_type = 'ownership_violation' AND created_at > ?2`
+  ).bind(attemptedUserId, Date.now() - 60 * 60 * 1000).first();
+  if (Number(recent?.count || 0) >= 3) {
+    await permanentlyDisableAccount(db, attemptedUserId, clientIp, 'Repeated ownership-boundary violations.', { resourceType, resourceId });
+  }
+}
+
 function safeUserFromRow(row) {
   return {
     id: row.id,
     username: row.username,
     email: row.email,
     verified: Boolean(row.verified),
+    disabled: Boolean(row.disabled_at),
     createdAt: new Date(Number(row.created_at)).toISOString(),
   };
 }
@@ -523,30 +845,48 @@ export default {
     // 2. Builder Status
     if (u.pathname === '/api/builder/status') {
       const now = Date.now();
-      const runnerOnline = state.runner && now - state.runnerLastSeen < 60000;
+      await env.DB.prepare(
+        `UPDATE builder_runners SET status = 'UNAVAILABLE'
+          WHERE last_seen < ?1 AND status <> 'UNAVAILABLE'`
+      ).bind(now - 60000).run();
+      const durableRunner = env?.DB
+        ? await env.DB.prepare(
+          `SELECT runner_id, workspace_id, workspace_path, status, hardware_json, last_seen
+             FROM builder_runners WHERE last_seen > ?1 ORDER BY last_seen DESC LIMIT 1`
+        ).bind(now - 60000).first()
+        : null;
+      const runnerOnline = Boolean(durableRunner);
       return json({
         runner: runnerOnline,
-        hardware: state.hardware,
+        runnerState: runnerOnline ? durableRunner.status : 'UNAVAILABLE',
+        hardware: parseJson(durableRunner?.hardware_json, state.hardware),
         experiment: state.activeMissionId ? 'Active Mission' : 'Idle',
-        workspace: state.workspace,
+        workspace: durableRunner?.workspace_path || state.workspace,
+        runnerId: durableRunner?.runner_id || null,
+        workspaceId: durableRunner?.workspace_id || null,
         activeMissionId: state.activeMissionId,
-        missionsCount: state.missions.size,
+        missionsCount: env?.DB ? (await env.DB.prepare(`SELECT COUNT(*) AS count FROM builder_missions`).first())?.count || 0 : 0,
       });
     }
 
     // 3. Runner Heartbeat / Pairing (Authenticated)
     if (u.pathname === '/api/runner/heartbeat' && req.method === 'POST') {
-      const authHeader = req.headers.get('authorization') || '';
-      const runnerSecret = req.headers.get('x-runner-secret') || authHeader.replace(/^Bearer\s+/i, '');
-      const expectedSecret = env?.RUNNER_SHARED_SECRET;
-
-      if (expectedSecret && runnerSecret !== expectedSecret) {
-        return json({ error: 'unauthorized', message: 'Invalid runner shared secret' }, 401);
-      }
+      const credentials = runnerCredentials(req, env);
+      if (!credentials.ok) return credentials.response;
+      if (!env?.DB) return json({ error: 'execution_unconfigured', message: 'Durable execution storage is not configured.' }, 503);
 
       const body = await req.json().catch(() => ({}));
+      const runnerId = String(body.runnerId || '').trim();
+      const workspacePath = String(body.workspace || '').trim();
+      const workspaceId = workspaceIdForPath(workspacePath);
+      if (!runnerId || !workspacePath) {
+        return json({ error: 'invalid_runner_identity', message: 'runnerId and workspace are required.' }, 400);
+      }
       state.runner = true;
       state.runnerLastSeen = Date.now();
+      state.runnerState = ['READY', 'BUSY', 'RECONNECTING', 'UNAVAILABLE', 'ERROR'].includes(body.status)
+        ? body.status
+        : 'READY';
       if (body.hardware) {
         state.hardware = typeof body.hardware === 'string'
           ? body.hardware
@@ -554,22 +894,143 @@ export default {
       }
       if (body.workspace) state.workspace = body.workspace;
 
-      const pending = [];
-      for (const [mId, actions] of state.pendingActions.entries()) {
-        const mission = state.missions.get(mId);
-        if (mission && (mission.status === 'running' || mission.status === 'queued')) {
-          while (actions.length > 0) {
-            pending.push(actions.shift());
-          }
-        }
+      const now = Date.now();
+      await env.DB.prepare(
+        `INSERT INTO builder_runners (runner_id, workspace_id, workspace_path, status, hardware_json, last_seen, connected_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?6)
+         ON CONFLICT(runner_id) DO UPDATE SET workspace_id = excluded.workspace_id,
+           workspace_path = excluded.workspace_path, status = excluded.status,
+           hardware_json = excluded.hardware_json, last_seen = excluded.last_seen`
+      ).bind(
+        runnerId,
+        workspaceId,
+        workspacePath,
+        state.runnerState,
+        JSON.stringify(body.hardware || {}),
+        now,
+      ).run();
+
+      const waitingMissions = await env.DB.prepare(
+        `SELECT id FROM builder_missions WHERE status = 'waiting_for_runner' ORDER BY updated_at LIMIT 10`
+      ).all();
+      for (const waiting of waitingMissions.results || []) {
+        const waitingMission = await durableMission(env, waiting.id);
+        if (!waitingMission) continue;
+        waitingMission.runnerId = runnerId;
+        waitingMission.workspaceId = workspaceId;
+        waitingMission.status = 'running';
+        await persistMission(env, waitingMission);
+        const eventCursor = waitingMission.events.length;
+        const existingActionIds = new Set(waitingMission.actions.map((action) => action.actionId));
+        await continueMissionWithAgent(waitingMission, env);
+        await persistNewMissionActions(env, waitingMission, existingActionIds);
+        for (const event of waitingMission.events.slice(eventCursor)) await persistEvent(env, waiting.id, event);
+        await persistMission(env, waitingMission);
+      }
+
+      await env.DB.prepare(
+        `UPDATE builder_actions SET status = 'pending', runner_id = ?1, started_at = NULL, lease_expires_at = NULL
+          WHERE workspace_id = ?2 AND status = 'running' AND lease_expires_at < ?3`
+      ).bind(runnerId, workspaceId, now).run();
+
+      const pendingRows = await env.DB.prepare(
+        `SELECT action_id, mission_id, operation, payload_json
+           FROM builder_actions
+          WHERE runner_id = ?1 AND workspace_id = ?2 AND status = 'pending'
+          ORDER BY created_at LIMIT 20`
+      ).bind(runnerId, workspaceId).all();
+      const pending = pendingRows.results || [];
+      for (const action of pending) {
+        await env.DB.prepare(
+          `UPDATE builder_actions SET status = 'running', attempts = attempts + 1, started_at = ?1, lease_expires_at = ?2
+            WHERE action_id = ?3 AND status = 'pending'`
+        ).bind(now, now + 60000, action.action_id).run();
       }
 
       return json({
         status: 'ok',
         acknowledged: true,
-        activeMissionId: state.activeMissionId,
-        pendingActions: pending,
+        runnerId,
+        workspaceId,
+        pendingActions: pending.map((action) => ({
+          actionId: action.action_id,
+          missionId: action.mission_id,
+          operation: action.operation,
+          payload: parseJson(action.payload_json, {}),
+          status: 'running',
+        })),
       });
+    }
+
+    // 3b. Runner action result callback (Authenticated)
+    if (u.pathname === '/api/runner/result' && req.method === 'POST') {
+      const credentials = runnerCredentials(req, env);
+      if (!credentials.ok) return credentials.response;
+
+      const body = await req.json().catch(() => ({}));
+      const missionId = String(body.missionId || '').trim();
+      const actionId = String(body.actionId || '').trim();
+      const runnerId = String(body.runnerId || '').trim();
+      const workspaceId = String(body.workspaceId || '').trim();
+      if (!missionId || !actionId || !runnerId || !workspaceId || !env?.DB) {
+        return json({ error: 'invalid_result', message: 'A valid missionId and actionId are required.' }, 400);
+      }
+      const runner = await durableRunner(env, runnerId);
+      if (!runner || runner.workspace_id !== workspaceId || Date.now() - Number(runner.last_seen) > 60000) {
+        return json({ error: 'runner_identity_invalid', message: 'Runner identity or workspace lease is invalid.' }, 409);
+      }
+      const mission = await durableMission(env, missionId);
+      const actionRow = await env.DB.prepare(
+        `SELECT * FROM builder_actions WHERE action_id = ?1 AND mission_id = ?2 LIMIT 1`
+      ).bind(actionId, missionId).first();
+      if (!mission || !actionRow || actionRow.runner_id !== runnerId || actionRow.workspace_id !== workspaceId) {
+        return json({ error: 'action_not_found', message: 'Action is not assigned to this runner workspace.' }, 404);
+      }
+      if (mission.status === 'stopped') {
+        return json({ error: 'mission_stopped', message: 'This mission was cancelled before the result arrived.' }, 409);
+      }
+
+      if (actionRow.status === 'success' || actionRow.status === 'failed') {
+        return json({ success: true, action: mission.actions.find((item) => item.actionId === actionId), mission, duplicate: true });
+      }
+
+      const succeeded = body.success === true;
+      if (['READY', 'BUSY', 'RECONNECTING', 'UNAVAILABLE', 'ERROR'].includes(body.runnerStatus)) {
+        state.runnerState = body.runnerStatus;
+      }
+      const result = body.result ?? null;
+      const error = succeeded ? null : String(body.error || 'Runner operation failed.');
+      await env.DB.prepare(
+        `UPDATE builder_actions SET status = ?1, result_json = ?2, error = ?3, completed_at = ?4, lease_expires_at = NULL
+          WHERE action_id = ?5 AND status = 'running'`
+      ).bind(succeeded ? 'success' : 'failed', result == null ? null : JSON.stringify(result), error, Date.now(), actionId).run();
+      const refreshed = await durableMission(env, missionId);
+      const action = refreshed.actions.find((item) => item.actionId === actionId);
+      refreshed.updatedAt = new Date().toISOString();
+      const existingActionIds = new Set(refreshed.actions.map((item) => item.actionId));
+      recordMissionEvent(refreshed, succeeded ? 'tool.completed' : 'tool.failed', {
+        actionId,
+        operation: action.operation,
+        error,
+      });
+      await persistEvent(env, missionId, refreshed.events.at(-1));
+
+      if (!succeeded) {
+        refreshed.status = 'failed';
+        refreshed.currentStep = 'blocked';
+      } else {
+        const eventCursor = refreshed.events.length;
+        const allFinished = refreshed.actions.length > 0 && refreshed.actions.every(
+          (item) => item.status === 'success' || item.status === 'failed',
+        );
+        if (allFinished && refreshed.actions.every((item) => item.status === 'success')) {
+          await continueMissionWithAgent(refreshed, env);
+          await persistNewMissionActions(env, refreshed, existingActionIds);
+          for (const event of refreshed.events.slice(eventCursor)) await persistEvent(env, missionId, event);
+        }
+      }
+      await persistMission(env, refreshed);
+      return json({ success: true, action: refreshed.actions.find((item) => item.actionId === actionId), mission: await durableMission(env, missionId) });
     }
 
     // 4. Create Mission
@@ -606,6 +1067,30 @@ export default {
         return json({ error: 'missing_message', message: 'A message is required.' }, 400);
       }
       if (prompt) messages.push({ role: 'user', content: prompt.slice(0, 20000) });
+
+      const requestText = prompt || [...messages].reverse().find((message) => message.role === 'user')?.content || '';
+      if (classifyRequest(requestText) === 'engineering') {
+        const missionId = `mission_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const requirements = extractRequirements(requestText);
+        await env.DB.prepare(
+          `INSERT INTO builder_missions
+            (id, user_id, prompt, mode, effort, status, current_step, request_kind, requirements_json, iteration_count, max_iterations, created_at, updated_at)
+           VALUES (?1, ?2, ?3, 'anything', 'medium', 'queued', 'understand', 'engineering', ?4, 0, 20, ?5, ?5)`
+        ).bind(missionId, authSession.id, requestText, JSON.stringify(requirements), Date.now()).run();
+        await persistEvent(env, missionId, { type: 'agent.started', prompt: requestText });
+        const mission = await durableMission(env, missionId, authSession.id);
+        const eventCursor = mission.events.length;
+        await continueMissionWithAgent(mission, env);
+        await persistNewMissionActions(env, mission);
+        for (const event of mission.events.slice(eventCursor)) await persistEvent(env, missionId, event);
+        await persistMission(env, mission);
+        return json({
+          success: true,
+          kind: 'engineering',
+          mission: await durableMission(env, missionId, authSession.id),
+          message: mission.agentMessage || 'I’m understanding the request and selecting the next safe workspace action.',
+        }, 202);
+      }
 
       const system = `You are KLIZONION Builder, an AI engineering assistant.
 You are conversational first. Do not start a build mission just because the user says hello, asks a question, or makes casual conversation.
@@ -647,9 +1132,10 @@ Current user: ${authSession.username || authSession.user?.username || 'user'} ($
     }
 
     if (u.pathname === '/api/builder/missions' && req.method === 'POST') {
-      const authHeader = req.headers.get('authorization') || '';
-      const authToken = authHeader.replace(/^Bearer\s+/i, '').trim();
-      const activeSession = authToken ? await getAuthSessionUser(env?.DB, authToken).catch(() => null) : null;
+      const auth = await requireBuilderSession(req, env);
+      if (auth.error) return auth.error;
+      if (!env?.DB) return json({ error: 'execution_unconfigured', message: 'Durable execution storage is not configured.' }, 503);
+      const activeSession = auth.session;
 
       const body = await req.json().catch(() => ({}));
       const prompt = body.prompt || body.mission || '';
@@ -673,15 +1159,27 @@ Current user: ${authSession.username || authSession.user?.username || 'user'} ($
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         actions: [],
+        events: [],
       };
+      recordMissionEvent(mission, 'agent.started', { prompt });
 
-      state.missions.set(missionId, mission);
-      state.pendingActions.set(missionId, []);
+      await env.DB.prepare(
+        `INSERT INTO builder_missions
+          (id, user_id, prompt, mode, effort, status, current_step, request_kind, requirements_json, iteration_count, max_iterations, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, 'queued', 'understand', 'engineering', ?6, 0, 20, ?7, ?7)`
+      ).bind(missionId, activeSession.id, prompt, mode, effort, JSON.stringify(extractRequirements(prompt)), Date.now()).run();
+      await persistEvent(env, missionId, { type: 'agent.started', prompt });
       state.activeMissionId = missionId;
+      const plannedMission = await durableMission(env, missionId, activeSession.id);
+      const eventCursor = plannedMission.events.length;
+      await continueMissionWithAgent(plannedMission, env);
+      await persistNewMissionActions(env, plannedMission);
+      for (const event of plannedMission.events.slice(eventCursor)) await persistEvent(env, missionId, event);
+      await persistMission(env, plannedMission);
 
       return json({
         success: true,
-        mission,
+        mission: await durableMission(env, missionId, activeSession.id),
         id: missionId,
         message: 'Mission created successfully',
       }, 201);
@@ -689,6 +1187,8 @@ Current user: ${authSession.username || authSession.user?.username || 'user'} ($
 
     // Legacy /api/builder/start endpoint compatibility
     if (u.pathname === '/api/builder/start' && req.method === 'POST') {
+      const auth = await requireBuilderSession(req, env);
+      if (auth.error) return auth.error;
       const body = await req.json().catch(() => ({}));
       const prompt = body.mission || body.prompt || '';
       const mode = body.mode || 'anything';
@@ -706,15 +1206,21 @@ Current user: ${authSession.username || authSession.user?.username || 'user'} ($
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         actions: [],
+        events: [],
       };
-      state.missions.set(missionId, mission);
-      state.pendingActions.set(missionId, []);
+      recordMissionEvent(mission, 'agent.started', { prompt });
+      await env.DB.prepare(
+        `INSERT INTO builder_missions
+          (id, user_id, prompt, mode, effort, status, current_step, request_kind, requirements_json, iteration_count, max_iterations, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, 'queued', 'understand', 'engineering', ?6, 0, 20, ?7, ?7)`
+      ).bind(missionId, auth.session.id, prompt, mode, effort, JSON.stringify(extractRequirements(prompt)), Date.now()).run();
+      await persistEvent(env, missionId, { type: 'agent.started', prompt });
       state.activeMissionId = missionId;
 
       return json({
         accepted: true,
         id: missionId,
-        mission,
+        mission: await durableMission(env, missionId, auth.session.id),
         message: 'Build mission queued for execution.',
       });
     }
@@ -722,29 +1228,47 @@ Current user: ${authSession.username || authSession.user?.username || 'user'} ($
     // 5. Get Mission Details
     const missionMatch = u.pathname.match(/^\/api\/builder\/missions\/([^/]+)$/);
     if (missionMatch && req.method === 'GET') {
+      const auth = await requireBuilderSession(req, env);
+      if (auth.error) return auth.error;
       const mId = decodeURIComponent(missionMatch[1]);
-      const mission = state.missions.get(mId);
-      if (!mission) return json({ error: 'not_found', message: 'Mission not found' }, 404);
+      const mission = await durableMission(env, mId, auth.session.id);
+      if (!mission) {
+        const foreignMission = await durableMission(env, mId);
+        if (foreignMission && foreignMission.userId !== auth.session.id) {
+          await recordOwnershipViolation(env.DB, auth.session.id, clientIp, 'mission', mId);
+        }
+        return json({ error: 'not_found', message: 'Mission not found' }, 404);
+      }
       return json({ mission });
     }
 
     // 6. Stop / Cancel Mission
     const stopMatch = u.pathname.match(/^\/api\/builder\/missions\/([^/]+)\/stop$/);
     if (stopMatch && req.method === 'POST') {
+      const auth = await requireBuilderSession(req, env);
+      if (auth.error) return auth.error;
       const mId = decodeURIComponent(stopMatch[1]);
-      const mission = state.missions.get(mId);
-      if (!mission) return json({ error: 'not_found', message: 'Mission not found' }, 404);
+      const mission = await durableMission(env, mId, auth.session.id);
+      if (!mission) {
+        const foreignMission = await durableMission(env, mId);
+        if (foreignMission && foreignMission.userId !== auth.session.id) {
+          await recordOwnershipViolation(env.DB, auth.session.id, clientIp, 'mission_stop', mId);
+        }
+        return json({ error: 'not_found', message: 'Mission not found' }, 404);
+      }
 
       mission.status = 'stopped';
-      mission.updatedAt = new Date().toISOString();
+      mission.currentStep = 'stopped';
+      await env.DB.prepare(`UPDATE builder_missions SET status = 'stopped', current_step = 'stopped', updated_at = ?1 WHERE id = ?2`).bind(Date.now(), mId).run();
+      await env.DB.prepare(`UPDATE builder_actions SET status = 'cancelled', completed_at = ?1 WHERE mission_id = ?2 AND status IN ('pending', 'running')`).bind(Date.now(), mId).run();
+      await persistEvent(env, mId, { type: 'agent.cancelled' });
       if (state.activeMissionId === mId) {
         state.activeMissionId = null;
       }
-      state.pendingActions.set(mId, []);
 
       return json({
         success: true,
-        mission,
+        mission: await durableMission(env, mId, auth.session.id),
         message: 'Mission stopped successfully',
       });
     }
@@ -752,9 +1276,17 @@ Current user: ${authSession.username || authSession.user?.username || 'user'} ($
     // 7. Queue Action for Mission
     const actionMatch = u.pathname.match(/^\/api\/builder\/missions\/([^/]+)\/actions$/);
     if (actionMatch && req.method === 'POST') {
+      const auth = await requireBuilderSession(req, env);
+      if (auth.error) return auth.error;
       const mId = decodeURIComponent(actionMatch[1]);
-      const mission = state.missions.get(mId);
-      if (!mission) return json({ error: 'not_found', message: 'Mission not found' }, 404);
+      const mission = await durableMission(env, mId, auth.session.id);
+      if (!mission) {
+        const foreignMission = await durableMission(env, mId);
+        if (foreignMission && foreignMission.userId !== auth.session.id) {
+          await recordOwnershipViolation(env.DB, auth.session.id, clientIp, 'mission_action', mId);
+        }
+        return json({ error: 'not_found', message: 'Mission not found' }, 404);
+      }
 
       if (mission.status === 'stopped') {
         return json({ error: 'mission_stopped', message: 'Cannot add actions to a stopped mission' }, 409);
@@ -763,24 +1295,42 @@ Current user: ${authSession.username || authSession.user?.username || 'user'} ($
       const body = await req.json().catch(() => ({}));
       const operation = body.operation;
       if (!operation) return json({ error: 'missing_operation', message: 'Operation is required' }, 400);
+      const validation = validateToolRequest({ operation, payload: body.payload || {} });
+      if (!validation.valid) return json({ error: 'invalid_tool_request', message: validation.error }, 400);
 
       const actionId = `act_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
       const action = {
         actionId,
         missionId: mId,
         operation,
-        payload: body.payload || {},
+        payload: validation.payload,
         status: 'pending',
         createdAt: new Date().toISOString(),
       };
 
       mission.actions.push(action);
+      recordMissionEvent(mission, 'tool.requested', { actionId, operation });
       mission.status = 'running';
       mission.updatedAt = new Date().toISOString();
 
-      const pending = state.pendingActions.get(mId) || [];
-      pending.push(action);
-      state.pendingActions.set(mId, pending);
+      const runner = await env.DB.prepare(
+        `SELECT runner_id, workspace_id, workspace_path FROM builder_runners
+          WHERE status IN ('READY', 'BUSY') AND last_seen > ?1 ORDER BY last_seen DESC LIMIT 1`
+      ).bind(Date.now() - 60000).first();
+      if (!runner) {
+        return json({ error: 'runner_unavailable', message: 'Workspace execution is unavailable. Start the supervised runner and try again.' }, 503);
+      }
+      action.runnerId = runner.runner_id;
+      action.workspaceId = runner.workspace_id;
+      mission.runnerId = runner.runner_id;
+      mission.workspaceId = runner.workspace_id;
+      await env.DB.prepare(
+        `INSERT INTO builder_actions
+          (action_id, mission_id, runner_id, workspace_id, operation, payload_json, status, created_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'pending', ?7)`
+      ).bind(actionId, mId, runner.runner_id, runner.workspace_id, operation, JSON.stringify(validation.payload), Date.now()).run();
+      await env.DB.prepare(`UPDATE builder_missions SET status = 'running', runner_id = ?1, workspace_id = ?2, updated_at = ?3 WHERE id = ?4`).bind(runner.runner_id, runner.workspace_id, Date.now(), mId).run();
+      await persistEvent(env, mId, { type: 'tool.requested', actionId, operation });
 
       return json({ success: true, action }, 201);
     }
@@ -1184,6 +1734,10 @@ Current user: ${authSession.username || authSession.user?.username || 'user'} ($
       if (!userRecord || !userRecord.verified) {
         return json({ error: 'invalid_credentials', message: 'Invalid email or password.' }, 401);
       }
+      if (userRecord.disabled_at) {
+        await recordSecurityEvent(env.DB, userRecord.id, 'disabled_account_login_attempt', clientIp);
+        return json({ error: 'account_disabled', message: 'This account is permanently disabled.' }, 403);
+      }
 
       const passwordOk = await verifyPasswordHash(password, userRecord.password_hash);
       if (!passwordOk) {
@@ -1225,6 +1779,10 @@ Current user: ${authSession.username || authSession.user?.username || 'user'} ($
         const tokenHash = await sha256(authToken);
         await env.DB.prepare(`DELETE FROM vault_auth_sessions WHERE token_hash = ?1 AND expires_at <= ?2`).bind(tokenHash, Date.now()).run();
         return json({ authenticated: false, message: 'Session expired or invalid.' }, 401);
+      }
+      if (session.disabled_at) {
+        await recordSecurityEvent(env.DB, session.id, 'disabled_account_session_attempt', clientIp);
+        return json({ authenticated: false, error: 'account_disabled', message: 'This account is permanently disabled.' }, 403);
       }
 
       return json({

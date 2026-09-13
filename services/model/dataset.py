@@ -80,6 +80,45 @@ class TextDataset:
 
         return x.to(device), y.to(device)
 
+    def iter_batches(
+        self,
+        batch_size: int,
+        device: torch.device | str,
+    ) -> Iterator[tuple[torch.Tensor, torch.Tensor]]:
+        """
+        Deterministically walks the dataset once using non-overlapping
+        windows. Used for reproducible evaluation (as opposed to
+        `sample`, which draws random overlapping windows for training).
+        """
+        if batch_size < 1:
+            raise ValueError("batch_size must be >= 1")
+
+        stride = self.sequence_length
+        last_start = self.tokens.numel() - self.sequence_length - 1
+
+        starts = list(range(0, last_start + 1, stride))
+
+        for batch_index in range(0, len(starts), batch_size):
+            batch_starts = starts[batch_index : batch_index + batch_size]
+
+            x = torch.stack(
+                [
+                    self.tokens[start : start + self.sequence_length]
+                    for start in batch_starts
+                ]
+            )
+
+            y = torch.stack(
+                [
+                    self.tokens[
+                        start + 1 : start + self.sequence_length + 1
+                    ]
+                    for start in batch_starts
+                ]
+            )
+
+            yield x.to(device), y.to(device)
+
 
 def read_text_file(path: str | Path) -> str:
     path = Path(path)

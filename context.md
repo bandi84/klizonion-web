@@ -38,7 +38,7 @@ The frontend currently contains:
 - Prompt-driven mission creation, effort selection, mission actions, runner status, activity logging, preview rendering, and model save/publish controls
 - Runtime DOM IDs/classes and hidden compatibility elements used by existing JavaScript; preserve them when changing the UI
 
-Known transition gap: the current frontend still advances part of the post-action workflow and preview completion with local timers. Replace that behavior with authoritative mission/runner polling before presenting those states as real progress or success.
+Execution path status: the Worker now rejects new actions when no authenticated runner is online, delivers actions through heartbeat, accepts authenticated structured results, and asks the configured agent planner for the next allowlisted actions. The frontend polls mission state and reports runner failures, timeouts, and verified completion honestly.
 
 ## Architecture
 
@@ -57,6 +57,21 @@ Deployment:
 - Backend storage: Cloudflare D1, with Worker state and bindings configured in `apps/worker/`
 
 The Worker owns authentication, verification, sessions, mission APIs, runner state, mission actions, and model save/publish endpoints. The browser must never receive runner secrets or unrestricted filesystem/shell access. The eventual agent should use structured, policy-checked tools and an explicitly authorized workspace boundary.
+
+Architecture modules now include:
+- `packages/core/tools.js`: shared structured-tool definitions and input validation
+- `packages/core/evolution.js`: evaluator-driven isolated candidate lifecycle primitives
+- `packages/core/roles.js`: least-privilege specialized role/tool contracts
+- `packages/core/research.js`: provider-gated structured web research adapter
+- `packages/core/requirements.js`: backend request classification and bounded requirement/evidence evaluation
+- Worker mission evaluator and bounded continuation loop with structured event history
+- `packages/agent/runner.py`: persistent authenticated runner with reconnect and safe shutdown
+
+P1 status: conversational versus engineering classification now occurs in the Worker. Engineering missions persist bounded requirements, invoke the planner to select the first tool, continue after real runner results, and complete only when requirement evidence passes. The frontend submits unified requests and polls authoritative mission state; it does not choose the initial tool sequence.
+
+P2 hardening status: runner commands now return structured build/test evidence with process-group timeout handling; unsupported preview/evaluation/experiment operations return explicit unavailable results; expired leases are recoverable on same-workspace reconnect; stale runner records are marked unavailable; wrong runner/workspace result callbacks are rejected; and deployment/migration prerequisites are documented in `docs/DEPLOYMENT.md`. Host-level process isolation still requires an external restricted account/container/VM in production.
+
+Account integrity status: `0004_account_integrity.sql` adds durable account disablement and security-event auditing. The Worker conservatively locks accounts only after repeated authenticated ownership-boundary violations, revokes sessions, and never treats browser tamper signals or ordinary client errors as proof of abuse.
 
 Preferred structured tool concepts:
 - `workspace.list`

@@ -24,6 +24,7 @@ const state = {
   user: null,
   authToken: null,
   pollInterval: null,
+  missionPollStartedAt: 0,
   steps: [
     'understand',
     'plan',
@@ -342,12 +343,16 @@ body{
 function renderPreview(prompt) {
   const previewFrame = $('#previewFrame');
   if (!previewFrame) return;
-  const [title, description] = modeLabels[state.mode];
-  previewFrame.srcdoc = previewTemplate(
-    title,
-    description,
-    prompt || 'Describe what you want to build in your mission prompt.',
-  );
+  const previewUrl = state.mission?.previewUrl || state.mission?.preview?.url;
+  if (typeof previewUrl === 'string' && /^https?:\/\//i.test(previewUrl)) {
+    previewFrame.removeAttribute('srcdoc');
+    previewFrame.src = previewUrl;
+    return;
+  }
+  previewFrame.removeAttribute('src');
+  previewFrame.removeAttribute('srcdoc');
+  const previewStatus = $('#previewStatus');
+  if (previewStatus) previewStatus.textContent = 'No preview yet';
 }
 
 function setMode(mode) {
@@ -723,8 +728,148 @@ async function createMissionAction(missionId, operation) {
     body: JSON.stringify({ operation, payload: {} }),
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || payload.message || `HTTP ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(payload.message || payload.error || `HTTP ${response.status}`);
+    error.code = payload.error || `http_${response.status}`;
+    throw error;
+  }
   return payload;
+}
+
+async function refreshMissionState() {
+  if (!state.missionId || !state.activeMissionRunning) return;
+  const response = await fetch(`${API}/api/builder/missions/${encodeURIComponent(state.missionId)}`, {
+    headers: { authorization: state.authToken ? `Bearer ${state.authToken}` : '' },
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.message || `HTTP ${response.status}`);
+
+  const mission = payload.mission || payload;
+  state.mission = mission;
+  const backendStep = {
+    understand: 'understand',
+    inspect: 'inspect',
+    plan: 'plan',
+    implement: 'build',
+    run: 'test',
+    test: 'test',
+    observe: 'preview',
+    verify: 'preview',
+  }[mission.currentStep];
+  if (backendStep) {
+    activateWorkflowStep(backendStep);
+    setMissionState(mission.currentStep.charAt(0).toUpperCase() + mission.currentStep.slice(1));
+  }
+  if (mission.status === 'waiting_for_runner') {
+    setJob('running', 'WAITING');
+    setMissionBadge('running', 'WAITING');
+    setMissionState('Runner unavailable');
+    return;
+  }
+  if (mission.status === 'blocked') {
+    const runnerBlocked = /runner|workspace execution/i.test(mission.error || '');
+    throw Object.assign(new Error(mission.error || 'The agent could not continue this request.'), {
+      code: runnerBlocked ? 'runner_unavailable' : 'agent_blocked',
+    });
+  }
+  const failedAction = (mission.actions || []).find((action) => action.status === 'failed');
+  if (failedAction) {
+    throw Object.assign(new Error(failedAction.error || 'Workspace execution failed.'), { code: 'runner_action_failed' });
+  }
+
+  const actions = mission.actions || [];
+  const finished = actions.length > 0 && actions.every((action) => action.status === 'success');
+  if (!finished) return;
+
+  if (mission.status === 'completed') {
+    if (state.pollInterval) clearInterval(state.pollInterval);
+    state.pollInterval = null;
+    state.busy = false;
+    state.activeMissionRunning = false;
+    setJob('success', 'READY');
+    setMissionBadge('success', 'READY');
+    setMissionState('Completed and verified');
+    completeWorkflow();
+    const stopBtn = $('#stopBtn');
+    const buildBtn = $('#buildBtn');
+    if (stopBtn) stopBtn.disabled = true;
+    if (buildBtn) {
+      buildBtn.disabled = false;
+      buildBtn.textContent = 'Build ↗';
+    }
+    addChatMessage('agent', mission.agentMessage || 'Done. I completed the requested workspace changes and verified the available results.');
+    log('Agent completed and verified the requested workspace operation.', 'success');
+    return;
+  }
+
+  if (state.pollInterval) clearInterval(state.pollInterval);
+  state.pollInterval = null;
+  state.busy = false;
+  state.activeMissionRunning = false;
+  setJob('success', 'INSPECTED');
+  setMissionBadge('success', 'READY');
+  setMissionState('Workspace inspected');
+  activateWorkflowStep('inspect');
+  const stopBtn = $('#stopBtn');
+  const buildBtn = $('#buildBtn');
+  if (stopBtn) stopBtn.disabled = true;
+  if (buildBtn) {
+    buildBtn.disabled = false;
+    buildBtn.textContent = 'Build ↗';
+  }
+  addChatMessage('agent', 'I inspected the authorized workspace. Tell me what you want to change, and I’ll continue from there.');
+  log('Workspace inspection completed with verified runner results.', 'success');
+}
+
+function startMissionPolling() {
+  if (state.pollInterval) clearInterval(state.pollInterval);
+  state.missionPollStartedAt = Date.now();
+  const poll = async () => {
+    if (!state.activeMissionRunning) return;
+    if (Date.now() - state.missionPollStartedAt > 5 * 60 * 1000) {
+      const timeout = new Error('The workspace runner did not return a result before the execution timeout.');
+      timeout.code = 'runner_timeout';
+      handleBuildFailure(timeout);
+      return;
+    }
+    try {
+      await refreshMissionState();
+    } catch (error) {
+      handleBuildFailure(error);
+    }
+  };
+  poll();
+  state.pollInterval = setInterval(poll, 3000);
+}
+
+function handleBuildFailure(error) {
+  if (state.pollInterval) clearInterval(state.pollInterval);
+  state.pollInterval = null;
+  state.busy = false;
+  state.activeMissionRunning = false;
+  setJob('failed', error.code === 'runner_unavailable' || error.code === 'runner_timeout' ? 'BLOCKED' : 'FAILED');
+  setMissionBadge('failed', 'BLOCKED');
+  setMissionState(error.code === 'runner_unavailable' ? 'Runner unavailable' : 'Execution failed');
+  failWorkflow('inspect');
+  const previewStatus = $('#previewStatus');
+  if (previewStatus) previewStatus.textContent = 'Preview unavailable';
+  const stopBtn = $('#stopBtn');
+  const buildBtn = $('#buildBtn');
+  if (stopBtn) stopBtn.disabled = true;
+  if (buildBtn) {
+    buildBtn.disabled = false;
+    buildBtn.textContent = 'Build ↗';
+  }
+  const message = error.code === 'runner_unavailable'
+    ? 'Workspace execution is unavailable. Start the supervised runner, then try again.'
+    : error.code === 'runner_timeout'
+      ? 'The supervised runner did not respond before the execution timeout.'
+      : error.code === 'agent_blocked'
+        ? `I couldn’t continue safely: ${error.message}`
+      : `I couldn’t complete the workspace operation: ${error.message}`;
+  addChatMessage('agent', message);
+  log(`Execution blocked: ${error.message}`, 'error');
+  showToast(message, 'error');
 }
 
 async function startBuild() {
@@ -753,11 +898,11 @@ async function startBuild() {
   }
   if (stopBtn) stopBtn.disabled = false;
 
-  setJob('running', 'STARTING');
-  setMissionBadge('running', 'PLANNING');
+  setJob('running', 'WORKING');
+  setMissionBadge('running', 'ACTIVE');
   resetWorkflow();
   activateWorkflowStep('understand');
-  setMissionState('Creating mission');
+  setMissionState('Understanding request');
 
   const name = guessProjectName(prompt);
   if (projectName) projectName.textContent = name;
@@ -776,56 +921,13 @@ async function startBuild() {
 
     if (missionIdLabel) missionIdLabel.textContent = state.missionId;
     if (missionIdSide) missionIdSide.textContent = state.missionId;
-    setMissionState('Planning');
-
-    log(`Mission created on Worker: ${state.missionId}`, 'success');
-    addChatMessage('agent', `Mission ${state.missionId} created with ${state.effort.toUpperCase()} effort. Beginning workflow.`);
-
-    activateWorkflowStep('plan');
-    log('Builder planning stage initialized.');
-
-    // Inspection & Build pipeline
-    const operations = ['workspace.list', 'git.status'];
-    for (const op of operations) {
-      if (!state.activeMissionRunning) break;
-      if (op === 'workspace.list') {
-        activateWorkflowStep('inspect');
-        setMissionState('Inspecting workspace');
-      }
-      log(`Queueing action: ${op}`);
-      try {
-        await createMissionAction(state.missionId, op);
-        log(`Action queued: ${op}`, 'success');
-      } catch (err) {
-        log(`Action failed: ${err.message}`, 'error');
-      }
-    }
-
-    if (state.activeMissionRunning) {
-      setJob('running', 'AWAITING RUNNER');
-      setMissionBadge('running', 'ACTIVE');
-      activateWorkflowStep('build');
-      setMissionState('Awaiting runner results');
-      if (previewStatus) previewStatus.textContent = 'Waiting for verified project output';
-      log('Mission actions submitted. Waiting for authoritative runner events before advancing status.', 'info');
-      addChatMessage('agent', 'The build request is active. KLIZONION is waiting for verified workspace and test results from the supervised runner.');
-    }
+    setMissionState(mission.status === 'waiting_for_runner' ? 'Runner unavailable' : 'Working');
+    log(`Engineering request accepted by the agent orchestrator.`, 'success');
+    addChatMessage('agent', mission.agentMessage || 'I’m understanding the request and choosing the next safe action.');
+    if (previewStatus) previewStatus.textContent = 'No preview yet';
+    startMissionPolling();
   } catch (error) {
-    setJob('failed', 'FAILED');
-    setMissionBadge('failed', 'FAILED');
-    setMissionState('Failed');
-    failWorkflow('understand');
-    if (previewStatus) previewStatus.textContent = 'Mission creation failed';
-    log(`Mission error: ${error.message}`, 'error');
-    addChatMessage('agent', `Could not create mission: ${error.message}`);
-    showToast(`Build error: ${error.message}`, 'error');
-    if (stopBtn) stopBtn.disabled = true;
-    if (buildBtn) {
-      buildBtn.disabled = false;
-      buildBtn.textContent = 'Build ↗';
-    }
-    state.busy = false;
-    state.activeMissionRunning = false;
+    handleBuildFailure(error);
   }
 }
 
@@ -987,9 +1089,10 @@ async function refreshStatus() {
     const workspacePathDisplay = $('#workspacePathDisplay');
     const hardwareState = $('#hardwareState');
 
+    const lifecycle = data.runnerState || (state.runner ? 'READY' : 'UNAVAILABLE');
     if (connectionPill) connectionPill.className = `connection-pill ${state.runner ? 'online' : 'offline'}`;
-    if (connectionText) connectionText.textContent = state.runner ? 'Runner online' : 'Runner offline';
-    if (runnerState) runnerState.textContent = state.runner ? 'Online' : 'Offline';
+    if (connectionText) connectionText.textContent = state.runner ? `Runner ${lifecycle.toLowerCase()}` : 'Runner unavailable';
+    if (runnerState) runnerState.textContent = lifecycle;
     if (environmentDot) environmentDot.className = `environment-dot ${state.runner ? 'online' : 'offline'}`;
     if (workspacePath) workspacePath.textContent = data.workspace || 'Not connected';
     if (workspacePathDisplay) workspacePathDisplay.textContent = data.workspace || 'Authorized workspace';
@@ -1076,7 +1179,7 @@ function setupEventListeners() {
   });
 
   // Build & Stop
-  $('#buildBtn')?.addEventListener('click', startBuild);
+  $('#buildBtn')?.addEventListener('click', () => $('#mainChatSendBtn')?.click());
   $('#stopBtn')?.addEventListener('click', stopActiveMission);
 
   // Model actions
@@ -1111,7 +1214,7 @@ function setupEventListeners() {
   promptInput?.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
-      startBuild();
+      $('#mainChatSendBtn')?.click();
     }
   });
 
@@ -1141,14 +1244,28 @@ function setupEventListeners() {
         body: JSON.stringify({ prompt: text }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.message?.content) {
+      if (res.ok && data.kind === 'engineering' && data.mission) {
+        state.mission = data.mission;
+        state.missionId = data.mission.id || data.mission.missionId;
+        state.busy = true;
+        state.activeMissionRunning = true;
+        setJob('running', data.mission.status === 'waiting_for_runner' ? 'BLOCKED' : 'WORKING');
+        setMissionBadge('running', 'ACTIVE');
+        setMissionState(data.mission.status === 'waiting_for_runner' ? 'Runner unavailable' : 'Understanding request');
+        addChatMessage('agent', data.message || 'I’m working on that request.');
+        startMissionPolling();
+      } else if (res.ok && data.message?.content) {
         addChatMessage('agent', data.message.content);
       } else {
-        const fallback = data.message || data.error || (state.missionId ? 'Directive captured by agent loop.' : 'Describe a build mission above to begin.');
+        const fallback = data.message || data.error || (state.missionId
+          ? 'I’m still working on your request. Ask me to continue or make another change.'
+          : 'I’m ready to help. Ask a question or describe the work you want to do.');
         addChatMessage('agent', fallback);
       }
     } catch {
-      addChatMessage('agent', state.missionId ? 'Directive captured by agent loop.' : 'Describe a build mission above to begin.');
+      addChatMessage('agent', state.missionId
+        ? 'I’m still working on your request. Ask me to continue or make another change.'
+        : 'I’m ready to help. Ask a question or describe the work you want to do.');
     }
   };
 

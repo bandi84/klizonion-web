@@ -1,14 +1,25 @@
 import fs from 'fs';
+import crypto from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import worker from '../apps/worker/src/index.js';
 import { SimpleZip } from '../apps/worker/src/zip.js';
+import { canPromote, createCandidate, createMutation, recordEvaluation, selectElite } from '../packages/core/evolution.js';
+import { roleCanUseTool } from '../packages/core/roles.js';
+import { classifyRequest, extractRequirements } from '../packages/core/requirements.js';
 
 function createD1Mock() {
   const rawDb = new DatabaseSync(':memory:');
   const migrationSql = fs.readFileSync('apps/worker/migrations/0001_secure_vault.sql', 'utf8');
+  const executionMigrationSql = fs.readFileSync('apps/worker/migrations/0002_agent_execution.sql', 'utf8');
+  const requirementsMigrationSql = fs.readFileSync('apps/worker/migrations/0003_agent_requirements.sql', 'utf8');
+  const integrityMigrationSql = fs.readFileSync('apps/worker/migrations/0004_account_integrity.sql', 'utf8');
   rawDb.exec(migrationSql);
+  rawDb.exec(executionMigrationSql);
+  rawDb.exec(requirementsMigrationSql);
+  rawDb.exec(integrityMigrationSql);
 
   return {
+    rawDb,
     prepare(sql) {
       let boundArgs = [];
       return {
@@ -39,7 +50,31 @@ async function runAllTests() {
   console.log('=== KLIZONION BUILDER & AUTH PRODUCTION TEST SUITE ===\n');
 
   const d1Db = createD1Mock();
+  const testUserId = 'usr_test_engineer';
+  const testToken = 'tok_test_engineer';
+  const tokenHash = crypto.createHash('sha256').update(testToken).digest('hex');
+  d1Db.rawDb.prepare(
+    `INSERT INTO vault_users (id, email, username, password_hash, verified, created_at)
+     VALUES (?, ?, ?, ?, 1, ?)`
+  ).run(testUserId, 'test@klizonion.dev', 'test-engineer', 'test-password-hash', Date.now());
+  d1Db.rawDb.prepare(
+    `INSERT INTO vault_auth_sessions (token_hash, user_id, created_at, expires_at)
+     VALUES (?, ?, ?, ?)`
+  ).run(tokenHash, testUserId, Date.now(), Date.now() + 3600000);
+  const userHeaders = { authorization: `Bearer ${testToken}` };
+  const attackerUserId = 'usr_other_engineer';
+  const attackerToken = 'tok_other_engineer';
+  d1Db.rawDb.prepare(
+    `INSERT INTO vault_users (id, email, username, password_hash, verified, created_at)
+     VALUES (?, ?, ?, ?, 1, ?)`
+  ).run(attackerUserId, 'other@klizonion.dev', 'other-engineer', 'test-password-hash', Date.now());
+  d1Db.rawDb.prepare(
+    `INSERT INTO vault_auth_sessions (token_hash, user_id, created_at, expires_at)
+     VALUES (?, ?, ?, ?)`
+  ).run(crypto.createHash('sha256').update(attackerToken).digest('hex'), attackerUserId, Date.now(), Date.now() + 3600000);
+  const attackerHeaders = { authorization: `Bearer ${attackerToken}` };
 
+  let plannerCalls = 0;
   const baseEnv = {
     BUILDER_PROTOCOL_VERSION: '0.2',
     RUNNER_SHARED_SECRET: 'klizonion_test_secret_xyz',
@@ -50,6 +85,18 @@ async function runAllTests() {
     AI: {
       run: async (model, options) => {
         if (model === 'anthropic/claude-fable-5.1') {
+          if (options?.system?.includes('controlled KLIZONION engineering planner')) {
+            plannerCalls += 1;
+            if (plannerCalls === 1) {
+              return {
+                response: JSON.stringify({
+                  message: 'I found the workspace and will create the requested starter file.',
+                  actions: [{ operation: 'file.write', payload: { path: 'index.html', content: '<!doctype html><title>KLIZONION</title>' } }],
+                }),
+              };
+            }
+            return { response: JSON.stringify({ message: 'The requested file is verified.', actions: [] }) };
+          }
           return {
             response: `KLIZONION Assistant [Claude Fable 5.1]: Ready to assist with ${options?.messages?.length || 0} messages.`,
           };
@@ -70,7 +117,20 @@ async function runAllTests() {
   if (!zipBytes || zipBytes.length < 100) throw new Error('Zip generation failed');
   console.log('✓ SimpleZip generated valid archive:', zipBytes.length, 'bytes\n');
 
-  console.log('[CORE 2] Testing /api/health and /api/auth/config...');
+  console.log('[CORE 2] Testing isolated evaluator-driven candidate primitives...');
+  const candidate = createCandidate({ candidateId: 'candidate_a', strategy: 'minimal', workspace: 'candidate-workspaces/a' });
+  const evaluated = recordEvaluation(candidate, { score: 1, passed: true, failures: [], requirements: [], observations: [] });
+  const elite = selectElite([evaluated], 1);
+  const mutation = createMutation(evaluated, { candidateId: 'candidate_b', strategy: 'accessible', workspace: 'candidate-workspaces/b' });
+  if (!canPromote(evaluated) || elite[0].candidateId !== 'candidate_a' || mutation.parentId !== 'candidate_a') {
+    throw new Error('Candidate evolution primitives did not preserve isolated lineage and evaluator evidence');
+  }
+  if (!roleCanUseTool('CODER', 'file.write') || roleCanUseTool('RESEARCHER', 'file.write')) {
+    throw new Error('Specialized role tool permissions are incorrect');
+  }
+  console.log('✓ Candidate lineage, evaluator evidence, and role permissions validated\n');
+
+  console.log('[CORE 3] Testing /api/health and /api/auth/config...');
   let res = await worker.fetch(new Request('http://localhost:8787/api/health'), baseEnv);
   let json = await res.json();
   if (!json.ready || json.version !== '0.2') throw new Error('Health check unexpected response');
@@ -85,7 +145,40 @@ async function runAllTests() {
   }
   console.log('✓ /api/health and /api/auth/config returned clean public configs\n');
 
-  console.log('[CORE 3] Testing Runner Heartbeat authentication...');
+  console.log('[CORE 4] Testing backend conversational/engineering classification...');
+  if (classifyRequest('hi') !== 'conversational' || classifyRequest('Explain recursion') !== 'conversational') {
+    throw new Error('Conversational classifier regression');
+  }
+  if (classifyRequest('Create index.html with a button') !== 'engineering') {
+    throw new Error('Engineering classifier regression');
+  }
+  const requirements = extractRequirements('Create index.html with a button and run tests.');
+  if (!requirements.some((requirement) => requirement.id === 'file:index.html')
+    || !requirements.some((requirement) => requirement.id === 'content:button')
+    || !requirements.some((requirement) => requirement.id === 'test:success')) {
+    throw new Error('Requirement extraction regression');
+  }
+  const missionsBeforeChat = d1Db.rawDb.prepare('SELECT COUNT(*) AS count FROM builder_missions').get().count;
+  res = await worker.fetch(new Request('http://localhost:8787/api/agent/chat', {
+    method: 'POST', headers: { 'content-type': 'application/json', ...userHeaders }, body: JSON.stringify({ prompt: 'hi' }),
+  }), baseEnv);
+  json = await res.json();
+  if (res.status !== 200 || !json.message?.content || json.kind === 'engineering') {
+    throw new Error(`Conversational request was not kept out of engineering flow: ${JSON.stringify(json)}`);
+  }
+  const missionsAfterChat = d1Db.rawDb.prepare('SELECT COUNT(*) AS count FROM builder_missions').get().count;
+  if (missionsAfterChat !== missionsBeforeChat) throw new Error('Conversational request created an engineering mission');
+  res = await worker.fetch(new Request('http://localhost:8787/api/agent/chat', {
+    method: 'POST', headers: { 'content-type': 'application/json', ...userHeaders }, body: JSON.stringify({ prompt: 'Create index.html with a button' }),
+  }), baseEnv);
+  json = await res.json();
+  if (res.status !== 202 || json.kind !== 'engineering' || !json.mission?.id) {
+    throw new Error(`Engineering request did not enter orchestrator: ${JSON.stringify(json)}`);
+  }
+  plannerCalls = 0;
+  console.log('✓ Backend classified conversation without tools and engineering request into orchestrator\n');
+
+  console.log('[CORE 5] Testing Runner Heartbeat authentication...');
   res = await worker.fetch(new Request('http://localhost:8787/api/runner/heartbeat', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -93,6 +186,35 @@ async function runAllTests() {
   }), baseEnv);
   if (res.status !== 401) throw new Error(`Expected 401 unauthorized, got ${res.status}`);
 
+  console.log('[CORE 4] Testing action rejection when no runner is online...');
+  res = await worker.fetch(new Request('http://localhost:8787/api/builder/missions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...userHeaders },
+    body: JSON.stringify({ prompt: 'This should fail without a runner.' }),
+  }), baseEnv);
+  json = await res.json();
+  const unavailableMissionId = json.mission.id;
+  res = await worker.fetch(new Request(`http://localhost:8787/api/builder/missions/${unavailableMissionId}/actions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...userHeaders },
+    body: JSON.stringify({ operation: 'workspace.list', payload: {} }),
+  }), baseEnv);
+  json = await res.json();
+  if (res.status !== 503 || json.error !== 'runner_unavailable') {
+    throw new Error(`Expected runner_unavailable, got ${res.status}: ${JSON.stringify(json)}`);
+  }
+  console.log('✓ Actions fail clearly when the supervised runner is unavailable\n');
+
+  console.log('[CORE 5] Testing mission ownership and unauthenticated access...');
+  res = await worker.fetch(new Request('http://localhost:8787/api/builder/missions/does-not-matter', { method: 'GET' }), baseEnv);
+  if (res.status !== 401) throw new Error(`Expected unauthenticated mission read to return 401, got ${res.status}`);
+  res = await worker.fetch(new Request('http://localhost:8787/api/builder/missions/does-not-matter/actions', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ operation: 'workspace.list' }),
+  }), baseEnv);
+  if (res.status !== 401) throw new Error(`Expected unauthenticated action request to return 401, got ${res.status}`);
+  console.log('✓ Mission reads and action writes require authentication\n');
+
+  console.log('[CORE 6] Testing authenticated runner pairing...');
   res = await worker.fetch(new Request('http://localhost:8787/api/runner/heartbeat', {
     method: 'POST',
     headers: {
@@ -102,24 +224,26 @@ async function runAllTests() {
     body: JSON.stringify({
       hardware: { os: 'Windows 11', cpu: 'AMD Ryzen', cores: 8, ram_gb: 16 },
       workspace: 'C:/authorized/workspace',
+      runnerId: 'runner_test',
     }),
   }), baseEnv);
   json = await res.json();
   if (res.status !== 200 || !json.acknowledged) throw new Error('Runner pairing failed');
+  plannerCalls = 0;
   console.log('✓ Runner authenticated and paired with x-runner-secret\n');
 
-  console.log('[CORE 4] Testing Builder status...');
+  console.log('[CORE 6] Testing Builder status...');
   res = await worker.fetch(new Request('http://localhost:8787/api/builder/status'), baseEnv);
   json = await res.json();
   if (!json.runner || !json.workspace) throw new Error('Status did not reflect online runner');
   console.log('✓ Status confirmed online runner & workspace:', json.workspace, '\n');
 
-  console.log('[CORE 5] Testing mission creation with Effort parameter...');
+  console.log('[CORE 7] Testing mission creation with Effort parameter...');
   res = await worker.fetch(new Request('http://localhost:8787/api/builder/missions', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...userHeaders },
     body: JSON.stringify({
-      prompt: 'Build a Roblox Studio place analyzer',
+      prompt: 'Inspect a Roblox Studio project workspace',
       mode: 'roblox',
       effort: 'maximum',
     }),
@@ -129,15 +253,70 @@ async function runAllTests() {
   const missionId = json.mission.id;
   console.log('✓ Mission created:', missionId, 'with Effort: maximum\n');
 
-  console.log('[CORE 6] Testing Stop Mission control...');
+  console.log('[CORE 8] Testing planner-selected action delivery and runner result callback...');
+  const plannedAction = json.mission.actions.find((action) => action.status === 'pending');
+  if (!plannedAction) throw new Error(`Planner did not select an initial action: ${JSON.stringify(json.mission)}`);
+  const actionId = plannedAction.actionId;
+
+  res = await worker.fetch(new Request('http://localhost:8787/api/runner/heartbeat', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-runner-secret': 'klizonion_test_secret_xyz' },
+    body: JSON.stringify({ hardware: 'Test CPU', workspace: 'C:/authorized/workspace', runnerId: 'runner_test' }),
+  }), baseEnv);
+  json = await res.json();
+  if (res.status !== 200 || json.pendingActions?.[0]?.actionId !== actionId || json.pendingActions[0].status !== 'running') {
+    throw new Error(`Runner did not receive the pending action: ${JSON.stringify(json)}`);
+  }
+  const actionWorkspaceId = json.workspaceId;
+
+  res = await worker.fetch(new Request('http://localhost:8787/api/runner/result', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-runner-secret': 'klizonion_test_secret_xyz' },
+    body: JSON.stringify({ missionId, actionId, runnerId: 'wrong-runner', workspaceId: actionWorkspaceId, success: true, result: {} }),
+  }), baseEnv);
+  if (res.status !== 409) throw new Error(`Wrong runner result was not rejected: ${res.status}`);
+
+  res = await worker.fetch(new Request('http://localhost:8787/api/runner/result', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-runner-secret': 'klizonion_test_secret_xyz' },
+    body: JSON.stringify({
+      missionId,
+      actionId,
+      success: true,
+      result: { entries: [{ path: 'index.html', type: 'file' }] },
+      runnerId: 'runner_test',
+      workspaceId: actionWorkspaceId,
+    }),
+  }), baseEnv);
+  json = await res.json();
+  if (res.status !== 200 || json.action?.status !== 'success' || json.mission?.status !== 'completed') {
+    throw new Error(`Runner result was not applied: ${JSON.stringify(json)}`);
+  }
+  console.log('✓ Planner selected, runner executed, and evaluator verified the action\n');
+
+  console.log('[CORE 9] Testing repeated ownership violations permanently disable an account...');
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    res = await worker.fetch(new Request(`http://localhost:8787/api/builder/missions/${missionId}`, {
+      method: 'GET', headers: attackerHeaders,
+    }), baseEnv);
+    if (res.status !== 404) throw new Error(`Foreign mission access did not remain hidden: ${res.status}`);
+  }
+  const disabled = d1Db.rawDb.prepare('SELECT disabled_at, disabled_reason FROM vault_users WHERE id = ?').get(attackerUserId);
+  if (!disabled?.disabled_at || !disabled.disabled_reason) throw new Error('Ownership violations did not create a durable account lock');
+  res = await worker.fetch(new Request('http://localhost:8787/api/auth/me', { headers: attackerHeaders }), baseEnv);
+  if (![401, 403].includes(res.status)) throw new Error(`Disabled account session was not rejected: ${res.status}`);
+  console.log('✓ Repeated ownership violations are audited and permanently locked\n');
+
+  console.log('[CORE 10] Testing Stop Mission control...');
   res = await worker.fetch(new Request(`http://localhost:8787/api/builder/missions/${missionId}/stop`, {
     method: 'POST',
+    headers: userHeaders,
   }), baseEnv);
   json = await res.json();
   if (!json.success || json.mission.status !== 'stopped') throw new Error('Mission stop failed');
   console.log('✓ Mission successfully stopped\n');
 
-  console.log('[CORE 7] Testing Save Model control...');
+  console.log('[CORE 10] Testing Save Model control...');
   res = await worker.fetch(new Request('http://localhost:8787/api/builder/models/save', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -154,7 +333,7 @@ async function runAllTests() {
   const modelId = json.model.id;
   console.log('✓ Model metadata & config saved (ID:', modelId, ')\n');
 
-  console.log('[CORE 8] Testing Publish Custom Model ZIP (Source & Config distinction)...');
+  console.log('[CORE 11] Testing Publish Custom Model ZIP (Source & Config distinction)...');
   res = await worker.fetch(new Request(`http://localhost:8787/api/builder/models/publish?modelId=${modelId}`), baseEnv);
   if (res.status !== 200) throw new Error(`Publish returned status ${res.status}`);
   const ct = res.headers.get('content-type');

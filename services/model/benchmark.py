@@ -192,8 +192,8 @@ def main() -> None:
 
     tokens_per_second = total_tokens / elapsed
     tokens_per_hour = tokens_per_second * 3600
-    tokens_per_12h = tokens_per_second * 3600 * 12
-    tokens_per_day = tokens_per_second * 3600 * 12
+    tokens_per_12h = tokens_per_hour * 12
+    tokens_per_day = tokens_per_hour * 24
     tokens_per_30_days = tokens_per_day * 30
     tokens_per_90_days = tokens_per_day * 90
 

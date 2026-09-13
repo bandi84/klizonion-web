@@ -181,46 +181,30 @@ class KlizonionTokenizer:
     # ------------------------------------------------------------------
 
     def _apply_merges(self, tokens: list[int]) -> list[int]:
+        """
+        Replays learned merges in rank order, merging every occurrence
+        of each pair in one linear pass (mirrors `train`'s algorithm).
+        A naive "rescan the whole sequence for the single best pair,
+        merge one occurrence, repeat" approach is both far slower on
+        long inputs and can diverge from the merge order actually
+        learned during training.
+        """
         if not tokens or not self.merges:
             return tokens
 
-        result = tokens[:]
+        result = tokens
 
-        while True:
-            best_index = None
-            best_rank = None
-
-            for i in range(len(result) - 1):
-                pair = (result[i], result[i + 1])
-
-                rank = self.merge_ranks.get(pair)
-
-                if rank is None:
-                    continue
-
-                if best_rank is None or rank < best_rank:
-                    best_rank = rank
-                    best_index = i
-
-            if best_index is None:
+        for rank, pair in enumerate(self.merges):
+            if len(result) < 2:
                 break
-
-            pair = (
-                result[best_index],
-                result[best_index + 1],
-            )
 
             new_token = (
                 self.BYTE_OFFSET
                 + self.BYTE_VOCAB_SIZE
-                + self.merge_ranks[pair]
+                + rank
             )
 
-            result = (
-                result[:best_index]
-                + [new_token]
-                + result[best_index + 2 :]
-            )
+            result = self._merge_pair(result, pair, new_token)
 
         return result
 
